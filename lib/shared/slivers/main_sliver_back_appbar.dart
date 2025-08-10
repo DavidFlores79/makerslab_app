@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../theme/app_color.dart';
+import '../widgets/index.dart';
 
 class MainSliverBackAppBar extends StatelessWidget {
   final String backLabel;
@@ -19,32 +19,59 @@ class MainSliverBackAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    const expandedHeight = 220.0;
+    const collapsedHeight = 80.0;
+
     return SliverAppBar(
-      expandedHeight: 200,
+      expandedHeight: expandedHeight,
+      collapsedHeight: collapsedHeight,
       pinned: true,
-      backgroundColor: AppColors.primary,
-      leading: BackButton(
-        color: AppColors.white,
-        onPressed: onBackPressed ?? () => context.pop(),
+      backgroundColor: AppColors.white,
+      leadingWidth: 64,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 16.0),
+        child: BackCircleButton(
+          onTap: onBackPressed ?? () => Navigator.of(context).pop(),
+        ),
       ),
       flexibleSpace: LayoutBuilder(
         builder: (context, constraints) {
-          // Calculamos si el SliverAppBar está colapsado
           final double percent =
-              (constraints.maxHeight - kToolbarHeight) / (200 - kToolbarHeight);
+              (constraints.maxHeight - collapsedHeight) /
+              (expandedHeight - collapsedHeight);
           final bool isCollapsed = percent < 0.5;
 
           return FlexibleSpaceBar(
-            titlePadding: const EdgeInsets.only(bottom: 12),
+            titlePadding: const EdgeInsets.only(bottom: 40),
             centerTitle: centerTitle,
             title: Text(
               backLabel,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: isCollapsed ? AppColors.white : AppColors.black3,
-                fontWeight: FontWeight.bold,
-              ),
+              style: (isCollapsed
+                      ? theme.textTheme.bodyLarge
+                      : theme.textTheme.bodyLarge)
+                  ?.copyWith(
+                    color: isCollapsed ? AppColors.black3 : AppColors.white,
+                    fontWeight: FontWeight.bold,
+                    shadows:
+                        isCollapsed
+                            ? null
+                            : [
+                              Shadow(
+                                color: AppColors.blackAlpha50,
+                                offset: const Offset(0, 2),
+                                blurRadius: 6,
+                              ),
+                            ],
+                  ),
             ),
-            background: Image.asset(assetImagePath, fit: BoxFit.cover),
+            background: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(assetImagePath, fit: BoxFit.cover),
+                Container(color: AppColors.blackAlpha40),
+              ],
+            ),
           );
         },
       ),

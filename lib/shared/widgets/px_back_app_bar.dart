@@ -1,6 +1,7 @@
 // lib/shared/widgets/px_back_app_bar.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:makerslab_app/shared/widgets/index.dart';
 import '../../theme/app_color.dart';
 
 class PxBackAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -22,10 +23,11 @@ class PxBackAppBar extends StatelessWidget implements PreferredSizeWidget {
     final isDarkMode = theme.brightness == Brightness.dark;
 
     return AppBar(
-      leading: BackButton(
-        color: isDarkMode ? Colors.white : AppColors.black,
-        onPressed: onBackPressed ?? () => context.pop(),
-      ),
+      leading: BackCircleButton(onTap: onBackPressed ?? () => context.pop()),
+      // leading: BackButton(
+      //   color: isDarkMode ? Colors.white : AppColors.black,
+      //   onPressed: onBackPressed ?? () => context.pop(),
+      // ),
       title: Text(
         backLabel!,
         style: theme.textTheme.titleMedium?.copyWith(

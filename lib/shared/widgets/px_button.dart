@@ -7,12 +7,12 @@ import '../../theme/app_color.dart';
 /// * Maneja estado de carga.
 /// * Puede expandirse al ancho completo si se envuelve con `Expanded` o usando `expand: true`.
 /// * Asegura que el texto no se desborde (usa ellipsis).
-class PXButton extends StatelessWidget {
-  const PXButton({
+class MainAppButton extends StatelessWidget {
+  const MainAppButton({
     super.key,
     required this.label,
     required this.onPressed,
-    this.variant = PXButtonVariant.filled,
+    this.variant = ButtonVariant.filled,
     this.expand = false,
     this.isLoading = false,
     this.isDisabled = false,
@@ -28,7 +28,7 @@ class PXButton extends StatelessWidget {
   // ────────────────────────────────────────────────────────────────────────────
   final String label;
   final VoidCallback? onPressed;
-  final PXButtonVariant variant;
+  final ButtonVariant variant;
   final bool expand;
   final bool isLoading;
   final bool isDisabled;
@@ -47,23 +47,23 @@ class PXButton extends StatelessWidget {
     final Color effectiveBg =
         backgroundColor ??
         switch (variant) {
-          PXButtonVariant.filled =>
+          ButtonVariant.filled =>
             isDisabled ? AppColors.gray300 : AppColors.primary,
-          PXButtonVariant.outlined || PXButtonVariant.text =>
+          ButtonVariant.outlined || ButtonVariant.text =>
             isDisabled ? AppColors.gray300 : Colors.transparent,
         };
 
     final Color effectiveText =
         textColor ??
         switch (variant) {
-          PXButtonVariant.filled => AppColors.white,
-          PXButtonVariant.outlined || PXButtonVariant.text => AppColors.primary,
+          ButtonVariant.filled => AppColors.white,
+          ButtonVariant.outlined || ButtonVariant.text => AppColors.primary,
         };
 
     final Color effectiveBorder =
         borderColor ??
         switch (variant) {
-          PXButtonVariant.outlined => AppColors.primary,
+          ButtonVariant.outlined => AppColors.primary,
           _ => Colors.transparent,
         };
 
@@ -102,7 +102,7 @@ class PXButton extends StatelessWidget {
       backgroundColor: WidgetStateProperty.all(effectiveBg),
       minimumSize: WidgetStateProperty.all(const Size(0, 48)),
       shape: WidgetStateProperty.all(
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       side: WidgetStateProperty.all(BorderSide(color: effectiveBorder)),
     );
@@ -110,21 +110,21 @@ class PXButton extends StatelessWidget {
     // Selección del widget específico
     late final Widget button;
     switch (variant) {
-      case PXButtonVariant.filled:
+      case ButtonVariant.filled:
         button = FilledButton(
           onPressed: isLoading || isDisabled ? null : onPressed,
           style: baseStyle,
           child: content,
         );
         break;
-      case PXButtonVariant.outlined:
+      case ButtonVariant.outlined:
         button = OutlinedButton(
           onPressed: isLoading || isDisabled ? null : onPressed,
           style: baseStyle,
           child: content,
         );
         break;
-      case PXButtonVariant.text:
+      case ButtonVariant.text:
         button = TextButton(
           onPressed: isLoading || isDisabled ? null : onPressed,
           style: baseStyle,
@@ -138,4 +138,4 @@ class PXButton extends StatelessWidget {
 }
 
 // Variantes visuales admitidas por [PXButton].
-enum PXButtonVariant { filled, outlined, text }
+enum ButtonVariant { filled, outlined, text }

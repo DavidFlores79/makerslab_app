@@ -47,6 +47,8 @@ flutter:
     - assets/
     - assets/images/
     - assets/images/static/
+    - assets/images/static/materials/
+    - assets/images/static/instructions/
     - assets/lotties/
 
   fonts:

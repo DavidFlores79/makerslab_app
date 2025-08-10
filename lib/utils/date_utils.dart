@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-String getSaludoPorHora() {
+String waveMeByHour() {
   final hora = DateTime.now().hour;
   if (hora >= 6 && hora < 12) {
     return 'Buenos días'; // Mañana

@@ -28,7 +28,7 @@ class MainShell extends StatelessWidget {
     return Scaffold(
       drawer: PxAppDrawer(),
       body: child,
-      bottomNavigationBar: showBottomBar ? const PxBottomNavigationBar() : null,
+      bottomNavigationBar: showBottomBar ? PxBottomNavigationBar() : null,
     );
   }
 }

@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../theme/app_color.dart';
 
 class PxBottomNavigationBar extends StatelessWidget {
-  const PxBottomNavigationBar({super.key});
+  PxBottomNavigationBar({super.key});
 
+  final routes = [HomePage.routeName, ProfilePage.routeName];
   @override
   Widget build(BuildContext context) {
     final currentIndex = _getCurrentIndex(context);
@@ -17,9 +20,8 @@ class PxBottomNavigationBar extends StatelessWidget {
       ),
       child: NavigationBar(
         selectedIndex: currentIndex,
-        indicatorColor: AppColors.greenLight,
+        indicatorColor: AppColors.primaryLight,
         onDestinationSelected: (index) {
-          final routes = ['/home', '/investments', '/profile'];
           context.go(routes[index]);
         },
         destinations: const [
@@ -27,15 +29,6 @@ class PxBottomNavigationBar extends StatelessWidget {
             icon: Icon(Symbols.home, color: AppColors.gray800),
             selectedIcon: Icon(Icons.home_filled, color: AppColors.gray800),
             label: 'Inicio',
-          ),
-          NavigationDestination(
-            icon: Icon(Symbols.finance_mode, color: AppColors.gray800),
-            selectedIcon: Icon(
-              Symbols.finance_mode,
-              weight: 900,
-              color: AppColors.gray800,
-            ),
-            label: 'Inversión',
           ),
           NavigationDestination(
             icon: Icon(Symbols.person, color: AppColors.gray800),
@@ -49,7 +42,7 @@ class PxBottomNavigationBar extends StatelessWidget {
 
   int _getCurrentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
-    final routes = ['/home', '/investments', '/profile'];
+
     for (int i = 0; i < routes.length; i++) {
       if (location.startsWith(routes[i])) {
         return i;

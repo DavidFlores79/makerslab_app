@@ -45,7 +45,7 @@ class PxActionCard extends StatelessWidget {
     final Widget? effectiveButton =
         trailingButton ??
         (buttonLabel != null
-            ? PXButton(label: buttonLabel!, onPressed: onButtonPressed)
+            ? MainAppButton(label: buttonLabel!, onPressed: onButtonPressed)
             : null);
 
     return PxCardContainer(

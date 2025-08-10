@@ -6,6 +6,7 @@ import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_color.dart';
 
 class ProfilePage extends StatefulWidget {
+  static const String routeName = "/profile";
   const ProfilePage({super.key});
 
   @override

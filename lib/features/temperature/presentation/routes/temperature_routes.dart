@@ -16,15 +16,15 @@ final temperatureRoutes = [
     builder:
         (context, state) => BlocProvider(
           create: (_) => getIt<TemperatureBloc>(),
-          child: const TemperaturePage(),
+          child: TemperaturePage(),
         ),
     routes: [
       GoRoute(
         path: TemperatureInstructionDetailsPage.routeName,
         name: TemperatureInstructionDetailsPage.routeName,
         builder: (context, state) {
-          final instructions = state.extra as List<Instruction>;
-          return TemperatureInstructionDetailsPage(intructions: instructions);
+          final instructions = state.extra as List<InstructionItem>;
+          return TemperatureInstructionDetailsPage(instructions: instructions);
         },
         // ^ builder ⇒ usa MaterialPage ⇒ animación por defecto (fade/slide)
       ),

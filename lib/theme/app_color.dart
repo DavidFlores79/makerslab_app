@@ -5,6 +5,8 @@ class AppColors {
   static const black2 = Color(0xFF111111);
   static const black3 = Color(0xFF222222);
   static const blackAlpha30 = Color(0x4D222222); // 30% opacity
+  static const blackAlpha40 = Color(0x66222222); // 40% opacity
+  static const blackAlpha50 = Color(0x80222222); // 50% opacity
 
   static const white = Color(0xFFFFFFFF);
   static const white2 = Color(0xFFFAFAFA);
@@ -22,7 +24,9 @@ class AppColors {
   static const gray950 = Color(0xFF111827);
 
   static const primary = Color(0xFF247BA0); // Tu nuevo primary color
-  static const primaryLight = Color(0xFF247BA0);
+  static const primaryLight = Color(
+    0xFFA8D0E6,
+  ); // Versión más clara del primary
   static const greenDark = Color(0xFF00461A);
   static const greenLight = Color(0xFFE8F6EC);
   static const greenLightAlpha5 = Color(0x0DE8F6EC); // 5% opacity

@@ -151,7 +151,7 @@ class BalanceCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: PXButton(
+                child: MainAppButton(
                   label: 'Depositar',
                   onPressed: () {},
                   expand: true,
@@ -159,9 +159,9 @@ class BalanceCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: PXButton(
+                child: MainAppButton(
                   label: 'Invertir',
-                  variant: PXButtonVariant.outlined,
+                  variant: ButtonVariant.outlined,
                   onPressed: () => context.go('/investments'),
                   expand: true,
                 ),

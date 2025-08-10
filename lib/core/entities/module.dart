@@ -5,7 +5,8 @@ class MainModule {
   final String title;
   final String description;
   final String? image; // puede ser una URL o un asset local
-  final List<Instruction>? instructions; // puede ser una ruta interna o una URL
+  final List<InstructionItem>?
+  instructions; // puede ser una ruta interna o una URL
   final List<MaterialItem>? materials; // puede ser una ruta interna o una URL
 
   MainModule({
@@ -13,6 +14,6 @@ class MainModule {
     required this.description,
     required this.instructions,
     required this.materials,
-    this.image,
-  });
+    image,
+  }) : image = image ?? 'assets/images/static/placeholder.png';
 }
