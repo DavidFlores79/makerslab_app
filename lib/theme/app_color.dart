@@ -22,6 +22,7 @@ class AppColors {
   static const gray950 = Color(0xFF111827);
 
   static const primary = Color(0xFF247BA0); // Tu nuevo primary color
+  static const primaryLight = Color(0xFF247BA0);
   static const greenDark = Color(0xFF00461A);
   static const greenLight = Color(0xFFE8F6EC);
   static const greenLightAlpha5 = Color(0x0DE8F6EC); // 5% opacity

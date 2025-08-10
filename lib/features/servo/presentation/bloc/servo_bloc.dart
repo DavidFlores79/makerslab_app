@@ -6,9 +6,7 @@ import '../../domain/usecases/get_servo_data_usecase.dart';
 class ServosBloc extends Bloc<ServosEvent, ServosState> {
   final GetServoDataUseCase getServoData;
 
-  ServosBloc({
-    required this.getServoData,
-  }) : super(InitialDataLoading()) {
+  ServosBloc({required this.getServoData}) : super(InitialDataLoading()) {
     on<LoadServos>(_onLoadServos);
   }
 
@@ -20,7 +18,9 @@ class ServosBloc extends Bloc<ServosEvent, ServosState> {
     final result = await getServoData();
     result.fold(
       (error) => emit(ServosError(error.message)),
-      (data) => emit(ServosLoaded(data: data)), // CAMBIO AQUÍ: 'data' en lugar de 'servos'
+      (data) => emit(
+        ServosLoaded(data: data),
+      ), // CAMBIO AQUï¿½: 'data' en lugar de 'servos'
     );
   }
 }

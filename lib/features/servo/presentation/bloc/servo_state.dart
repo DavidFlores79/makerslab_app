@@ -7,9 +7,11 @@ class InitialDataLoading extends ServosState {}
 class ServosLoading extends ServosState {}
 
 class ServosLoaded extends ServosState {
-  final List<ServoEntity> data; // CAMBIO AQUÍ: 'data' en lugar de 'investments'
+  final List<ServoEntity> data; // CAMBIO AQUï¿½: 'data' en lugar de 'investments'
 
-  ServosLoaded({required this.data}); // CAMBIO AQUÍ: 'data' en lugar de 'investments'
+  ServosLoaded({
+    required this.data,
+  }); // CAMBIO AQUï¿½: 'data' en lugar de 'investments'
 }
 
 class ServosError extends ServosState {

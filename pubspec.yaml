@@ -29,6 +29,9 @@ dependencies:
   package_info_plus: ^8.3.0
   lottie: ^3.3.1
   community_material_icon: ^5.9.55
+  video_player: ^2.10.0
+  youtube_player_flutter: ^9.1.2
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
@@ -43,6 +46,7 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/images/static/
     - assets/lotties/
 
   fonts:

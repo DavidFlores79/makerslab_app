@@ -3,10 +3,10 @@ import 'gamepad_event.dart';
 import 'gamepad_state.dart';
 import '../../domain/usecases/get_gamepad_data_usecase.dart';
 
-class GamepadsBloc extends Bloc<GamepadsEvent, GamepadsState> {
+class GamepadBloc extends Bloc<GamepadsEvent, GamepadsState> {
   final GetGamepadDataUseCase getGamepadData;
 
-  GamepadsBloc({required this.getGamepadData}) : super(InitialDataLoading()) {
+  GamepadBloc({required this.getGamepadData}) : super(InitialDataLoading()) {
     on<LoadGamepads>(_onLoadGamepads);
   }
 

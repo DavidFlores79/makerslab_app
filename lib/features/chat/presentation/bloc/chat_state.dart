@@ -7,9 +7,11 @@ class InitialDataLoading extends ChatsState {}
 class ChatsLoading extends ChatsState {}
 
 class ChatsLoaded extends ChatsState {
-  final List<ChatEntity> data; // CAMBIO AQUÍ: 'data' en lugar de 'investments'
+  final List<ChatEntity> data; // CAMBIO AQUï¿½: 'data' en lugar de 'investments'
 
-  ChatsLoaded({required this.data}); // CAMBIO AQUÍ: 'data' en lugar de 'investments'
+  ChatsLoaded({
+    required this.data,
+  }); // CAMBIO AQUï¿½: 'data' en lugar de 'investments'
 }
 
 class ChatsError extends ChatsState {

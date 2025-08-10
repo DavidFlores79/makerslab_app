@@ -7,9 +7,12 @@ class InitialDataLoading extends TemperaturesState {}
 class TemperaturesLoading extends TemperaturesState {}
 
 class TemperaturesLoaded extends TemperaturesState {
-  final List<TemperatureEntity> data; // CAMBIO AQUÍ: 'data' en lugar de 'investments'
+  final List<TemperatureEntity>
+  data; // CAMBIO AQUï¿½: 'data' en lugar de 'investments'
 
-  TemperaturesLoaded({required this.data}); // CAMBIO AQUÍ: 'data' en lugar de 'investments'
+  TemperaturesLoaded({
+    required this.data,
+  }); // CAMBIO AQUï¿½: 'data' en lugar de 'investments'
 }
 
 class TemperaturesError extends TemperaturesState {

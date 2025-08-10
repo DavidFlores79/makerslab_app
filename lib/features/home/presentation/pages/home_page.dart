@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/entities/main_menu_item.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_color.dart';
-import '../../../../utils/date_utils.dart';
 import '../../../../utils/formatters.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
 
 class HomePage extends StatefulWidget {
+  static const String routeName = "/home";
   const HomePage({super.key});
 
   @override
@@ -41,26 +42,76 @@ class _HomePageState extends State<HomePage> {
               );
             }
             if (state.status == HomeStatus.success) {
-              final balance = state.balance!.amount;
+              final List<MainMenuItem> menu = state.mainMenuItems ?? [];
 
-              return Column(
-                children: [
-                  BalanceCard(balance: balance),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(color: AppColors.gray200),
-                      child: ListView(
-                        padding: const EdgeInsets.all(15),
-                        children: [
-                          SectionHeader(
-                            title: 'Remesas recibidas',
-                            onViewAll: () {}, // navegar a lista completa
-                          ),
-                        ],
-                      ),
+              return Scrollbar(
+                thickness: 3,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0,
+                    vertical: 20,
+                  ),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      children: [
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: menu.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                childAspectRatio: 1,
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 10.0,
+                                mainAxisSpacing: 10.0,
+                              ),
+                          itemBuilder: (BuildContext context, int index) {
+                            return Card(
+                              color: AppColors.gray300,
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: InkWell(
+                                onTap: () => context.push(menu[index].route),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: <Widget>[
+                                      Icon(
+                                        menu[index].icon,
+                                        size: 50,
+                                        color: menu[index].iconColor,
+                                      ),
+                                      const SizedBox(height: 20),
+                                      Text(
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        menu[index].title,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.black3,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               );
             }
             return const SizedBox(); // estado inicial
@@ -119,26 +170,6 @@ class BalanceCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class SectionHeader extends StatelessWidget {
-  const SectionHeader({super.key, required this.title, this.onViewAll});
-  final String title;
-  final VoidCallback? onViewAll;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(title, style: theme.textTheme.titleMedium),
-        if (onViewAll != null)
-          TextButton(onPressed: onViewAll, child: const Text('Ver todas')),
-      ],
     );
   }
 }

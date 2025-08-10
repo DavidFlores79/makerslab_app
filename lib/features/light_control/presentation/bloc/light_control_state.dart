@@ -7,9 +7,12 @@ class InitialDataLoading extends LightControlsState {}
 class LightControlsLoading extends LightControlsState {}
 
 class LightControlsLoaded extends LightControlsState {
-  final List<LightControlEntity> data; // CAMBIO AQUÍ: 'data' en lugar de 'investments'
+  final List<LightControlEntity>
+  data; // CAMBIO AQUï¿½: 'data' en lugar de 'investments'
 
-  LightControlsLoaded({required this.data}); // CAMBIO AQUÍ: 'data' en lugar de 'investments'
+  LightControlsLoaded({
+    required this.data,
+  }); // CAMBIO AQUï¿½: 'data' en lugar de 'investments'
 }
 
 class LightControlsError extends LightControlsState {
