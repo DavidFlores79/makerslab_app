@@ -1,4 +1,4 @@
-# makerslab_app
+# Makerslab App
 
 A new Flutter project.
 

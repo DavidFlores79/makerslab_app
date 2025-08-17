@@ -27,12 +27,12 @@ class PxBottomNavigationBar extends StatelessWidget {
         destinations: const [
           NavigationDestination(
             icon: Icon(Symbols.home, color: AppColors.gray800),
-            selectedIcon: Icon(Icons.home_filled, color: AppColors.gray800),
+            selectedIcon: Icon(Icons.home_filled, color: AppColors.primary),
             label: 'Inicio',
           ),
           NavigationDestination(
             icon: Icon(Symbols.person, color: AppColors.gray800),
-            selectedIcon: Icon(Icons.person, color: AppColors.gray800),
+            selectedIcon: Icon(Icons.person, color: AppColors.primary),
             label: 'Perfil',
           ),
         ],

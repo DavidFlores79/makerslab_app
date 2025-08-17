@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import 'fullscreen_youtube_player.dart';
+
 class YouTubePlayer extends StatefulWidget {
   final String videoId;
 
@@ -12,7 +14,6 @@ class YouTubePlayer extends StatefulWidget {
 
 class _YouTubePlayerState extends State<YouTubePlayer> {
   late YoutubePlayerController _controller;
-  bool _isPlayerVisible = false;
 
   @override
   void initState() {
@@ -20,15 +21,42 @@ class _YouTubePlayerState extends State<YouTubePlayer> {
     _controller = YoutubePlayerController(
       initialVideoId: widget.videoId,
       flags: const YoutubePlayerFlags(
-        autoPlay: true,
+        autoPlay: false,
         mute: false,
-        // forceHD: true,
+        useHybridComposition: true,
       ),
     );
+
+    _controller.addListener(_listener);
+  }
+
+  void _listener() {
+    if (_controller.value.isFullScreen) {
+      // Cancelamos el fullscreen interno
+      _controller.toggleFullScreenMode();
+
+      // Guardamos el estado actual
+      final position = _controller.value.position;
+      final isPlaying = _controller.value.isPlaying;
+
+      // Abrimos nuestra propia pantalla
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder:
+              (_) => FullscreenYoutubePlayer(
+                videoId: widget.videoId,
+                initialPosition: position,
+                isPlaying: isPlaying,
+              ),
+        ),
+      );
+    }
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_listener);
     _controller.dispose();
     super.dispose();
   }
@@ -36,40 +64,11 @@ class _YouTubePlayerState extends State<YouTubePlayer> {
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      aspectRatio: 16 / 9, // Mantener proporción estándar de video
-      child:
-          _isPlayerVisible
-              ? YoutubePlayer(
-                controller: _controller,
-                showVideoProgressIndicator: true,
-                onReady: () => debugPrint("YouTube Player listo"),
-              )
-              : GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _isPlayerVisible = true;
-                  });
-                },
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.network(
-                      YoutubePlayer.getThumbnail(videoId: widget.videoId),
-                      fit: BoxFit.cover,
-                    ),
-                    Container(
-                      color: Colors.black45,
-                      child: const Center(
-                        child: Icon(
-                          Icons.play_circle_fill,
-                          color: Colors.white,
-                          size: 64,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+      aspectRatio: 16 / 9,
+      child: YoutubePlayer(
+        controller: _controller,
+        showVideoProgressIndicator: true,
+      ),
     );
   }
 }

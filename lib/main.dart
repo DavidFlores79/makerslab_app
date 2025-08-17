@@ -12,9 +12,14 @@ void main() async {
   setupLocator();
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.manual,
+    SystemUiMode.immersive,
     overlays: [SystemUiOverlay.top],
   );
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp, // 👈 App siempre en vertical
+  ]);
+
   await initializeDateFormatting('es_MX');
   EquatableConfig.stringify = true;
   Bloc.observer = SimpleBlocObserver();

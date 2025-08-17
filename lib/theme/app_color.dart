@@ -7,6 +7,8 @@ class AppColors {
   static const blackAlpha30 = Color(0x4D222222); // 30% opacity
   static const blackAlpha40 = Color(0x66222222); // 40% opacity
   static const blackAlpha50 = Color(0x80222222); // 50% opacity
+  static const blackAlpha80 = Color(0xCC444555); // 80% opacity
+  static const blackAlpha90 = Color(0xE6456666); // 90% opacity
 
   static const white = Color(0xFFFFFFFF);
   static const white2 = Color(0xFFFAFAFA);

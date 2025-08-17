@@ -1,4 +1,4 @@
-package com.example.makerslab_app
+package mx.enlacetecnologias.makerslab_app
 
 import io.flutter.embedding.android.FlutterActivity
 

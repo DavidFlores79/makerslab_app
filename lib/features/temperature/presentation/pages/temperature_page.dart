@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:makerslab_app/core/entities/material.dart';
-import 'package:makerslab_app/core/entities/module.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../../shared/widgets/index.dart';
 import '../../../../core/entities/instruction.dart';
-import '../../../../theme/app_color.dart';
+import '../../../../core/entities/material.dart';
+import '../../../../core/entities/module.dart';
+import '../../../../core/usecases/share_file_usecase.dart';
+import '../../../../di/service_locator.dart';
 
 class TemperaturePage extends StatelessWidget {
   static const String routeName = '/temperature';
@@ -15,6 +14,7 @@ class TemperaturePage extends StatelessWidget {
     title: 'title',
     description: 'description',
     image: 'assets/images/static/esp32DHT11.png',
+    inoFile: 'assets/files/DHT11_Arduino_ESP32.ino',
     instructions: [
       InstructionItem(
         title:
@@ -55,36 +55,42 @@ class TemperaturePage extends StatelessWidget {
         title: 'Sensor DHT11',
         description: 'Sensor de temperatura y humedad digital',
         qty: '1',
+        imagePath: 'assets/images/static/materials/dht-11.png',
         actionType: MaterialItemType.modalBottomSheet,
       ),
       MaterialItem(
         title: 'Resistencia 10k',
         description: 'Componente para pull-up del DHT11 sensor',
         qty: '1',
+        imagePath: 'assets/images/static/materials/resistance10k.png',
         actionType: MaterialItemType.modalBottomSheet,
       ),
       MaterialItem(
         title: 'Cables de conexión',
         description: 'Dupont o jumper cables para conexiones',
         qty: '1',
+        imagePath: 'assets/images/static/materials/dupont-cables.png',
         actionType: MaterialItemType.modalBottomSheet,
       ),
       MaterialItem(
         title: 'Protoboard',
         description: 'Placa de pruebas para circuitos',
         qty: '1',
+        imagePath: 'assets/images/static/materials/breadboard.png',
         actionType: MaterialItemType.modalBottomSheet,
       ),
       MaterialItem(
         title: 'Fuente de alimentación',
         description: '5V DC (USB) o 3.3V DC (3.3V) conector Molex',
         qty: '1',
+        imagePath: 'assets/images/static/materials/powersupply.png',
         actionType: MaterialItemType.modalBottomSheet,
       ),
       MaterialItem(
         title: 'Software de programación',
         description: 'Instalar Arduino IDE',
         qty: '1',
+        imagePath: 'assets/images/static/materials/arduino-uno.png',
         actionType: MaterialItemType.externalUrl,
         actionValue: 'https://www.arduino.cc/es/software',
       ),
@@ -118,11 +124,12 @@ class _BuildMainContent extends StatelessWidget {
   final MainModule mainModule;
 
   const _BuildMainContent({super.key, required this.mainModule});
+
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start, // mejor alineación
       children: [
-        // Aquí iría el contenido real de la pantalla
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Row(
@@ -135,7 +142,7 @@ class _BuildMainContent extends StatelessWidget {
                 child: MainAppButton(
                   variant: ButtonVariant.outlined,
                   label: 'Descargar INO',
-                  onPressed: () {},
+                  onPressed: () => _onDownloadAndShare(),
                 ),
               ),
             ],
@@ -143,14 +150,30 @@ class _BuildMainContent extends StatelessWidget {
         ),
         InstructionsSection(instructions: mainModule.instructions ?? []),
         const SizedBox(height: 30),
+
+        // 👇 Aquí el cambio importante
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: YouTubePlayer(videoId: 'K98h51XuqBE'),
+          child: AspectRatio(
+            aspectRatio: 16 / 9, // proporción estándar de video
+            child: YouTubePlayer(videoId: 'K98h51XuqBE'),
+          ),
         ),
+
         const SizedBox(height: 30),
         BillOfMaterialsSection(materials: mainModule.materials ?? []),
-        const SizedBox(height: 200), // Solo para probar el scroll
+        const SizedBox(height: 200),
       ],
+    );
+  }
+
+  Future<void> _onDownloadAndShare() async {
+    final shareFileUseCase = getIt<ShareFileUseCase>();
+
+    await shareFileUseCase(
+      assetPath: mainModule.inoFile,
+      fileName: mainModule.inoFile.split('/').last,
+      text: 'Aquí tienes tu archivo INO',
     );
   }
 }

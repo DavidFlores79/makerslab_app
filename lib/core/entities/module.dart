@@ -5,6 +5,7 @@ class MainModule {
   final String title;
   final String description;
   final String? image; // puede ser una URL o un asset local
+  final String inoFile;
   final List<InstructionItem>?
   instructions; // puede ser una ruta interna o una URL
   final List<MaterialItem>? materials; // puede ser una ruta interna o una URL
@@ -12,6 +13,7 @@ class MainModule {
   MainModule({
     required this.title,
     required this.description,
+    required this.inoFile,
     required this.instructions,
     required this.materials,
     image,
