@@ -13,7 +13,7 @@ class TemperaturePage extends StatelessWidget {
   final MainModule mainModule = MainModule(
     title: 'title',
     description: 'description',
-    image: 'assets/images/static/esp32DHT11.png',
+    image: 'assets/images/static/temperature/esp32DHT11.png',
     inoFile: 'assets/files/DHT11_Arduino_ESP32.ino',
     instructions: [
       InstructionItem(
@@ -21,7 +21,7 @@ class TemperaturePage extends StatelessWidget {
             '1. Conectar el sensor DHT11 y el modulo Bluetooth HC-05 al Protoboard ',
         description:
             'Descripción de la instrucción 1 para la ruta interna lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        imagePath: 'assets/images/static/instruction1.png',
+        imagePath: 'assets/images/static/temperature/instruction1.png',
         actionType: IntructionItemType.modalBottomSheet,
       ),
       InstructionItem(

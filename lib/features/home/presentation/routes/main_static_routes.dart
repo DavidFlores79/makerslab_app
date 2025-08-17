@@ -29,7 +29,7 @@ final mainStaticRoutes = [
     builder:
         (context, state) => BlocProvider(
           create: (_) => getIt<ServosBloc>(),
-          child: const ServoPage(),
+          child: ServoPage(),
         ),
   ),
   GoRoute(
