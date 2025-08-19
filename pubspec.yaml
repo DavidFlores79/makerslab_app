@@ -75,6 +75,10 @@ flutter:
     - assets/images/static/temperature/instructions/
     - assets/images/static/servo/
     - assets/images/static/servo/instructions/
+    - assets/images/static/light_control/
+    - assets/images/static/light_control/instructions/
+    - assets/images/static/gamepad/
+    - assets/images/static/gamepad/instructions/
     - assets/files/
     - assets/lotties/
 

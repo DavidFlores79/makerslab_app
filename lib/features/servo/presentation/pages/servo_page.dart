@@ -13,7 +13,7 @@ class ServoPage extends StatelessWidget {
   final MainModule mainModule = MainModule(
     title: 'title',
     description: 'description',
-    image: 'assets/images/static/servo/servo1.png',
+    image: 'assets/images/static/servo/servo2.png',
     inoFile: 'assets/files/DHT11_Arduino_ESP32.ino',
     instructions: [
       InstructionItem(

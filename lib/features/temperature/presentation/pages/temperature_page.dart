@@ -21,7 +21,8 @@ class TemperaturePage extends StatelessWidget {
             '1. Conectar el sensor DHT11 y el modulo Bluetooth HC-05 al Protoboard ',
         description:
             'Descripción de la instrucción 1 para la ruta interna lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        imagePath: 'assets/images/static/temperature/instruction1.png',
+        imagePath:
+            'assets/images/static/temperature/instructions/instruction1.png',
         actionType: IntructionItemType.modalBottomSheet,
       ),
       InstructionItem(

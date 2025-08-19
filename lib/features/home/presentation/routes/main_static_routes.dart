@@ -19,7 +19,7 @@ final mainStaticRoutes = [
     builder:
         (context, state) => BlocProvider(
           create: (_) => getIt<GamepadBloc>(),
-          child: const GamepadPage(),
+          child: GamepadPage(),
         ),
   ),
   ...temperatureRoutes,
@@ -38,7 +38,7 @@ final mainStaticRoutes = [
     builder:
         (context, state) => BlocProvider(
           create: (_) => getIt<LightControlsBloc>(),
-          child: const LightControlPage(),
+          child: LightControlPage(),
         ),
   ),
   GoRoute(

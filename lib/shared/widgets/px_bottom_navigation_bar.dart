@@ -19,6 +19,17 @@ class PxBottomNavigationBar extends StatelessWidget {
         border: Border(top: BorderSide(color: AppColors.gray400)),
       ),
       child: NavigationBar(
+        labelTextStyle: WidgetStateProperty.resolveWith<TextStyle?>((
+          Set<WidgetState> states,
+        ) {
+          if (states.contains(WidgetState.selected)) {
+            return TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w500,
+            );
+          }
+          return TextStyle(color: AppColors.gray600);
+        }),
         selectedIndex: currentIndex,
         indicatorColor: AppColors.primaryLight,
         onDestinationSelected: (index) {
@@ -26,12 +37,12 @@ class PxBottomNavigationBar extends StatelessWidget {
         },
         destinations: const [
           NavigationDestination(
-            icon: Icon(Symbols.home, color: AppColors.gray800),
+            icon: Icon(Symbols.home, color: AppColors.gray600),
             selectedIcon: Icon(Icons.home_filled, color: AppColors.primary),
             label: 'Inicio',
           ),
           NavigationDestination(
-            icon: Icon(Symbols.person, color: AppColors.gray800),
+            icon: Icon(Symbols.person, color: AppColors.gray600),
             selectedIcon: Icon(Icons.person, color: AppColors.primary),
             label: 'Perfil',
           ),
