@@ -1,3 +1,4 @@
+export 'modules/build_main_content.dart';
 export 'instructions/presentation/instruction_section.dart';
 export 'instructions/presentation/instruction_details_section.dart';
 export 'materials/bill_of_materials_section.dart';

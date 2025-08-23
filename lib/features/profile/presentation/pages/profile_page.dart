@@ -248,9 +248,9 @@ class ProfileItemCard extends StatelessWidget {
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.greenLight,
+                color: AppColors.primaryLight,
               ),
-              child: Icon(icon, size: 28, color: AppColors.gray700),
+              child: Icon(icon, size: 28, color: AppColors.white),
             ),
             SizedBox(width: 15),
             Flexible(
