@@ -1,5 +1,8 @@
-import '../../domain/entities/chat_entity.dart';
+import 'dart:async';
 
-abstract class ChatLocalDatasource {
-  Future<List<ChatEntity>> getChatData();
+import 'package:flutter_chat_core/flutter_chat_core.dart';
+
+abstract class LocalChatDataSource {
+  Stream<List<Message>> messages();
+  Future<void> saveMessage(Message message);
 }

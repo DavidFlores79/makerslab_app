@@ -1,28 +1,35 @@
+import 'dart:async';
+import 'package:flutter_chat_core/flutter_chat_core.dart';
 import 'package:logger/logger.dart';
+import 'package:uuid/uuid.dart';
 
-import '../../../../core/error/exceptions.dart';
-import '../../domain/entities/chat_entity.dart';
 import '../datasources/chat_local_datasource.dart';
 
-class ChatLocalDatasourceImpl implements ChatLocalDatasource {
+class LocalChatDataSourceImpl implements LocalChatDataSource {
   final Logger logger;
+  final _controller = StreamController<List<Message>>.broadcast();
+  final List<Message> _messages = [];
+  final _uuid = const Uuid();
 
-  ChatLocalDatasourceImpl({required this.logger});
+  LocalChatDataSourceImpl({Logger? logger}) : logger = logger ?? Logger() {
+    // push initial empty list
+    _controller.add(List.unmodifiable(_messages));
+    this.logger.d('LocalChatDataSource initialized');
+  }
 
   @override
-  Future<List<ChatEntity>> getChatData() async {
+  Stream<List<Message>> messages() => _controller.stream;
+
+  @override
+  Future<void> saveMessage(Message message) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      logger.i("Obteniendo chats localmente...");
-      return sampleChats;
-    } catch (e, stackTrace) {
-      logger.e('Error getting local data for chat', error: e, stackTrace: stackTrace);
-      throw CacheException('Error al obtener chats locales', stackTrace);
+      // simple in-memory store; later persist to sqlite/hive if needed
+      _messages.insert(0, message);
+      _controller.add(List.unmodifiable(_messages));
+      logger.d('Saved message locally: ${message.id}');
+    } catch (e, s) {
+      logger.e('Failed saving message locally', error: e, stackTrace: s);
+      rethrow;
     }
   }
 }
-
-final List<ChatEntity> sampleChats = [
-  ChatEntity(id: 'chat-001'),
-  ChatEntity(id: 'chat-002'),
-];

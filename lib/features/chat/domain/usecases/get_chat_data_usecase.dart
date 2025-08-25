@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter_chat_core/flutter_chat_core.dart';
+
 import '../../../../core/error/failure.dart';
-import '../entities/chat_entity.dart';
 import '../repositories/chat_repository.dart';
 
 class GetChatDataUseCase {
@@ -8,7 +9,7 @@ class GetChatDataUseCase {
 
   GetChatDataUseCase(this.repository);
 
-  Future<Either<Failure, List<ChatEntity>>> call() async {
+  Future<Either<Failure, List<Message>>> call() async {
     return await repository.getChatData();
   }
 }

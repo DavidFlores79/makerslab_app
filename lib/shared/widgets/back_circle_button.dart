@@ -9,16 +9,19 @@ class BackCircleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.white,
-      elevation: 0,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: const Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Icon(Icons.arrow_back, size: 28, color: AppColors.primary),
+    return Container(
+      margin: EdgeInsets.only(left: 6.0),
+      child: Material(
+        color: AppColors.primaryLight,
+        elevation: 0,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: const Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Icon(Icons.arrow_back, size: 28, color: AppColors.primary),
+          ),
         ),
       ),
     );

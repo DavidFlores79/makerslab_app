@@ -1,17 +1,18 @@
 // lib/shared/widgets/px_back_app_bar.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:makerslab_app/shared/widgets/index.dart';
 import '../../theme/app_color.dart';
 
 class PxBackAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? backLabel;
   final VoidCallback? onBackPressed;
+  final Color? backgroundColor;
 
   const PxBackAppBar({
     super.key,
     this.backLabel = 'Regresar',
     this.onBackPressed,
+    this.backgroundColor,
   });
 
   @override
@@ -23,24 +24,30 @@ class PxBackAppBar extends StatelessWidget implements PreferredSizeWidget {
     final isDarkMode = theme.brightness == Brightness.dark;
 
     return AppBar(
-      leading: BackCircleButton(onTap: onBackPressed ?? () => context.pop()),
-      // leading: BackButton(
-      //   color: isDarkMode ? Colors.white : AppColors.black,
-      //   onPressed: onBackPressed ?? () => context.pop(),
-      // ),
+      backgroundColor:
+          backgroundColor ?? (isDarkMode ? AppColors.black : AppColors.white),
+      //chevron back button
+      leading: Container(
+        margin: EdgeInsets.only(left: 6.0),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onBackPressed ?? () => context.pop(),
+          child: Icon(
+            Icons.chevron_left_outlined,
+            size: 50,
+            color: AppColors.primary,
+          ),
+        ),
+      ),
       title: Text(
         backLabel!,
-        style: theme.textTheme.titleMedium?.copyWith(
+        style: theme.textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w500,
           color: isDarkMode ? Colors.white : AppColors.black,
         ),
       ),
       centerTitle: false,
       surfaceTintColor: Colors.transparent,
-      bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(1),
-        child: Divider(height: 1, thickness: 1, color: AppColors.gray400),
-      ),
     );
   }
 }

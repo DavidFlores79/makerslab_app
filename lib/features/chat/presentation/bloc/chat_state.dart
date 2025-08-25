@@ -1,20 +1,26 @@
-import '../../domain/entities/chat_entity.dart';
+import 'package:flutter_chat_core/flutter_chat_core.dart';
 
-abstract class ChatsState {}
+enum ChatStatus { initial, loading, success, failure, sending }
 
-class InitialDataLoading extends ChatsState {}
+class ChatState {
+  final ChatStatus status;
+  final List<Message> messages;
+  final String? errorMessage;
 
-class ChatsLoading extends ChatsState {}
+  ChatState({required this.status, required this.messages, this.errorMessage});
 
-class ChatsLoaded extends ChatsState {
-  final List<ChatEntity> data; // CAMBIO AQU�: 'data' en lugar de 'investments'
+  factory ChatState.initial() =>
+      ChatState(status: ChatStatus.initial, messages: []);
 
-  ChatsLoaded({
-    required this.data,
-  }); // CAMBIO AQU�: 'data' en lugar de 'investments'
-}
-
-class ChatsError extends ChatsState {
-  final String message;
-  ChatsError(this.message);
+  ChatState copyWith({
+    ChatStatus? status,
+    List<Message>? messages,
+    String? errorMessage,
+  }) {
+    return ChatState(
+      status: status ?? this.status,
+      messages: messages ?? this.messages,
+      errorMessage: errorMessage,
+    );
+  }
 }
