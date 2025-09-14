@@ -46,7 +46,7 @@ final mainStaticRoutes = [
     name: ChatPage.routeName,
     builder:
         (context, state) => BlocProvider(
-          create: (_) => getIt<ChatsBloc>(),
+          create: (_) => getIt<ChatBloc>(),
           child: const ChatPage(),
         ),
   ),

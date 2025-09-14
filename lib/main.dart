@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'MakersLab App',
+      title: 'Makers Lab',
       routerConfig: appRouter, // ← aquí enchufas go_router
       debugShowCheckedModeBanner: false,
       // Configuración de localización

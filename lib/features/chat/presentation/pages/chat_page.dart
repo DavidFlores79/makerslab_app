@@ -85,10 +85,6 @@ class _ChatPageState extends State<ChatPage> {
     final Uint8List bytes = await picked.readAsBytes();
     final ui.Image decoded = await decodeImageFromList(bytes);
 
-    // DEPENDIENDO de tu versión usan 'uri' o 'source'.
-    // Si tu ImageMessage acepta 'source' usa source: picked.path
-    // Aquí intento crear ambos para ser seguro: primero pruebo source, si no compila cambia a uri.
-    // Ejemplo con 'source' (si tu versión lo requiere):
     final msg = ImageMessage(
       id: _uuid.v4(),
       authorId: _currentUserId,
@@ -115,9 +111,7 @@ class _ChatPageState extends State<ChatPage> {
       authorId: _currentUserId,
       createdAt: DateTime.now().toUtc(),
       size: f.size,
-      // usa source para compatibilidad. Si tu versión necesita 'uri' cambia por uri: f.path
       source: f.path ?? '',
-      // name podría no existir en tu modelo; pero el builder usa _extractName
       name: f.name,
     );
 
@@ -125,7 +119,6 @@ class _ChatPageState extends State<ChatPage> {
     _localMessages.insert(0, msg);
   }
 
-  // resolveUser
   Future<User> _resolveUser(UserID id) async {
     return User(id: id, name: id == _currentUserId ? 'Tú' : 'IA Bot');
   }
@@ -150,8 +143,9 @@ class _ChatPageState extends State<ChatPage> {
                 MessageGroupStatus? groupStatus,
               }) {
                 final source = _extractSource(message);
-                if (source == null || source.isEmpty)
+                if (source == null || source.isEmpty) {
                   return const SizedBox.shrink();
+                }
 
                 if (_isRemote(source)) {
                   // remoto -> widget oficial (cached)

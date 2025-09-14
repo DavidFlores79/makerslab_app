@@ -13,7 +13,7 @@ class LocalChatDataSourceImpl implements LocalChatDataSource {
 
   LocalChatDataSourceImpl({Logger? logger}) : logger = logger ?? Logger() {
     // push initial empty list
-    _controller.add(List.unmodifiable(_messages));
+    _controller.add(_messages);
     this.logger.d('LocalChatDataSource initialized');
   }
 

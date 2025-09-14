@@ -32,7 +32,7 @@ class PxActionCard extends StatelessWidget {
   // ────────────────────────────────────────────────────────────────────
   //  API avanzada (composición)
   //    - Si envías un [trailingButton], se ignoran [buttonLabel] y
-  //      [onButtonPressed]. Útil si necesitas un PXButton con loading,
+  //      [onButtonPressed]. Útil si necesitas un MainAppButton con loading,
   //      un Outlined, etc.
   // ────────────────────────────────────────────────────────────────────
   final Widget? trailingButton;
