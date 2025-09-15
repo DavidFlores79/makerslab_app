@@ -1,30 +1,51 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:logger/logger.dart';
 import 'core/router/app_router.dart';
+import 'core/ui/snackbar_service.dart';
 import 'di/service_locator.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/bloc/auth_event.dart';
 import 'theme/app_color.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
-  setupLocator();
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.immersive,
-    overlays: [SystemUiOverlay.top],
-  );
-
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp, // 👈 App siempre en vertical
-  ]);
-
+  await setupLocator();
+  _configSystemUIMode();
+  _configEnvironment();
   await initializeDateFormatting('es_MX');
   EquatableConfig.stringify = true;
   Bloc.observer = SimpleBlocObserver();
 
-  runApp(const MyApp());
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => getIt<AuthBloc>()..add(CheckAuthStatus()),
+          lazy: false,
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
+
+void _configSystemUIMode() {
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.manual,
+    overlays: [SystemUiOverlay.top],
+  );
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+}
+
+void _configEnvironment() {
+  Logger.level = kDebugMode ? Level.all : Level.info;
 }
 
 class MyApp extends StatelessWidget {
@@ -38,6 +59,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       // Configuración de localización
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -65,6 +87,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
+      scaffoldMessengerKey: SnackbarService().messengerKey,
     );
   }
 }

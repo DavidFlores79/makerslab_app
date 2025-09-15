@@ -41,27 +41,31 @@ class LoginPage extends StatelessWidget {
           }
         },
         builder: (context, state) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildLogo(context),
-                  const SizedBox(height: 20),
-                  _buildWelcomeText(context),
-                  const SizedBox(height: 20),
-                  _buildPhoneField(context),
-                  SizedBox(height: 20),
-                  _buildPasswordField(context),
-                  const SizedBox(height: 20),
-                  _buildForgotPasswordButton(context),
-                  const SizedBox(height: 10),
-                  _buildLoginButton(context, state),
-                  const SizedBox(height: 10),
-                  _buildRegisterButton(context),
-                ],
+          return Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildLogo(context),
+                      const SizedBox(height: 20),
+                      _buildWelcomeText(context),
+                      const SizedBox(height: 20),
+                      _buildPhoneField(context),
+                      SizedBox(height: 20),
+                      _buildPasswordField(context),
+                      const SizedBox(height: 20),
+                      _buildForgotPasswordButton(context),
+                      const SizedBox(height: 10),
+                      _buildLoginButton(context, state),
+                      const SizedBox(height: 10),
+                      _buildRegisterButton(context),
+                    ],
+                  ),
+                ),
               ),
             ),
           );
@@ -123,7 +127,7 @@ class LoginPage extends StatelessWidget {
   Widget _buildLogo(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Image.asset(
-      UtilImage.PAISAMEX_LOGO_GREEN,
+      UtilImage.LOGO_MAIN,
       fit: BoxFit.fitWidth,
       width: size.width * 0.5,
     );

@@ -74,15 +74,6 @@ class RegisterPage extends StatelessWidget {
                       children: [
                         _buildLogo(context),
                         const SizedBox(height: 20),
-                        TriCircleHeader(
-                          centerImage: AssetImage(
-                            UtilImage.SIGN_IN_BACKGROUND_1,
-                          ),
-                          leftImage: AssetImage(UtilImage.SIGN_IN_BACKGROUND_4),
-                          rightImage: AssetImage(
-                            UtilImage.SIGN_IN_BACKGROUND_2,
-                          ),
-                        ),
                         PXSectionTitle(
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           title:
@@ -161,7 +152,7 @@ class RegisterPage extends StatelessWidget {
   Widget _buildLogo(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Image.asset(
-      UtilImage.PAISAMEX_LOGO_GREEN,
+      UtilImage.LOGO_MAIN,
       fit: BoxFit.fitWidth,
       width: size.width * 0.5,
     );

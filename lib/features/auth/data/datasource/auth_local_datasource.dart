@@ -53,12 +53,12 @@ class AuthLocalDataSourceMockImpl implements AuthLocalDataSource {
       debugPrint('$phone ------- $password');
 
       final user = users.firstWhere(
-        (u) => u['phone'] == '52$phone' && u['password'] == password,
+        (u) => u['phone'] == '+52$phone' && u['password'] == password,
         orElse: () => throw Exception('Invalid credentials'),
       );
       _jwt = 'token_${Random().nextInt(999999)}';
 
-      return LoginResponseModel.fromJson({'jwt': _jwt, 'user': user});
+      return LoginResponseModel.fromJson({'jwt': _jwt, 'data': user});
     } catch (e, stackTrace) {
       logger.e(
         'Error haciendo Login localmente...',
@@ -88,19 +88,18 @@ class AuthLocalDataSourceMockImpl implements AuthLocalDataSource {
       if (users.any((u) => u['phone'] == phone)) {
         throw Exception('Phone already exists');
       }
-      final id = Random().nextInt(99999).toString();
 
       final user =
           UserModel.fromJson({
-            "id": id,
-            "firstName": firstName ?? '',
-            "secondName": '',
-            "firstSurname": firstSurname ?? '',
-            "secondSurname": secondSurname ?? '',
+            "id": Uuid().v4(),
+            "name":
+                '${firstName ?? ''} ${firstSurname ?? ''} ${secondSurname ?? ''}'
+                    .trim(),
+
             "email": '',
-            "phone": '52$phone',
+            "phone": '+52$phone',
             "password": password,
-            "status": "pending",
+            "status": true,
             "verified": false,
             "isProfileCompleted": false,
             "createdAt": DateTime.now().toIso8601String(),
@@ -109,19 +108,19 @@ class AuthLocalDataSourceMockImpl implements AuthLocalDataSource {
       users.add(user);
 
       //add balance with this userId
-      final balanceId = Uuid().v4();
-      final newClabe = 'clabe_${Random().nextInt(999999)}';
-      balances.add({
-        "id": balanceId,
-        "userId": id,
-        "currentBalance": "0.00",
-        "currency": "MXN",
-        "lastUpdatedAt": DateTime.now().toIso8601String(),
-        "createdAt": DateTime.now().toIso8601String(),
-        "updatedAt": DateTime.now().toIso8601String(),
-      });
+      // final balanceId = Uuid().v4();
+      // final newClabe = 'clabe_${Random().nextInt(999999)}';
+      // balances.add({
+      //   "id": balanceId,
+      //   "userId": id,
+      //   "currentBalance": "0.00",
+      //   "currency": "MXN",
+      //   "lastUpdatedAt": DateTime.now().toIso8601String(),
+      //   "createdAt": DateTime.now().toIso8601String(),
+      //   "updatedAt": DateTime.now().toIso8601String(),
+      // });
       // Map CLABE to Balance ID
-      clabeToBalanceIdMock[newClabe] = balanceId;
+      // clabeToBalanceIdMock[newClabe] = balanceId;
 
       _jwt = 'token_${Random().nextInt(999999)}';
       return LoginResponseModel.fromJson({'jwt': _jwt, 'user': user});

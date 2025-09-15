@@ -80,6 +80,7 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/images/brand/
     - assets/images/static/
     - assets/images/static/materials/
     - assets/images/static/temperature/

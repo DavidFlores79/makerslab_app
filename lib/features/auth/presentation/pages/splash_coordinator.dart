@@ -7,10 +7,10 @@ import '../../../onboarding/presentation/bloc/onboarding_bloc.dart';
 import '../../../onboarding/presentation/bloc/onboarding_event.dart';
 import '../../../onboarding/presentation/bloc/onboarding_state.dart';
 import '../../../onboarding/presentation/screen/onboarding_page.dart';
-import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart';
-import '../bloc/auth_state.dart';
-import 'login_page.dart';
+// import '../bloc/auth_bloc.dart';
+// import '../bloc/auth_event.dart';
+// import '../bloc/auth_state.dart';
+// import 'login_page.dart';
 import 'splash_view_page.dart';
 
 class SplashCoordinator extends StatefulWidget {
@@ -32,34 +32,35 @@ class _SplashCoordinatorState extends State<SplashCoordinator> {
 
     // Obtener los blocs globales
     onboardingBloc = context.read<OnboardingBloc>();
-    final authBloc = context.read<AuthBloc>();
+    // final authBloc = context.read<AuthBloc>();
 
     // Disparar solo al inicio de la app
     onboardingBloc.add(LoadOnboardingStatus());
-    authBloc.add(CheckAuthStatus());
+    // authBloc.add(CheckAuthStatus());
 
     // Escuchar streams y navegar cuando ambos estén listos
     onboardingBloc.stream.listen((_) => _tryNavigate());
-    authBloc.stream.listen((_) => _tryNavigate());
+    // authBloc.stream.listen((_) => _tryNavigate());
   }
 
   void _tryNavigate() {
     if (!_isAnimationCompleted || !mounted) return;
 
     final onboardingState = context.read<OnboardingBloc>().state;
-    final authState = context.read<AuthBloc>().state;
+    // final authState = context.read<AuthBloc>().state;
 
     if (onboardingState is OnboardingShouldShow) {
       context.go(OnboardingPage.routeName);
       return;
     }
 
-    if (authState is Authenticated) {
-      context.go(HomePage.routeName);
-    } else if (authState is Unauthenticated) {
-      context.go(LoginPage.routeName);
-    }
+    // if (authState is Authenticated) {
+    //   context.go(HomePage.routeName);
+    // } else if (authState is Unauthenticated) {
+    //   context.go(LoginPage.routeName);
+    // }
     // Si está AuthLoading o AuthError, puedes mostrar un loader o mensaje
+    context.go(HomePage.routeName);
   }
 
   @override

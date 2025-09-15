@@ -182,7 +182,7 @@ class _OtpPageState extends State<OtpPage> {
   Widget _buildLogo(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Image.asset(
-      UtilImage.PAISAMEX_LOGO_GREEN,
+      UtilImage.LOGO_MAIN,
       fit: BoxFit.fitWidth,
       width: size.width * 0.5,
     );
