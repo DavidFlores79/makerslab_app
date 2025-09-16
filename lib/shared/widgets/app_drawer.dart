@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/auth/presentation/bloc/auth_event.dart';
+import '../../features/home/presentation/pages/home_page.dart';
 import '../../theme/app_color.dart';
 
 class PxAppDrawer extends StatelessWidget {
@@ -9,16 +16,34 @@ class PxAppDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppDrawer(
       menuItems: [
-        DrawerMenuItem(label: 'Inicio', icon: Symbols.home, onTap: () {}),
         DrawerMenuItem(
-          label: 'Sucursales',
-          icon: Symbols.location_pin,
+          label: AppLocalizations.of(context)!.home_label,
+          icon: Symbols.home,
+          onTap: () {
+            Navigator.of(context).pop();
+            context.go(HomePage.routeName);
+          },
+        ),
+        DrawerMenuItem(
+          label: AppLocalizations.of(context)!.contact_us_label,
+          icon: Symbols.mail,
           onTap: () {},
         ),
-        DrawerMenuItem(label: 'Contáctanos', icon: Symbols.mail, onTap: () {}),
-        DrawerMenuItem(label: 'Síguenos', icon: Symbols.favorite, onTap: () {}),
-        DrawerMenuItem(label: 'Legal', icon: Symbols.balance, onTap: () {}),
-        DrawerMenuItem(label: 'Salir', icon: Symbols.logout, onTap: () {}),
+        DrawerMenuItem(
+          label: AppLocalizations.of(context)!.follow_us_label,
+          icon: Symbols.favorite,
+          onTap: () {},
+        ),
+        DrawerMenuItem(
+          label: AppLocalizations.of(context)!.go_out_label,
+          icon: Symbols.logout,
+          onTap: () {
+            context.read<AuthBloc>().add(LogoutRequested());
+
+            Navigator.of(context).pop();
+            context.go(HomePage.routeName);
+          },
+        ),
       ],
       selectedIndex: 0, // opcional, resalta "Inicio"
     );

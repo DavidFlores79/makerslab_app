@@ -9,6 +9,7 @@ abstract class AuthTokenLocalDataSource {
     required String refreshToken,
   });
   Future<String?> getAccessToken();
+  Future<String?> getRefreshToken();
   Future<void> clearSession();
   Future<bool> hasTokenStored();
 }
@@ -42,5 +43,10 @@ class AuthTokenLocalDataSourceImpl implements AuthTokenLocalDataSource {
     final token = await secureStorage.read(SecureStorageKeys.accessToken);
     debugPrint(">>> hasTokenStored: $token");
     return token != null && token.isNotEmpty;
+  }
+
+  @override
+  Future<String?> getRefreshToken() async {
+    return await secureStorage.read(SecureStorageKeys.refreshToken);
   }
 }

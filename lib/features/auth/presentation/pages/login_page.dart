@@ -13,6 +13,7 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import 'forgot_password_page.dart';
+import 'otp_page.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatelessWidget {
@@ -31,9 +32,9 @@ class LoginPage extends StatelessWidget {
         listener: (context, state) {
           if (state is Authenticated) {
             SnackbarService().show(
-              message: AppLocalizations.of(
-                context,
-              )!.sign_in_label_welcome('${state.user.name}'),
+              message: AppLocalizations.of(context)!.sign_in_label_welcome(
+                '${state.user.name ?? state.user.phone}',
+              ),
             );
             context.go(HomePage.routeName);
           } else if (state is AuthError) {
@@ -76,7 +77,7 @@ class LoginPage extends StatelessWidget {
 
   onLoginRequest(BuildContext context) {
     context.read<AuthBloc>().add(
-      LoginRequested(_phoneController.text, _passwordController.text),
+      SigninWithPhoneRequested(_phoneController.text, _passwordController.text),
     );
   }
 

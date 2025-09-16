@@ -1,17 +1,20 @@
 // lib/di/service_locator.dart
 
+import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 import 'package:makerslab_app/features/home/domain/usecases/get_home_menu.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/network/dio_client.dart';
 import '../core/repositories/file_sharing_repository.dart';
 import '../core/services/file_sharing_service.dart';
 import '../core/storage/secure_storage_service.dart';
 import '../core/ui/snackbar_service.dart';
 import '../core/usecases/share_file_usecase.dart';
 import '../features/auth/data/datasource/auth_local_datasource.dart';
+import '../features/auth/data/datasource/auth_remote_datasource.dart';
 import '../features/auth/data/datasource/auth_token_local_datasource.dart';
 import '../features/auth/data/datasource/auth_user_local_datasource.dart';
 import '../features/auth/data/repository/auth_repository_impl.dart';
@@ -25,6 +28,7 @@ import '../features/auth/domain/usecases/login_user.dart';
 import '../features/auth/domain/usecases/logout_user.dart';
 import '../features/auth/domain/usecases/register_user.dart';
 import '../features/auth/domain/usecases/resend_sign_up_code.dart';
+import '../features/auth/domain/usecases/signin_with_phone.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/auth/presentation/bloc/otp/otp_bloc.dart';
 import '../features/auth/presentation/bloc/register/register_cubit.dart';
@@ -62,6 +66,15 @@ Future<void> setupLocator() async {
     () => SecureStorageService(getIt()),
   );
 
+  // Dio client
+  getIt.registerLazySingleton<Dio>(() {
+    final dioClient = DioClient(
+      secureStorage: getIt(),
+      // baseUrl optional override
+    );
+    return dioClient.dio;
+  });
+
   // Snackbar Service
   getIt.registerSingleton<SnackbarService>(SnackbarService());
 
@@ -94,6 +107,11 @@ Future<void> setupLocator() async {
   );
   // final profileLocalDataSource = ProfileLocalDataSourceImpl(logger: logger);
 
+  //remote data sources
+  getIt.registerLazySingleton<AuthRemoteDataSource>(
+    () => AuthRemoteDataSourceImpl(dio: getIt()),
+  );
+
   // cubits
   getIt.registerFactory(() => RegisterCubit());
 
@@ -118,6 +136,7 @@ Future<void> setupLocator() async {
       localDataSource: authLocalDataSource,
       tokenLocalDataSource: authTokenDataSource,
       userLocalDataSource: userLocalDataSource,
+      remoteDataSource: getIt<AuthRemoteDataSource>(),
     ),
   );
 
@@ -140,6 +159,7 @@ Future<void> setupLocator() async {
   );
 
   getIt.registerLazySingleton(() => LoginUser(repository: getIt()));
+  getIt.registerLazySingleton(() => SigninWithPhone(repository: getIt()));
   getIt.registerLazySingleton(() => RegisterUser(repository: getIt()));
   getIt.registerLazySingleton(() => ChangePassword(repository: getIt()));
   getIt.registerLazySingleton(() => ForgotPassword(repository: getIt()));
@@ -164,6 +184,7 @@ Future<void> setupLocator() async {
       checkSession: getIt(),
       getUserFromCache: getIt(),
       logoutUser: getIt(),
+      signinWithPhone: getIt(),
     ),
   );
 

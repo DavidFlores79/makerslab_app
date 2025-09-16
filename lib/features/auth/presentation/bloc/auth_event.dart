@@ -8,6 +8,12 @@ class LoginRequested extends AuthEvent {
   LoginRequested(this.email, this.password);
 }
 
+class SigninWithPhoneRequested extends AuthEvent {
+  final String phone;
+  final String password;
+  SigninWithPhoneRequested(this.phone, this.password);
+}
+
 class LogoutRequested extends AuthEvent {}
 
 class RegisterRequested extends AuthEvent {

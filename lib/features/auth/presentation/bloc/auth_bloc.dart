@@ -8,11 +8,13 @@ import '../../domain/usecases/logout_user.dart';
 import '../../domain/usecases/register_user.dart';
 import '../../domain/usecases/change_password.dart';
 import '../../domain/usecases/forgot_password.dart';
+import '../../domain/usecases/signin_with_phone.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUser loginUser;
+  final SigninWithPhone signinWithPhone;
   final RegisterUser registerUser;
   final ChangePassword changePassword;
   final ForgotPassword forgotPassword;
@@ -22,6 +24,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   AuthBloc({
     required this.loginUser,
+    required this.signinWithPhone,
     required this.registerUser,
     required this.changePassword,
     required this.forgotPassword,
@@ -31,6 +34,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }) : super(AuthInitial()) {
     debugPrint('>>> AuthBloc creado');
     on<LoginRequested>(_onLoginRequested);
+    on<SigninWithPhoneRequested>(_onSigninWithPhoneRequested);
     on<RegisterRequested>(_onRegisterRequested);
     on<ChangePasswordRequested>(_onChangePasswordRequested);
     on<ForgotPasswordRequested>(_onForgotPasswordRequested);
@@ -65,6 +69,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       },
       (user) {
         debugPrint(">>> login exitoso: ${user.name}");
+        emit(Authenticated(user: user));
+      },
+    );
+  }
+
+  Future<void> _onSigninWithPhoneRequested(
+    SigninWithPhoneRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    debugPrint(">>> SigninWithPhoneRequested event recibido");
+    emit(SignInWithPhoneInProgress());
+
+    final result = await signinWithPhone(event.phone, event.password);
+    debugPrint(">>> signinWithPhone result: $result");
+
+    result.fold(
+      (failure) {
+        debugPrint(">>> signinWithPhone falló: ${failure.message}");
+        emit(AuthError(failure.message));
+      },
+      (user) {
+        debugPrint(">>> signinWithPhone exitoso: ${user.name}");
         emit(Authenticated(user: user));
       },
     );

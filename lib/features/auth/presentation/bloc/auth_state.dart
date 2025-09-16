@@ -6,6 +6,18 @@ class AuthInitial extends AuthState {}
 
 class AuthLoading extends AuthState {}
 
+class SignInWithPhoneInProgress extends AuthState {}
+
+class SignInWithPhoneSuccess extends AuthState {
+  final String message;
+  SignInWithPhoneSuccess({required this.message});
+}
+
+class SignInWithPhoneFailure extends AuthState {
+  final String message;
+  SignInWithPhoneFailure(this.message);
+}
+
 class RegistrationPending extends AuthState {
   final String userId;
   final String phone;

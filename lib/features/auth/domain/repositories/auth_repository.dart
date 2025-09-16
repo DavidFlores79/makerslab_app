@@ -6,6 +6,7 @@ import '../../data/models/login_response_model.dart';
 
 abstract class AuthRepository {
   Future<Either<Failure, User>> signIn(String email, String password);
+  Future<Either<Failure, User>> signInWithPhone(String phone, String password);
   Future<Either<Failure, User>> signUp({
     required String phone,
     required String password,

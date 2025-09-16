@@ -1,6 +1,7 @@
 // lib/main_shell.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'core/app_keys.dart';
 import 'shared/widgets/app_drawer.dart';
 import 'shared/widgets/index.dart';
 
@@ -8,7 +9,7 @@ class MainShell extends StatelessWidget {
   const MainShell({super.key, required this.child});
   final Widget child;
 
-  static final _mainTabs = ['/home', '/investments', '/profile'];
+  static final _mainTabs = ['/home', '/profile'];
 
   int _getCurrentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
@@ -26,6 +27,7 @@ class MainShell extends StatelessWidget {
     final showBottomBar = currentIndex >= 0;
 
     return Scaffold(
+      key: mainScaffoldKey,
       drawer: PxAppDrawer(),
       body: child,
       bottomNavigationBar: showBottomBar ? PxBottomNavigationBar() : null,
