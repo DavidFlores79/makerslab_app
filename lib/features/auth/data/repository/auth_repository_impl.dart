@@ -11,6 +11,7 @@ import '../datasource/auth_local_datasource.dart';
 import '../datasource/auth_remote_datasource.dart';
 import '../datasource/auth_token_local_datasource.dart';
 import '../datasource/auth_user_local_datasource.dart';
+import '../models/forgot_password_response_model.dart';
 import '../models/login_response_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -91,9 +92,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> forgotPassword(String email) {
-    return _safeCall<void>(() async {
-      await remoteDataSource.forgotPassword(email);
+  Future<Either<Failure, ForgotPasswordResponseModel>> forgotPassword(
+    String phone,
+  ) {
+    return _safeCall<ForgotPasswordResponseModel>(() async {
+      final response = await remoteDataSource.forgotPassword(phone);
+      return response;
     });
   }
 

@@ -6,18 +6,6 @@ class AuthInitial extends AuthState {}
 
 class AuthLoading extends AuthState {}
 
-class SignInWithPhoneInProgress extends AuthState {}
-
-class SignInWithPhoneSuccess extends AuthState {
-  final String message;
-  SignInWithPhoneSuccess({required this.message});
-}
-
-class SignInWithPhoneFailure extends AuthState {
-  final String message;
-  SignInWithPhoneFailure(this.message);
-}
-
 class RegistrationPending extends AuthState {
   final String userId;
   final String phone;
@@ -40,3 +28,29 @@ class AuthError extends AuthState {
 class Unauthenticated extends AuthState {}
 
 class AuthSessionValid extends AuthState {}
+
+//forgot password
+class ForgotPasswordInProgress extends AuthState {}
+
+class ForgotPasswordSuccess extends AuthState {
+  final String message;
+  final String userId;
+  ForgotPasswordSuccess({required this.message, required this.userId});
+}
+
+class ForgotPasswordFailure extends AuthState {
+  final String message;
+  ForgotPasswordFailure(this.message);
+}
+
+class SignInWithPhoneInProgress extends AuthState {}
+
+class SignInWithPhoneSuccess extends AuthState {
+  final String message;
+  SignInWithPhoneSuccess({required this.message});
+}
+
+class SignInWithPhoneFailure extends AuthState {
+  final String message;
+  SignInWithPhoneFailure(this.message);
+}

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/api_config.dart';
 import '../../../../core/network/api_exceptions.dart';
+import '../models/forgot_password_response_model.dart';
 import '../models/login_response_model.dart';
 
 abstract class AuthRemoteDataSource {
@@ -17,7 +18,7 @@ abstract class AuthRemoteDataSource {
     String? secondSurname,
   });
   Future<void> changePassword(String oldPassword, String newPassword);
-  Future<void> forgotPassword(String phone);
+  Future<ForgotPasswordResponseModel> forgotPassword(String phone);
   Future<void> resendSignUpCode({required String userId});
   Future<LoginResponseModel> confirmSignUp({
     required String userId,
@@ -77,21 +78,36 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> changePassword(String oldPassword, String newPassword) async {
+  Future<void> changePassword(
+    String confirmPassword,
+    String newPassword,
+  ) async {
     await _safePost(
-      '/auth/change-password',
-      data: {'oldPassword': oldPassword, 'newPassword': newPassword},
+      ApiConfig.changePasswordEndpoint,
+      data: {'confirmPassword': confirmPassword, 'newPassword': newPassword},
     );
   }
 
   @override
-  Future<void> forgotPassword(String phone) async {
-    await _safePost('/auth/forgot-password', data: {'phone': phone});
+  Future<ForgotPasswordResponseModel> forgotPassword(String phone) async {
+    debugPrint('POST ${ApiConfig.forgotPasswordEndpoint} -> phone: +52$phone');
+
+    final response = await _safePost(
+      ApiConfig.forgotPasswordEndpoint,
+      data: {'phone': '+52$phone'},
+    );
+
+    debugPrint('>>> forgotPassword response: ${response.data}');
+
+    return ForgotPasswordResponseModel.fromJson(response.data);
   }
 
   @override
   Future<void> resendSignUpCode({required String userId}) async {
-    await _safePost('/auth/resend-code', data: {'userId': userId});
+    await _safePost(
+      ApiConfig.resendSignUpCodeEndpoint,
+      data: {'resetRequestId': userId},
+    );
   }
 
   @override
@@ -100,8 +116,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String code,
   }) async {
     final response = await _safePost(
-      '/auth/confirm-signup',
-      data: {'userId': userId, 'code': code},
+      ApiConfig.confirmSignUpEndpoint,
+      data: {'resetRequestId': userId, 'otp': code},
     );
 
     return LoginResponseModel.fromJson(_ensureMap(response.data));

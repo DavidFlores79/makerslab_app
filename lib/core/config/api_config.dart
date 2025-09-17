@@ -6,10 +6,10 @@ class ApiConfig {
   // Endpoints de auth
   static const String signInEndpoint = '/auth/login';
   static const String phoneSignInEndpoint = '/auth/phone-login';
-  static const String signUpEndpoint = '/auth/signup';
   static const String forgotPasswordEndpoint = '/auth/forgot-password';
   static const String changePasswordEndpoint = '/auth/change-password';
-  static const String confirmSignUpEndpoint = '/auth/confirm';
+  static const String signUpEndpoint = '/auth/signup';
+  static const String confirmSignUpEndpoint = '/auth/phone-verify';
   static const String resendSignUpCodeEndpoint = '/auth/resend-code';
 
   // Endpoints de usuarios

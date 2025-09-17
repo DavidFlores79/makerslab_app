@@ -1,6 +1,9 @@
 // lib/core/network/interceptors/auth_interceptor.dart
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../../storage/secure_storage_keys.dart';
 
 class AuthInterceptor extends Interceptor {
   final FlutterSecureStorage secureStorage;
@@ -12,7 +15,10 @@ class AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     try {
-      final token = await secureStorage.read(key: 'access_token');
+      final token = await secureStorage.read(
+        key: SecureStorageKeys.accessToken,
+      );
+      debugPrint(">>> Adding auth token to request $token");
       if (token != null && token.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $token';
       }

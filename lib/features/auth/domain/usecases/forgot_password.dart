@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failure.dart';
+import '../../data/models/forgot_password_response_model.dart';
 import '../repositories/auth_repository.dart';
 
 class ForgotPassword {
@@ -8,7 +9,7 @@ class ForgotPassword {
 
   ForgotPassword({required this.repository});
 
-  Future<Either<Failure, void>> call(String email) {
+  Future<Either<Failure, ForgotPasswordResponseModel>> call(String email) {
     return repository.forgotPassword(email);
   }
 }

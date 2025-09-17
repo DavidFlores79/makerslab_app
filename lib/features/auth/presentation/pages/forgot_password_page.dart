@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:go_router/go_router.dart';
+import 'package:makerslab_app/features/auth/presentation/pages/otp_page.dart';
 
 import '../../../../core/ui/snackbar_service.dart';
 import '../../../../core/validators/px_validators.dart';
@@ -23,12 +25,17 @@ class ForgotPasswordPage extends StatelessWidget {
       appBar: PxBackAppBar(),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthSuccess) {
-            SnackbarService().show(message: 'SMS de recuperación enviado');
-            Navigator.pop(context);
-
-            //TODO: Create next screen where OTP code is captured
-          } else if (state is AuthError) {
+          if (state is ForgotPasswordSuccess) {
+            SnackbarService().show(message: state.message);
+            context.push(
+              OtpPage.routeName,
+              extra: {
+                'userId': state.userId,
+                'phone': _phoneController.text,
+                'isForForgotPassword': true,
+              },
+            );
+          } else if (state is ForgotPasswordFailure) {
             SnackbarService().show(message: state.message);
           }
         },
@@ -82,8 +89,9 @@ class ForgotPasswordPage extends StatelessWidget {
   }
 
   Widget _buildSendCodeButton(BuildContext context, AuthState state) {
+    debugPrint('>>> Phone to send: ${_phoneController.text}');
     return MainAppButton(
-      isLoading: state is AuthLoading,
+      isLoading: state is ForgotPasswordInProgress,
       onPressed: () {
         context.read<AuthBloc>().add(
           ForgotPasswordRequested(_phoneController.text),

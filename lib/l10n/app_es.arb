@@ -34,6 +34,7 @@
   "send_label": "Enviar",
   "replace_help_message": "Le pediremos esta contraseña cada vez que inicie sesión.",
   "create_new_password_label": "Crear nueva contraseña",
+  "create_new_password_help_message": "Crea una nueva contraseña para tu cuenta.",
   "new_password_label": "Nueva contraseña",
   "verification_code_label": "Código de verificación",
   "verification_code_help_message": "Ingresa el código de verificación enviado al número {phone_number}",

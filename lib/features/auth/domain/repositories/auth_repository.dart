@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failure.dart';
 import '../../../../core/entities/user.dart';
+import '../../data/models/forgot_password_response_model.dart';
 import '../../data/models/login_response_model.dart';
 
 abstract class AuthRepository {
@@ -24,7 +25,9 @@ abstract class AuthRepository {
     String oldPassword,
     String newPassword,
   );
-  Future<Either<Failure, void>> forgotPassword(String email);
+  Future<Either<Failure, ForgotPasswordResponseModel>> forgotPassword(
+    String phone,
+  );
   Future<bool> hasTokenStored();
   Future<Either<Failure, User>> getUserFromCache();
   Future<Either<Failure, void>> logout();

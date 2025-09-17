@@ -63,12 +63,19 @@ final authRoutes = [
     path: OtpPage.routeName,
     name: OtpPage.routeName,
     builder: (context, state) {
-      final userId = (state.extra as Map<String, dynamic>?)?['userId']!;
-      final phone = (state.extra as Map<String, dynamic>?)?['phone']!;
+      final userId = (state.extra as Map<String, dynamic>?)?['userId'] ?? '';
+      final phone = (state.extra as Map<String, dynamic>?)?['phone'] ?? '';
+      final isForForgotPassword =
+          (state.extra as Map<String, dynamic>?)?['isForForgotPassword'] ??
+          false;
 
       return BlocProvider(
         create: (_) => getIt<OtpBloc>(),
-        child: OtpPage(userId: userId, phone: phone),
+        child: OtpPage(
+          userId: userId,
+          phone: phone,
+          isForForgotPassword: isForForgotPassword,
+        ),
       );
     },
   ),
@@ -85,11 +92,13 @@ final authRoutes = [
   GoRoute(
     path: ChangePasswordPage.routeName,
     name: ChangePasswordPage.routeName,
-    builder:
-        (context, state) => BlocProvider.value(
-          value: context.read<AuthBloc>(),
-          child: ChangePasswordPage(),
-        ),
+    builder: (context, state) {
+      final phone = (state.extra as Map<String, dynamic>?)?['phone'] ?? '';
+      return BlocProvider.value(
+        value: context.read<AuthBloc>(),
+        child: ChangePasswordPage(phone: phone),
+      );
+    },
   ),
   GoRoute(
     path: ForgotPasswordPage.routeName,

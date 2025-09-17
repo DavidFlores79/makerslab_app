@@ -69,7 +69,7 @@ class AppDrawer extends StatelessWidget {
     super.key,
     required this.menuItems,
     this.selectedIndex,
-    this.highlightColor = AppColors.greenLight, // verde claro
+    this.highlightColor = AppColors.primaryLight, // verde claro
   });
 
   /// Lista de opciones que se mostrarán

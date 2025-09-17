@@ -15,13 +15,20 @@ import '../bloc/auth_event.dart';
 import '../bloc/otp/otp_bloc.dart';
 import '../bloc/otp/otp_event.dart';
 import '../bloc/otp/otp_state.dart';
+import 'change_password_page.dart';
 
 class OtpPage extends StatefulWidget {
   static const routeName = '/auth/otp';
   final String userId;
   final String phone;
+  final bool isForForgotPassword;
 
-  const OtpPage({super.key, required this.userId, required this.phone});
+  const OtpPage({
+    super.key,
+    required this.userId,
+    required this.phone,
+    this.isForForgotPassword = false,
+  });
 
   @override
   State<OtpPage> createState() => _OtpPageState();
@@ -167,6 +174,15 @@ class _OtpPageState extends State<OtpPage> {
         AppLocalizations.of(context)!.account_verified_successfully_label,
       );
       _codeController.clear();
+
+      if (mounted && widget.isForForgotPassword) {
+        context.go(
+          ChangePasswordPage.routeName,
+          extra: {'phone': widget.phone},
+        );
+        return;
+      }
+
       try {
         final authBloc = context.read<AuthBloc>();
         authBloc.add(

@@ -34,14 +34,14 @@ class RegisterRequested extends AuthEvent {
 }
 
 class ChangePasswordRequested extends AuthEvent {
-  final String oldPassword;
+  final String confirmPassword;
   final String newPassword;
-  ChangePasswordRequested(this.oldPassword, this.newPassword);
+  ChangePasswordRequested(this.confirmPassword, this.newPassword);
 }
 
 class ForgotPasswordRequested extends AuthEvent {
-  final String email;
-  ForgotPasswordRequested(this.email);
+  final String phone;
+  ForgotPasswordRequested(this.phone);
 }
 
 class CheckAuthStatus extends AuthEvent {}

@@ -48,14 +48,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     LoginRequested event,
     Emitter<AuthState> emit,
   ) async {
-    // emit(AuthLoading());
-
-    // final result = await loginUser(event.email, event.password);
-
-    // result.fold((failure) => emit(AuthError(failure.message)), (user) {
-    //   emit(Unauthenticated());
-    //   emit(Authenticated(user: user));
-    // });
     debugPrint(">>> LoginRequested event recibido");
     emit(AuthLoading());
 
@@ -96,25 +88,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
-  // Future<void> _onRegisterRequested(
-  //   RegisterRequested event,
-  //   Emitter<AuthState> emit,
-  // ) async {
-  //   emit(AuthLoading());
-  //   final result = await registerUser(
-  //     firstName: event.firstName,
-  //     firstSurname: event.firstSurname,
-  //     secondSurname: event.secondSurname,
-  //     phone: event.phone,
-  //     password: event.password,
-  //     confirmPassword: event.confirmPassword,
-  //   );
-
-  //   result.fold(
-  //     (failure) => emit(AuthError(failure.message)),
-  //     (user) => emit(Authenticated(user: user)),
-  //   );
-  // }
   Future<void> _onRegisterRequested(
     RegisterRequested event,
     Emitter<AuthState> emit,
@@ -165,7 +138,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-    final result = await changePassword(event.oldPassword, event.newPassword);
+    final result = await changePassword(
+      event.confirmPassword,
+      event.newPassword,
+    );
 
     result.fold(
       (failure) => emit(AuthError(failure.message)),
@@ -177,12 +153,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ForgotPasswordRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
-    final result = await forgotPassword(event.email);
+    emit(ForgotPasswordInProgress());
+    final result = await forgotPassword(event.phone);
 
     result.fold(
-      (failure) => emit(AuthError(failure.message)),
-      (_) => emit(AuthSuccess()),
+      (failure) => emit(ForgotPasswordFailure(failure.message)),
+      (data) => emit(
+        ForgotPasswordSuccess(
+          message: data.message ?? '',
+          userId: data.resetRequestId ?? '',
+        ),
+      ),
     );
   }
 
@@ -190,16 +171,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     CheckAuthStatus event,
     Emitter<AuthState> emit,
   ) async {
-    // final hasSession = await checkSession();
-    // if (hasSession) {
-    //   final result = await getUserFromCache();
-    //   result.fold(
-    //     (failure) => emit(AuthError(failure.message)),
-    //     (user) => emit(Authenticated(user: user)),
-    //   );
-    // } else {
-    //   emit(Unauthenticated());
-    // }
     debugPrint(">>> CheckAuthStatus ejecutado");
     final hasSession = await checkSession();
     if (hasSession) {

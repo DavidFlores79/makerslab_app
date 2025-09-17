@@ -35,6 +35,7 @@
   "send_label": "Send",
   "replace_help_message": "We will ask for this password every time you sign in.",
   "create_new_password_label": "Create new password",
+  "create_new_password_help_message": "Create a new password for your account.",
   "new_password_label": "New password",
   "verification_code_label": "Verification code",
   "verification_code_help_message": "Enter the verification code sent to {phone_number}",
