@@ -31,7 +31,12 @@ class PxChatBotFloatingButton extends StatelessWidget {
 
         PxChatBotModal.show(context, moduleKey: moduleKey);
       },
-      child: const Icon(Icons.chat),
+      child: Image.asset(
+        'assets/images/brand/logo-app.png',
+        width: 32,
+        height: 32,
+        // color: Colors.white,
+      ),
     );
   }
 }
