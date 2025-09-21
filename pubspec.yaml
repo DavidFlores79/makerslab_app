@@ -46,6 +46,15 @@ dependencies:
   smooth_page_indicator: ^1.2.1
   pin_code_fields: ^8.0.1
 
+  flutter_reactive_ble: ^5.4.0
+  flutter_bluetooth_classic_serial: ^1.0.3
+  # versiones compatibles con Flutter 3.29.x
+  syncfusion_flutter_core: ^29.1.33
+  syncfusion_flutter_gauges: ^29.1.33
+  
+  permission_handler: ^12.0.1
+  keep_screen_on: ^4.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

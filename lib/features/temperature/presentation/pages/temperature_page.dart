@@ -5,14 +5,17 @@ import '../../../../core/entities/instruction.dart';
 import '../../../../core/entities/material.dart';
 import '../../../../core/entities/module.dart';
 import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
+import '../widgets/temperature_interface_page.dart';
 
 class TemperaturePage extends StatelessWidget {
   static const String routeName = '/temperature';
   TemperaturePage({super.key});
 
   final MainModule mainModule = MainModule(
-    title: 'title',
+    title: 'DHT11 Temperatura',
     description: 'description',
+    moduleRoute: TemperaturePage.routeName,
+    interfaceRoute: TemperatureInterfacePage.routeName,
     image: 'assets/images/static/temperature/esp32DHT11.png',
     videoId: 'kJpdoBLSmHs',
     inoFile: 'assets/files/DHT11_Arduino_ESP32.ino',
@@ -108,7 +111,7 @@ class TemperaturePage extends StatelessWidget {
             assetImagePath:
                 mainModule.image ?? 'assets/images/static/placeholder.png',
             centerTitle: true,
-            backLabel: 'DHT11 Temperatura',
+            backLabel: mainModule.title,
           ),
           SliverList(
             delegate: SliverChildListDelegate([

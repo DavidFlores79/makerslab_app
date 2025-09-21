@@ -8,6 +8,7 @@ import '../bloc/temperature_bloc.dart';
 import '../pages/instruction_detail_page.dart';
 import '../pages/material_details_page.dart';
 import '../pages/temperature_page.dart';
+import '../widgets/temperature_interface_page.dart';
 
 final temperatureRoutes = [
   GoRoute(
@@ -19,6 +20,14 @@ final temperatureRoutes = [
           child: TemperaturePage(),
         ),
     routes: [
+      GoRoute(
+        path: TemperatureInterfacePage.routeName,
+        name: TemperatureInterfacePage.routeName,
+        builder: (context, state) {
+          return TemperatureInterfacePage();
+        },
+        // ^ builder ⇒ usa MaterialPage ⇒ animación por defecto (fade/slide)
+      ),
       GoRoute(
         path: TemperatureInstructionDetailsPage.routeName,
         name: TemperatureInstructionDetailsPage.routeName,

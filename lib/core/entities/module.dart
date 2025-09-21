@@ -4,6 +4,8 @@ import 'material.dart';
 class MainModule {
   final String title;
   final String description;
+  final String? moduleRoute;
+  final String? interfaceRoute;
   final String? image; // puede ser una URL o un asset local
   final String? videoId; // puede ser una URL o un asset local
   final String inoFile;
@@ -14,6 +16,8 @@ class MainModule {
   MainModule({
     required this.title,
     required this.description,
+    this.moduleRoute,
+    this.interfaceRoute,
     required this.videoId,
     required this.inoFile,
     required this.instructions,
