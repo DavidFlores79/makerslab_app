@@ -67,11 +67,5 @@ class HomeLocalDatasourceImpl implements HomeLocalDatasource {
       LightControlPage.routeName,
       AppColors.orange,
     ),
-    MainMenuItem(
-      CommunityMaterialIcons.chat_processing_outline,
-      'Chat',
-      ChatPage.routeName,
-      AppColors.purple,
-    ),
   ];
 }

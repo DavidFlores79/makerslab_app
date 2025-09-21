@@ -12,6 +12,11 @@ abstract class ChatRepository {
 
   /// Obtiene el listado de mensajes (una vez) - envuelto en Either por si falla.
   Future<Either<Failure, List<Message>>> fetchMessages(String conversationId);
+  Future<Either<Failure, String>> sendMessage(
+    String conversationId,
+    String content,
+    String imageUrl,
+  );
 
   /// Envía un texto. Devuelve Either para propagar errores.
   Future<Either<Failure, void>> sendText(String authorId, String text);

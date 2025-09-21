@@ -40,6 +40,7 @@ import '../features/chat/domain/repositories/chat_repository.dart';
 import '../features/chat/domain/usecases/get_chat_data_usecase.dart';
 import '../features/chat/domain/usecases/send_file_message_usecase.dart';
 import '../features/chat/domain/usecases/send_image_message_usecase.dart';
+import '../features/chat/domain/usecases/send_message_usecase.dart';
 import '../features/chat/domain/usecases/send_text_message_usecase.dart';
 import '../features/chat/domain/usecases/start_chat_session_usecase.dart';
 import '../features/chat/presentation/bloc/chat_bloc.dart';
@@ -178,6 +179,7 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => LogoutUser(repository: getIt()));
   getIt.registerLazySingleton(() => ResendSignUpCode(repository: getIt()));
   getIt.registerLazySingleton(() => ConfirmSignUp(repository: getIt()));
+  getIt.registerLazySingleton(() => SendMessageUsecase(repository: getIt()));
 
   // Blocs
   getIt.registerFactory(() => OnboardingBloc(getIt(), getIt()));
@@ -209,6 +211,7 @@ Future<void> setupLocator() async {
       sendFileUseCase: getIt<SendFileMessageUseCase>(),
       logger: logger,
       startChatSession: getIt<StartChatSessionUseCase>(),
+      sendMessageUsecase: getIt<SendMessageUsecase>(),
     ),
   );
 }

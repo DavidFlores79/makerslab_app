@@ -20,8 +20,8 @@ class PxChatBotFloatingButton extends StatelessWidget {
         final isLoggedIn = context.read<AuthBloc>().state is Authenticated;
 
         if (!isLoggedIn) {
-          final result = await context.push(LoginPage.routeName);
-          if (result != true) {
+          final loginResult = await context.push(LoginPage.routeName);
+          if (loginResult != true) {
             SnackbarService().show(
               message: 'Debes iniciar sesión o registrarte para usar el chat.',
             );

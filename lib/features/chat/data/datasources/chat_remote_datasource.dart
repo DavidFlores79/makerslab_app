@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
 import 'package:logger/logger.dart';
+import 'package:makerslab_app/features/chat/data/models/send_message_response.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:ui' as ui;
 
@@ -11,7 +12,11 @@ import 'package:makerslab_app/features/chat/data/models/message_model.dart';
 
 abstract class RemoteChatDataSource {
   Future<String> startChatSession(String moduleKey);
-  Future<void> sendMessage(String moduleKey, String message);
+  Future<String> sendMessage(
+    String conversationId,
+    String content,
+    String imageUrl,
+  );
   Future<List<Message>> fetchMessages(String conversationId);
 }
 
@@ -33,15 +38,6 @@ class ChatRemoteDataSourceImpl implements RemoteChatDataSource {
     );
     debugPrint('Chat session started: ${response.data}');
     return response.data['conversationId'] as String;
-  }
-
-  @override
-  Future<void> sendMessage(String moduleKey, String message) async {
-    try {
-      await dio.post('/chat/$moduleKey/messages', data: {'message': message});
-    } catch (e) {
-      logger.e('Error sending message: $e');
-    }
   }
 
   @override
@@ -187,5 +183,23 @@ class ChatRemoteDataSourceImpl implements RemoteChatDataSource {
       logger.e('Error fetching messages: $e\n$st');
       return [];
     }
+  }
+
+  @override
+  Future<String> sendMessage(
+    String conversationId,
+    String content,
+    String imageUrl,
+  ) async {
+    final response = await dio.post(
+      '/api/chat/message',
+      data: {
+        'conversationId': conversationId,
+        'content': content,
+        'imageUrl': (imageUrl.isEmpty) ? null : imageUrl,
+      },
+    );
+    return SendMessageResponse.fromJson(response.data).assistant ??
+        'No se obtuvo respuesta';
   }
 }

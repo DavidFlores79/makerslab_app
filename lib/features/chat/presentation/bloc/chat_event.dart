@@ -12,6 +12,18 @@ class StartChatSessionEvent extends ChatEvent {
   StartChatSessionEvent(this.moduleKey);
 }
 
+class SendMessageEvent extends ChatEvent {
+  final String conversationId;
+  final String content;
+  final String imageUrl;
+
+  SendMessageEvent({
+    required this.conversationId,
+    required this.content,
+    required this.imageUrl,
+  });
+}
+
 class SendTextMessage extends ChatEvent {
   final String authorId;
   final String text;

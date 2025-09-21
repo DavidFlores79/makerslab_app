@@ -10,6 +10,7 @@ import '../../domain/repositories/chat_repository.dart';
 import '../../domain/usecases/get_chat_data_usecase.dart';
 import '../../domain/usecases/send_file_message_usecase.dart';
 import '../../domain/usecases/send_image_message_usecase.dart';
+import '../../domain/usecases/send_message_usecase.dart';
 import '../../domain/usecases/send_text_message_usecase.dart';
 import '../../domain/usecases/start_chat_session_usecase.dart';
 import 'chat_event.dart';
@@ -22,6 +23,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final SendImageMessageUseCase sendImageUseCase;
   final SendFileMessageUseCase sendFileUseCase;
   final StartChatSessionUseCase startChatSession;
+  final SendMessageUsecase sendMessageUsecase;
   final Logger logger;
 
   final InMemoryChatController chatController = InMemoryChatController();
@@ -35,6 +37,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     required this.sendTextUseCase,
     required this.sendImageUseCase,
     required this.sendFileUseCase,
+    required this.sendMessageUsecase,
     Logger? logger,
   }) : logger = logger ?? Logger(),
        super(ChatState.initial()) {
@@ -44,6 +47,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<SendTextMessage>(_onSendText);
     on<SendImageMessage>(_onSendImage);
     on<SendFileMessage>(_onSendFile);
+    on<SendMessageEvent>(_onSendMessage);
   }
 
   Future<void> _onStartChatSession(
@@ -103,6 +107,46 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _messagesSub = repository.messagesStream().listen((messages) {
       add(MessagesUpdated(messages));
     });
+  }
+
+  Future<void> _onSendMessage(
+    SendMessageEvent event,
+    Emitter<ChatState> emit,
+  ) async {
+    emit(state.copyWith(status: ChatStatus.sending));
+    final Either<Failure, String> res = await sendMessageUsecase(
+      event.conversationId,
+      event.content,
+      event.imageUrl,
+    );
+    res.fold(
+      (failure) {
+        logger.e('sendMessage failed: ${failure.message}');
+        emit(
+          state.copyWith(
+            status: ChatStatus.failure,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (message) {
+        // actualizar estado y el chatController
+        _pushMessagesToController([
+          TextMessage.fromJson({
+            'id': 'local-${DateTime.now().millisecondsSinceEpoch}',
+            'authorId': 'assistant',
+            'createdAt': DateTime.now().toUtc().millisecondsSinceEpoch,
+            'text': message,
+          }),
+        ]);
+        emit(
+          state.copyWith(
+            status: ChatStatus.messageResponseReceived,
+            responseMessage: message,
+          ),
+        );
+      },
+    );
   }
 
   void _onMessagesUpdated(MessagesUpdated event, Emitter<ChatState> emit) {

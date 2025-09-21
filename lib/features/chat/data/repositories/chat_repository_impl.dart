@@ -10,11 +10,12 @@ import 'dart:ui' as ui;
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failure.dart';
+import '../../../../core/repositories/base_repository.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../datasources/chat_local_datasource.dart';
 import '../datasources/chat_remote_datasource.dart';
 
-class ChatRepositoryImpl implements ChatRepository {
+class ChatRepositoryImpl extends BaseRepository implements ChatRepository {
   final LocalChatDataSource localDataSource;
   final RemoteChatDataSource remoteDataSource;
   final Logger logger;
@@ -29,24 +30,36 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<Either<Failure, String>> startChatSession(String moduleKey) async {
-    try {
+    return safeCall<String>(() async {
       final conversationId = await remoteDataSource.startChatSession(moduleKey);
-      return Right(conversationId);
-    } on CacheException catch (e, stackTrace) {
-      return Left(CacheFailure(e.message, stackTrace));
-    }
+      return conversationId;
+    });
   }
 
   @override
   Future<Either<Failure, List<Message>>> fetchMessages(
     String conversationId,
   ) async {
-    try {
+    return safeCall<List<Message>>(() async {
       final messages = await remoteDataSource.fetchMessages(conversationId);
-      return Right(messages);
-    } on CacheException catch (e, stackTrace) {
-      return Left(CacheFailure(e.message, stackTrace));
-    }
+      return messages;
+    });
+  }
+
+  @override
+  Future<Either<Failure, String>> sendMessage(
+    String conversationId,
+    String content,
+    String imageUrl,
+  ) {
+    return safeCall<String>(() async {
+      final result = await remoteDataSource.sendMessage(
+        conversationId,
+        content,
+        imageUrl,
+      );
+      return result;
+    });
   }
 
   ///////////////////////////////////   local data source   ///////////////////////////////////
