@@ -3,6 +3,7 @@ import '../../../../../shared/widgets/index.dart';
 import '../../../../core/entities/instruction.dart';
 import '../../../../core/entities/material.dart';
 import '../../../../core/entities/module.dart';
+import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
 
 class ServoPage extends StatelessWidget {
   static const String routeName = '/servo';
@@ -114,6 +115,9 @@ class ServoPage extends StatelessWidget {
             ]),
           ),
         ],
+      ),
+      floatingActionButton: const PxChatBotFloatingButton(
+        moduleKey: 'servo_control',
       ),
     );
   }

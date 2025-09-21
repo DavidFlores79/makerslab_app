@@ -39,7 +39,6 @@ class _ChatContentState extends State<ChatContent> {
   @override
   void initState() {
     super.initState();
-
     context.read<ChatBloc>().add(StartChatSessionEvent(widget.moduleKey));
   }
 
@@ -184,6 +183,8 @@ class _ChatContentState extends State<ChatContent> {
       top: false,
       child: BlocConsumer<ChatBloc, ChatState>(
         builder: (context, state) {
+          final size = MediaQuery.of(context).size;
+
           if (state.status == ChatStatus.messagesLoading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -202,6 +203,21 @@ class _ChatContentState extends State<ChatContent> {
               onMessageSend: _onMessageSend,
               onAttachmentTap: _onAttachmentTap,
               builders: Builders(
+                textMessageBuilder: (
+                  context,
+                  message,
+                  index, {
+                  required bool isSentByMe,
+                  MessageGroupStatus? groupStatus,
+                }) {
+                  return Container(
+                    constraints: BoxConstraints(
+                      maxWidth:
+                          size.width * 0.75, // <- ancho máximo de la burbuja
+                    ),
+                    child: SimpleTextMessage(message: message, index: index),
+                  );
+                },
                 composerBuilder:
                     (context) => Composer(
                       hintText: 'Escribe un mensaje...', // <- tu nueva leyenda

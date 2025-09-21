@@ -3,6 +3,7 @@ import '../../../../../shared/widgets/index.dart';
 import '../../../../core/entities/instruction.dart';
 import '../../../../core/entities/material.dart';
 import '../../../../core/entities/module.dart';
+import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
 
 class GamepadPage extends StatelessWidget {
   static const String routeName = '/gamepad';
@@ -114,6 +115,9 @@ class GamepadPage extends StatelessWidget {
             ]),
           ),
         ],
+      ),
+      floatingActionButton: const PxChatBotFloatingButton(
+        moduleKey: 'joystick_control',
       ),
     );
   }

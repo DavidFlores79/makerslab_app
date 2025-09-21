@@ -3,6 +3,7 @@ import '../../../../../shared/widgets/index.dart';
 import '../../../../core/entities/instruction.dart';
 import '../../../../core/entities/material.dart';
 import '../../../../core/entities/module.dart';
+import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
 
 class LightControlPage extends StatelessWidget {
   static const String routeName = '/light_control';
@@ -115,6 +116,9 @@ class LightControlPage extends StatelessWidget {
             ]),
           ),
         ],
+      ),
+      floatingActionButton: const PxChatBotFloatingButton(
+        moduleKey: 'led_control',
       ),
     );
   }
