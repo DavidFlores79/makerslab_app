@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/storage/secure_storage_keys.dart';
@@ -11,7 +13,7 @@ abstract class AuthTokenLocalDataSource {
   Future<String?> getAccessToken();
   Future<String?> getRefreshToken();
   Future<void> clearSession();
-  Future<bool> hasTokenStored();
+  Future<bool> hasValidTokenStored();
 }
 
 class AuthTokenLocalDataSourceImpl implements AuthTokenLocalDataSource {
@@ -39,14 +41,41 @@ class AuthTokenLocalDataSourceImpl implements AuthTokenLocalDataSource {
   }
 
   @override
-  Future<bool> hasTokenStored() async {
+  Future<bool> hasValidTokenStored() async {
     final token = await secureStorage.read(SecureStorageKeys.accessToken);
     debugPrint(">>> hasTokenStored: $token");
-    return token != null && token.isNotEmpty;
+    if (token == null || token.isEmpty) return false;
+    return !_isJwtExpired(token);
   }
 
   @override
   Future<String?> getRefreshToken() async {
     return await secureStorage.read(SecureStorageKeys.refreshToken);
+  }
+
+  bool _isJwtExpired(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return true;
+      final payload = utf8.decode(base64Url.decode(_normalize(parts[1])));
+      final Map<String, dynamic> map = json.decode(payload);
+      final exp = map['exp'];
+      if (exp == null) return true;
+      final expiry = DateTime.fromMillisecondsSinceEpoch(
+        exp * 1000,
+        isUtc: true,
+      );
+      return expiry.isBefore(DateTime.now().toUtc());
+    } catch (e) {
+      debugPrint('Error decodificando JWT: $e');
+      return true;
+    }
+  }
+
+  String _normalize(String input) {
+    return input
+        .padRight((input.length + 3) ~/ 4 * 4, '=')
+        .replaceAll('-', '+')
+        .replaceAll('_', '/');
   }
 }

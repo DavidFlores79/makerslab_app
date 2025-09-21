@@ -2,7 +2,15 @@ import 'package:flutter_chat_core/flutter_chat_core.dart';
 
 abstract class ChatEvent {}
 
-class LoadMessages extends ChatEvent {}
+class LoadMessages extends ChatEvent {
+  final String conversationId;
+  LoadMessages({required this.conversationId});
+}
+
+class StartChatSessionEvent extends ChatEvent {
+  final String moduleKey;
+  StartChatSessionEvent(this.moduleKey);
+}
 
 class SendTextMessage extends ChatEvent {
   final String authorId;

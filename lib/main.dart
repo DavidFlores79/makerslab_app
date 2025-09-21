@@ -10,6 +10,7 @@ import 'core/ui/snackbar_service.dart';
 import 'di/service_locator.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
+import 'features/chat/presentation/bloc/chat_bloc.dart';
 import 'theme/app_color.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -30,6 +31,7 @@ void main() async {
           create: (_) => getIt<AuthBloc>()..add(CheckAuthStatus()),
           lazy: false,
         ),
+        BlocProvider(create: (_) => getIt<ChatBloc>()),
       ],
       child: const MyApp(),
     ),

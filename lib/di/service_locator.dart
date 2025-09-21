@@ -34,11 +34,14 @@ import '../features/auth/presentation/bloc/otp/otp_bloc.dart';
 import '../features/auth/presentation/bloc/register/register_cubit.dart';
 import '../features/chat/data/datasources/chat_local_datasource.dart';
 import '../features/chat/data/datasources/chat_local_datasource_impl.dart';
+import '../features/chat/data/datasources/chat_remote_datasource.dart';
+import '../features/chat/data/repositories/chat_repository_impl.dart';
 import '../features/chat/domain/repositories/chat_repository.dart';
 import '../features/chat/domain/usecases/get_chat_data_usecase.dart';
 import '../features/chat/domain/usecases/send_file_message_usecase.dart';
 import '../features/chat/domain/usecases/send_image_message_usecase.dart';
 import '../features/chat/domain/usecases/send_text_message_usecase.dart';
+import '../features/chat/domain/usecases/start_chat_session_usecase.dart';
 import '../features/chat/presentation/bloc/chat_bloc.dart';
 import '../features/home/data/datasources/home_local_datasource_impl.dart';
 import '../features/home/data/repository/home_repository_impl.dart';
@@ -79,8 +82,8 @@ Future<void> setupLocator() async {
   getIt.registerSingleton<SnackbarService>(SnackbarService());
 
   //LocalDataSources
-  getIt.registerLazySingleton<AuthLocalDataSourceMockImpl>(
-    () => AuthLocalDataSourceMockImpl(secureStorage: getIt(), logger: logger),
+  getIt.registerLazySingleton<AuthLocalDataSourceImpl>(
+    () => AuthLocalDataSourceImpl(secureStorage: getIt(), logger: logger),
   );
   getIt.registerLazySingleton<AuthUserLocalDataSourceImpl>(
     () => AuthUserLocalDataSourceImpl(secureStorage: getIt()),
@@ -88,14 +91,11 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton<AuthTokenLocalDataSourceImpl>(
     () => AuthTokenLocalDataSourceImpl(secureStorage: getIt()),
   );
-  // getIt.registerLazySingleton<ProfileRepository>(
-  //   () => ProfileRepositoryImpl(
-  //     localDatasource: profileLocalDataSource,
-  //     userLocalDataSource: userLocalDataSource,
-  //   ),
-  // );
+  getIt.registerLazySingleton<LocalChatDataSourceImpl>(
+    () => LocalChatDataSourceImpl(),
+  );
 
-  final authLocalDataSource = AuthLocalDataSourceMockImpl(
+  final authLocalDataSource = AuthLocalDataSourceImpl(
     logger: logger,
     secureStorage: getIt(),
   );
@@ -105,11 +105,15 @@ Future<void> setupLocator() async {
   final userLocalDataSource = AuthUserLocalDataSourceImpl(
     secureStorage: getIt(),
   );
-  // final profileLocalDataSource = ProfileLocalDataSourceImpl(logger: logger);
+  final chatLocalDataSource = LocalChatDataSourceImpl(logger: logger);
 
   //remote data sources
   getIt.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(dio: getIt()),
+  );
+
+  getIt.registerLazySingleton<RemoteChatDataSource>(
+    () => ChatRemoteDataSourceImpl(dio: getIt(), logger: logger),
   );
 
   // cubits
@@ -125,18 +129,22 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton<LocalChatDataSource>(
     () => LocalChatDataSourceImpl(logger: getIt<Logger>()),
   );
-
   getIt.registerLazySingleton<OnboardingRepository>(
     () =>
         OnboardingRepositoryImpl(sharedPreferences: getIt<SharedPreferences>()),
   );
-
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
       localDataSource: authLocalDataSource,
       tokenLocalDataSource: authTokenDataSource,
       userLocalDataSource: userLocalDataSource,
       remoteDataSource: getIt<AuthRemoteDataSource>(),
+    ),
+  );
+  getIt.registerLazySingleton<ChatRepository>(
+    () => ChatRepositoryImpl(
+      localDataSource: chatLocalDataSource,
+      remoteDataSource: getIt<RemoteChatDataSource>(),
     ),
   );
 
@@ -157,7 +165,9 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(
     () => SendFileMessageUseCase(getIt<ChatRepository>()),
   );
-
+  getIt.registerLazySingleton(
+    () => StartChatSessionUseCase(repository: getIt<ChatRepository>()),
+  );
   getIt.registerLazySingleton(() => LoginUser(repository: getIt()));
   getIt.registerLazySingleton(() => SigninWithPhone(repository: getIt()));
   getIt.registerLazySingleton(() => RegisterUser(repository: getIt()));
@@ -168,9 +178,6 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => LogoutUser(repository: getIt()));
   getIt.registerLazySingleton(() => ResendSignUpCode(repository: getIt()));
   getIt.registerLazySingleton(() => ConfirmSignUp(repository: getIt()));
-  // getIt.registerLazySingleton(() => GetUserProfile(repository: getIt()));
-  // getIt.registerLazySingleton(() => SaveUserProfile(repository: getIt()));
-  // getIt.registerLazySingleton(() => GetSupportInfo(repository: getIt()));
 
   // Blocs
   getIt.registerFactory(() => OnboardingBloc(getIt(), getIt()));
@@ -200,7 +207,8 @@ Future<void> setupLocator() async {
       sendTextUseCase: getIt<SendTextMessageUseCase>(),
       sendImageUseCase: getIt<SendImageMessageUseCase>(),
       sendFileUseCase: getIt<SendFileMessageUseCase>(),
-      logger: getIt<Logger>(),
+      logger: logger,
+      startChatSession: getIt<StartChatSessionUseCase>(),
     ),
   );
 }

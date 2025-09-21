@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../../../../../shared/widgets/index.dart';
 import '../../../../core/entities/instruction.dart';
 import '../../../../core/entities/material.dart';
 import '../../../../core/entities/module.dart';
+import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
 
 class TemperaturePage extends StatelessWidget {
   static const String routeName = '/temperature';
@@ -115,6 +117,10 @@ class TemperaturePage extends StatelessWidget {
             ]),
           ),
         ],
+      ),
+      floatingActionButton: const PxChatBotFloatingButton(
+        moduleKey:
+            'temperature_sensor', //aqui eventualmente llaman al chat content
       ),
     );
   }

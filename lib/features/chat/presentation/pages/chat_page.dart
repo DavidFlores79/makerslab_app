@@ -66,6 +66,8 @@ class _ChatPageState extends State<ChatPage> {
       id: _uuid.v4(),
       authorId: _currentUserId,
       createdAt: DateTime.now().toUtc(),
+      sentAt: DateTime.now().toUtc(),
+      seenAt: DateTime.now().toUtc(),
       text: text,
     );
     _chatController.insertMessage(msg);
@@ -135,6 +137,20 @@ class _ChatPageState extends State<ChatPage> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Chat(
             builders: Builders(
+              textMessageBuilder: (
+                context,
+                message,
+                index, {
+                required bool isSentByMe,
+                MessageGroupStatus? groupStatus,
+              }) {
+                return SimpleTextMessage(
+                  message: message,
+                  index: index,
+                  receivedBackgroundColor: AppColors.lightGreen,
+                  sentBackgroundColor: AppColors.red,
+                );
+              },
               imageMessageBuilder: (
                 context,
                 message,
@@ -227,64 +243,47 @@ class _ChatPageState extends State<ChatPage> {
             currentUserId: _currentUserId,
             resolveUser: _resolveUser,
             onMessageSend: _onMessageSend,
-            onAttachmentTap: () async {
-              final choice = await showModalBottomSheet<String>(
-                context: context,
-                builder:
-                    (_) => SafeArea(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ListTile(
-                            leading: const Icon(Icons.photo),
-                            title: const Text('Imagen'),
-                            onTap: () => Navigator.pop(context, 'image'),
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.attach_file),
-                            title: const Text('Archivo'),
-                            onTap: () => Navigator.pop(context, 'file'),
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.close),
-                            title: const Text('Cancelar'),
-                            onTap: () => Navigator.pop(context, null),
-                          ),
-                        ],
-                      ),
-                    ),
-              );
-
-              if (choice == 'image') {
-                await _handleImageSelection();
-              } else if (choice == 'file') {
-                await _handleFileSelection();
-              }
-            },
+            onAttachmentTap: _onAttachmentTap,
           ),
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   tooltip: 'Ver mensajes locales (debug)',
-      //   child: const Icon(Icons.list),
-      //   onPressed: () {
-      //     showModalBottomSheet(
-      //       context: context,
-      //       builder:
-      //           (_) => ListView.builder(
-      //             itemCount: _localMessages.length,
-      //             itemBuilder: (_, i) {
-      //               final m = _localMessages[i];
-      //               return ListTile(
-      //                 title: Text('${m.runtimeType} — id: ${m.id}'),
-      //                 subtitle: Text('authorId: ${m.authorId}'),
-      //               );
-      //             },
-      //           ),
-      //     );
-      //   },
-      // ),
     );
+  }
+
+  // manejar tap en icono adjuntar
+  void _onAttachmentTap() async {
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      builder:
+          (_) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo),
+                  title: const Text('Imagen'),
+                  onTap: () => Navigator.pop(context, 'image'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.attach_file),
+                  title: const Text('Archivo'),
+                  onTap: () => Navigator.pop(context, 'file'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.close),
+                  title: const Text('Cancelar'),
+                  onTap: () => Navigator.pop(context, null),
+                ),
+              ],
+            ),
+          ),
+    );
+
+    if (choice == 'image') {
+      await _handleImageSelection();
+    } else if (choice == 'file') {
+      await _handleFileSelection();
+    }
   }
 
   // pequeño helper UI para archivos locales

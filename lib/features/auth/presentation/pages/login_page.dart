@@ -36,7 +36,7 @@ class LoginPage extends StatelessWidget {
                 '${state.user.name ?? state.user.phone}',
               ),
             );
-            context.go(HomePage.routeName);
+            context.pop(true);
           } else if (state is AuthError) {
             SnackbarService().show(message: state.message);
           }
@@ -51,6 +51,7 @@ class LoginPage extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      _closeButton(context),
                       _buildLogo(context),
                       const SizedBox(height: 20),
                       _buildWelcomeText(context),
@@ -71,6 +72,16 @@ class LoginPage extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _closeButton(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: IconButton(
+        icon: const Icon(Icons.close),
+        onPressed: () => context.pop(false),
       ),
     );
   }

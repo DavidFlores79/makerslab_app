@@ -11,6 +11,7 @@ import '../../domain/usecases/get_chat_data_usecase.dart';
 import '../../domain/usecases/send_file_message_usecase.dart';
 import '../../domain/usecases/send_image_message_usecase.dart';
 import '../../domain/usecases/send_text_message_usecase.dart';
+import '../../domain/usecases/start_chat_session_usecase.dart';
 import 'chat_event.dart';
 import 'chat_state.dart';
 
@@ -20,6 +21,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final SendTextMessageUseCase sendTextUseCase;
   final SendImageMessageUseCase sendImageUseCase;
   final SendFileMessageUseCase sendFileUseCase;
+  final StartChatSessionUseCase startChatSession;
   final Logger logger;
 
   final InMemoryChatController chatController = InMemoryChatController();
@@ -28,6 +30,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   ChatBloc({
     required this.repository,
+    required this.startChatSession,
     required this.getChatDataUseCase,
     required this.sendTextUseCase,
     required this.sendImageUseCase,
@@ -35,6 +38,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     Logger? logger,
   }) : logger = logger ?? Logger(),
        super(ChatState.initial()) {
+    on<StartChatSessionEvent>(_onStartChatSession);
     on<LoadMessages>(_onInit);
     on<MessagesUpdated>(_onMessagesUpdated);
     on<SendTextMessage>(_onSendText);
@@ -42,10 +46,39 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<SendFileMessage>(_onSendFile);
   }
 
+  Future<void> _onStartChatSession(
+    StartChatSessionEvent event,
+    Emitter<ChatState> emit,
+  ) async {
+    emit(state.copyWith(status: ChatStatus.sessionLoading));
+    final Either<Failure, String> res = await startChatSession(event.moduleKey);
+    res.fold(
+      (failure) {
+        logger.e('StartChatSession failed: ${failure.message}');
+        emit(
+          state.copyWith(
+            status: ChatStatus.failure,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (conversationId) {
+        emit(
+          state.copyWith(
+            status: ChatStatus.sessionStarted,
+            conversationId: conversationId,
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _onInit(LoadMessages event, Emitter<ChatState> emit) async {
-    emit(state.copyWith(status: ChatStatus.loading));
+    emit(state.copyWith(status: ChatStatus.messagesLoading));
     // 1) cargar snapshot inicial
-    final Either<Failure, List<Message>> res = await getChatDataUseCase();
+    final Either<Failure, List<Message>> res = await getChatDataUseCase(
+      state.conversationId ?? '',
+    );
     res.fold(
       (failure) {
         logger.e('InitChat: getChatData failed: ${failure.message}');
@@ -59,7 +92,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       (messages) {
         // actualizar estado y el chatController
         _pushMessagesToController(messages);
-        emit(state.copyWith(status: ChatStatus.success, messages: messages));
+        emit(
+          state.copyWith(status: ChatStatus.messagesLoaded, messages: messages),
+        );
       },
     );
 

@@ -103,7 +103,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<bool> hasTokenStored() async {
-    return await tokenLocalDataSource.hasTokenStored();
+    return await tokenLocalDataSource.hasValidTokenStored();
   }
 
   @override

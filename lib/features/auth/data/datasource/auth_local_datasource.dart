@@ -31,14 +31,11 @@ abstract class AuthLocalDataSource {
   Future<List<UserModel>> getUsers();
 }
 
-class AuthLocalDataSourceMockImpl implements AuthLocalDataSource {
+class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final ISecureStorageService secureStorage;
   final Logger logger;
 
-  AuthLocalDataSourceMockImpl({
-    required this.secureStorage,
-    required this.logger,
-  });
+  AuthLocalDataSourceImpl({required this.secureStorage, required this.logger});
 
   String? _jwt;
   String otpCode = '123456';

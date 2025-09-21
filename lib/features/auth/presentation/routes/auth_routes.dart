@@ -11,7 +11,6 @@ import '../bloc/otp/otp_bloc.dart';
 import '../pages/change_password_page.dart';
 import '../pages/forgot_password_page.dart';
 import '../pages/login_page.dart';
-import '../pages/notification_permission_request_page.dart';
 import '../pages/otp_page.dart';
 import '../pages/register_page.dart';
 import '../pages/splash_coordinator.dart';
