@@ -1,7 +1,11 @@
-class TemperatureEntity {
-  final String id;
+class Temperature {
+  final double celsius;
+  final double humidity;
+  final DateTime timestamp;
 
-  TemperatureEntity({
-    required this.id,
-  });
+  Temperature({
+    required this.celsius,
+    required this.humidity,
+    DateTime? timestamp,
+  }) : timestamp = timestamp ?? DateTime.now();
 }

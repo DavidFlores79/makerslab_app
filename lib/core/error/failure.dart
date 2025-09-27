@@ -19,8 +19,15 @@ abstract class Failure extends Equatable {
 
 // Errores específicos de la aplicación
 class CacheFailure extends Failure {
-  const CacheFailure(String message, [StackTrace? stackTrace])
-    : super(message, stackTrace);
+  const CacheFailure(super.message, [super.stackTrace]);
+}
+
+class BluetoothFailure extends Failure {
+  const BluetoothFailure(super.message, [super.stackTrace]);
+}
+
+class UnknownFailure extends Failure {
+  const UnknownFailure(super.message, [super.stackTrace]);
 }
 
 class ServerFailure extends Failure {

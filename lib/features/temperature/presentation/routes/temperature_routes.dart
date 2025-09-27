@@ -23,10 +23,14 @@ final temperatureRoutes = [
       GoRoute(
         path: TemperatureInterfacePage.routeName,
         name: TemperatureInterfacePage.routeName,
-        builder: (context, state) {
-          return TemperatureInterfacePage();
+        pageBuilder: (context, state) {
+          return NoTransitionPage(
+            child: BlocProvider<TemperatureBloc>(
+              create: (_) => getIt<TemperatureBloc>(),
+              child: const TemperatureInterfacePage(),
+            ),
+          );
         },
-        // ^ builder ⇒ usa MaterialPage ⇒ animación por defecto (fade/slide)
       ),
       GoRoute(
         path: TemperatureInstructionDetailsPage.routeName,

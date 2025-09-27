@@ -3,12 +3,11 @@ import '../../../../core/error/failure.dart';
 import '../entities/temperature_entity.dart';
 import '../repositories/temperature_repository.dart';
 
-class GetTemperatureDataUseCase {
+class GetTemperatureStream {
   final TemperatureRepository repository;
+  GetTemperatureStream({required this.repository});
 
-  GetTemperatureDataUseCase(this.repository);
-
-  Future<Either<Failure, List<TemperatureEntity>>> call() async {
-    return await repository.getTemperatureData();
+  Stream<Either<Failure, Temperature>> call() {
+    return repository.temperatureStream();
   }
 }

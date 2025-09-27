@@ -1,21 +1,27 @@
 import '../../domain/entities/temperature_entity.dart';
 
-abstract class TemperaturesState {}
+abstract class TemperatureState {}
 
-class InitialDataLoading extends TemperaturesState {}
+class TempInitial extends TemperatureState {}
 
-class TemperaturesLoading extends TemperaturesState {}
+class TempLoading extends TemperatureState {}
 
-class TemperaturesLoaded extends TemperaturesState {
-  final List<TemperatureEntity>
-  data; // CAMBIO AQU�: 'data' en lugar de 'investments'
-
-  TemperaturesLoaded({
-    required this.data,
-  }); // CAMBIO AQU�: 'data' en lugar de 'investments'
+class DevicesLoaded extends TemperatureState {
+  final List<dynamic> devices; // cambia a List<BluetoothDevice> si lo adaptas
+  DevicesLoaded(this.devices);
 }
 
-class TemperaturesError extends TemperaturesState {
+class TempConnecting extends TemperatureState {}
+
+class TempConnected extends TemperatureState {
+  final Temperature latest;
+  final List<Temperature> history;
+  TempConnected({required this.latest, required this.history});
+}
+
+class TempDisconnected extends TemperatureState {}
+
+class TempError extends TemperatureState {
   final String message;
-  TemperaturesError(this.message);
+  TempError(this.message);
 }

@@ -20,7 +20,7 @@ class PxAppDrawer extends StatelessWidget {
           label: AppLocalizations.of(context)!.home_label,
           icon: Symbols.home,
           onTap: () {
-            Navigator.of(context).pop();
+            context.pop();
             context.go(HomePage.routeName);
           },
         ),
@@ -40,7 +40,7 @@ class PxAppDrawer extends StatelessWidget {
           onTap: () {
             context.read<AuthBloc>().add(LogoutRequested());
 
-            Navigator.of(context).pop();
+            context.pop();
             context.go(HomePage.routeName);
           },
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/entities/instruction.dart';
 import '../../../../shared/widgets/instructions/helpers/instruction_actions.dart';
@@ -19,7 +20,7 @@ class TemperatureInstructionDetailsPage extends StatelessWidget {
         title: const Text('Instrucciones'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
         ),
       ),
       body: _BuildMainContent(instructions: instructions),

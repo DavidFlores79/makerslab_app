@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/network/dio_client.dart';
 import '../core/repositories/file_sharing_repository.dart';
+import '../core/services/bluetooth_service.dart';
 import '../core/services/file_sharing_service.dart';
 import '../core/storage/secure_storage_service.dart';
 import '../core/ui/snackbar_service.dart';
@@ -53,6 +54,12 @@ import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/onboarding/domain/usecases/mark_onboarding_completed_usecase.dart';
 import '../features/onboarding/domain/usecases/should_show_onboarding_usecase.dart';
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
+import '../features/temperature/data/datasources/temperature_local_datasource.dart';
+import '../features/temperature/data/repositories/temperature_repository_impl.dart';
+import '../features/temperature/domain/repositories/temperature_repository.dart';
+import '../features/temperature/domain/usecases/get_temperature_stream_usecase.dart';
+import '../features/temperature/presentation/bloc/temperature_bloc.dart';
+import '../features/temperature/presentation/bloc/temperature_event.dart';
 
 // Importa tus repositorios, usecases, Blocs
 
@@ -69,6 +76,9 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton<ISecureStorageService>(
     () => SecureStorageService(getIt()),
   );
+
+  // Bluetooth Service
+  getIt.registerLazySingleton(() => BluetoothService());
 
   // Dio client
   getIt.registerLazySingleton<Dio>(() {
@@ -107,6 +117,11 @@ Future<void> setupLocator() async {
     secureStorage: getIt(),
   );
   final chatLocalDataSource = LocalChatDataSourceImpl(logger: logger);
+
+  // temperature local datasource
+  getIt.registerLazySingleton<TemperatureLocalDataSource>(
+    () => TemperatureLocalDataSourceImpl(prefs: getIt()),
+  );
 
   //remote data sources
   getIt.registerLazySingleton<AuthRemoteDataSource>(
@@ -148,6 +163,13 @@ Future<void> setupLocator() async {
       remoteDataSource: getIt<RemoteChatDataSource>(),
     ),
   );
+  // temperature repository
+  getIt.registerLazySingleton<TemperatureRepository>(
+    () => TemperatureRepositoryImpl(
+      btService: getIt<BluetoothService>(),
+      local: getIt<TemperatureLocalDataSource>(),
+    ),
+  );
 
   // Use cases
   getIt.registerLazySingleton(() => ShareFileUseCase(getIt()));
@@ -180,6 +202,7 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => ResendSignUpCode(repository: getIt()));
   getIt.registerLazySingleton(() => ConfirmSignUp(repository: getIt()));
   getIt.registerLazySingleton(() => SendMessageUsecase(repository: getIt()));
+  getIt.registerLazySingleton(() => GetTemperatureStream(repository: getIt()));
 
   // Blocs
   getIt.registerFactory(() => OnboardingBloc(getIt(), getIt()));
@@ -212,6 +235,13 @@ Future<void> setupLocator() async {
       logger: logger,
       startChatSession: getIt<StartChatSessionUseCase>(),
       sendMessageUsecase: getIt<SendMessageUsecase>(),
+    ),
+  );
+
+  getIt.registerFactory(
+    () => TemperatureBloc(
+      repository: getIt<TemperatureRepository>(),
+      getTemperatureStream: getIt<GetTemperatureStream>(),
     ),
   );
 }
