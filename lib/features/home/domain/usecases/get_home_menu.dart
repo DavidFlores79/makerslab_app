@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/entities/main_menu_item.dart';
+import '../../../../core/domain/entities/main_menu_item.dart';
 import '../../../../core/error/failure.dart';
 import '../repositories/home_repository.dart';
 

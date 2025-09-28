@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/entities/material.dart';
+import '../../../../core/domain/entities/material.dart';
 import '../../../../shared/widgets/index.dart';
 
 class TemperatureMaterialDetailsPage extends StatelessWidget {

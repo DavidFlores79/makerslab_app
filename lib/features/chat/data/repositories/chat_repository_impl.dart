@@ -10,7 +10,7 @@ import 'dart:ui' as ui;
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failure.dart';
-import '../../../../core/repositories/base_repository.dart';
+import '../../../../core/domain/repositories/base_repository.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../datasources/chat_local_datasource.dart';
 import '../datasources/chat_remote_datasource.dart';

@@ -41,7 +41,7 @@ void main() async {
 void _configSystemUIMode() {
   SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.manual,
-    overlays: [SystemUiOverlay.top],
+    overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
   );
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 }

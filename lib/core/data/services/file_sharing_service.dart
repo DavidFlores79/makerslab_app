@@ -3,7 +3,7 @@ import 'package:flutter/material.dart' show debugPrint;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import '../repositories/file_sharing_repository.dart';
+import '../../domain/repositories/file_sharing_repository.dart';
 
 class FileSharingService implements FileSharingRepository {
   @override

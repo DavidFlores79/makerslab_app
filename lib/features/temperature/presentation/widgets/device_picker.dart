@@ -1,18 +1,18 @@
 // lib/presentation/widgets/device_picker.dart
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_bluetooth_classic_serial/flutter_bluetooth_classic.dart'
-    as btcs;
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:makerslab_app/shared/widgets/index.dart';
-import '../../../../core/services/bluetooth_service.dart';
+import '../../../../core/data/services/bluetooth_service.dart';
 
 class DevicePicker {
-  /// Muestra un bottom modal y devuelve el BluetoothDevice seleccionado (o null)
-  static Future<btcs.BluetoothDevice?> show(
+  static Future<BluetoothDevice?> show(
     BuildContext context,
     BluetoothService btService,
   ) {
-    return showModalBottomSheet<btcs.BluetoothDevice?>(
+    return showModalBottomSheet<BluetoothDevice?>(
       context: context,
       isScrollControlled: true,
       builder: (_) => _DevicePickerSheet(btService: btService),
@@ -22,8 +22,7 @@ class DevicePicker {
 
 class _DevicePickerSheet extends StatefulWidget {
   final BluetoothService btService;
-  const _DevicePickerSheet({Key? key, required this.btService})
-    : super(key: key);
+  const _DevicePickerSheet({required this.btService});
 
   @override
   State<_DevicePickerSheet> createState() => _DevicePickerSheetState();
@@ -31,12 +30,20 @@ class _DevicePickerSheet extends StatefulWidget {
 
 class _DevicePickerSheetState extends State<_DevicePickerSheet> {
   bool _loading = false;
-  List<btcs.BluetoothDevice> _paired = [];
+  List<BluetoothDevice> _paired = [];
+  List<BluetoothDiscoveryResult> _discoveryResults = [];
+  StreamSubscription<BluetoothDiscoveryResult>? _discoveryStreamSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadPaired();
+  }
+
+  @override
+  void dispose() {
+    _discoveryStreamSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadPaired() async {
@@ -46,51 +53,94 @@ class _DevicePickerSheetState extends State<_DevicePickerSheet> {
       setState(() => _paired = p);
     } catch (e) {
       setState(() => _paired = []);
-      // opcional: mostrar snackbar de error
-    } finally {
-      setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _onBuscarPressed() async {
-    setState(() => _loading = true);
-    try {
-      // Inicia discovery (no devuelve lista; sirve para que OS descubra y permita pairing)
-      final started = await widget.btService.startDiscovery();
-      if (!started) {
-        // discovery failed; informar al usuario
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo iniciar búsqueda')),
+          SnackBar(content: Text('Error al cargar dispositivos: $e')),
         );
-      } else {
-        // Espera X segundos para que el usuario empareje o el sistema detecte el device.
-        await Future.delayed(const Duration(seconds: 6));
-        // Después de discovery: refresca la lista de emparejados (si el usuario hizo pairing desde el sistema)
-        await _loadPaired();
       }
-    } catch (e) {
-      // simplemente refrescamos la lista y mostramos el error si quieres
-      await _loadPaired();
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
-  Widget _tileFromDevice(btcs.BluetoothDevice d) {
-    final name = (d.name != null && d.name!.isNotEmpty) ? d.name! : d.address;
+  void _startDiscovery() {
+    setState(() {
+      _loading = true;
+      _discoveryResults = [];
+    });
+
+    _discoveryStreamSubscription = widget.btService.startDiscovery().listen(
+      (result) {
+        setState(() {
+          final existingIndex = _discoveryResults.indexWhere(
+            (r) => r.device.address == result.device.address,
+          );
+          if (existingIndex >= 0) {
+            _discoveryResults[existingIndex] = result;
+          } else {
+            _discoveryResults.add(result);
+          }
+        });
+      },
+      onDone: () {
+        if (mounted) {
+          setState(() => _loading = false);
+        }
+        debugPrint("Discovery finished");
+      },
+      onError: (error) {
+        if (mounted) {
+          setState(() => _loading = false);
+        }
+        debugPrint("Discovery error: $error");
+      },
+    );
+  }
+
+  List<BluetoothDevice> _getCombinedDevices() {
+    final allDevices = <BluetoothDevice>[];
+    final addresses = <String>{};
+
+    for (final device in _paired) {
+      if (addresses.add(device.address)) {
+        allDevices.add(device);
+      }
+    }
+
+    for (final result in _discoveryResults) {
+      if (addresses.add(result.device.address)) {
+        allDevices.add(result.device);
+      }
+    }
+
+    return allDevices;
+  }
+
+  Widget _tileFromDevice(BluetoothDevice d) {
+    final name = d.name ?? 'Dispositivo Desconocido';
+    final address = d.address;
+    final isPaired = _paired.any((device) => device.address == address);
+
     return ListTile(
-      leading: const Icon(Icons.bluetooth),
+      leading: Icon(isPaired ? Icons.bluetooth_connected : Icons.bluetooth),
       title: Text(name),
-      subtitle: Text(d.address),
+      subtitle: Text(address),
       trailing: MainAppButton(
         label: 'Conectar',
-        onPressed: () => context.pop(d),
+        onPressed: () {
+          _discoveryStreamSubscription?.cancel();
+          context.pop(d);
+        },
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final combinedDevices = _getCombinedDevices();
+
     return SafeArea(
       child: SizedBox(
         height: MediaQuery.of(context).size.height * 0.65,
@@ -109,22 +159,27 @@ class _DevicePickerSheetState extends State<_DevicePickerSheet> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Expanded(
-                    child: Text(
-                      'Dispositivos Bluetooth',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                  const Text(
+                    'Dispositivos Bluetooth',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.refresh),
-                    tooltip: 'Refrescar emparejados',
-                    onPressed: _loadPaired,
-                  ),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.search),
-                    label: const Text('Buscar'),
-                    onPressed: _onBuscarPressed,
+                  // CAMBIO: Botones de acción simplificados
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.refresh),
+                        tooltip: 'Refrescar emparejados',
+                        onPressed: _loading ? null : _loadPaired,
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.search),
+                        label: const Text('Buscar'),
+                        onPressed: _loading ? null : _startDiscovery,
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -133,17 +188,21 @@ class _DevicePickerSheetState extends State<_DevicePickerSheet> {
             if (_loading) const LinearProgressIndicator(),
             Expanded(
               child:
-                  _paired.isEmpty && !_loading
+                  combinedDevices.isEmpty && !_loading
                       ? const Center(
-                        child: Text(
-                          'No hay dispositivos emparejados. Usa Buscar o empareja desde Ajustes.',
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text(
+                            'No se encontraron dispositivos. Presiona "Buscar" para descubrir o "Refrescar" para ver los ya emparejados.',
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       )
                       : ListView.separated(
-                        itemCount: _paired.length,
-                        separatorBuilder: (_, __) => const Divider(),
+                        itemCount: combinedDevices.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
                         itemBuilder:
-                            (context, i) => _tileFromDevice(_paired[i]),
+                            (context, i) => _tileFromDevice(combinedDevices[i]),
                       ),
             ),
           ],

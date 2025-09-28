@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/widgets/index.dart';
-import '../../../../core/entities/instruction.dart';
-import '../../../../core/entities/material.dart';
-import '../../../../core/entities/module.dart';
+import '../../../../core/domain/entities/instruction.dart';
+import '../../../../core/domain/entities/material.dart';
+import '../../../../core/domain/entities/module.dart';
 import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
 
 class ServoPage extends StatelessWidget {
@@ -14,7 +14,7 @@ class ServoPage extends StatelessWidget {
     description: 'description',
     image: 'assets/images/static/servo/servo2.png',
     videoId: 'kJpdoBLSmHs',
-    inoFile: 'assets/files/DHT11_Arduino_ESP32.ino',
+    inoFile: 'assets/files/esp32_bt_temp.ino',
     instructions: [
       InstructionItem(
         title:

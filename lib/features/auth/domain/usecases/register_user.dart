@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failure.dart';
-import '../../../../core/entities/user.dart';
+import '../../../../core/domain/entities/user.dart';
 import '../repositories/auth_repository.dart';
 
 class RegisterUser {

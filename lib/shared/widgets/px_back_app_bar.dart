@@ -7,12 +7,14 @@ class PxBackAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? backLabel;
   final VoidCallback? onBackPressed;
   final Color? backgroundColor;
+  final List<Widget>? actions;
 
   const PxBackAppBar({
     super.key,
     this.backLabel = 'Regresar',
     this.onBackPressed,
     this.backgroundColor,
+    this.actions,
   });
 
   @override
@@ -32,22 +34,19 @@ class PxBackAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: InkWell(
           customBorder: const CircleBorder(),
           onTap: onBackPressed ?? () => context.pop(),
-          child: Icon(
-            Icons.chevron_left_outlined,
-            size: 50,
-            color: AppColors.primary,
-          ),
+          child: Icon(Icons.chevron_left_outlined, size: 40),
         ),
       ),
       title: Text(
         backLabel!,
-        style: theme.textTheme.titleLarge?.copyWith(
+        style: theme.textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.w500,
           color: isDarkMode ? Colors.white : AppColors.black,
         ),
       ),
       centerTitle: false,
       surfaceTintColor: Colors.transparent,
+      actions: actions,
     );
   }
 }

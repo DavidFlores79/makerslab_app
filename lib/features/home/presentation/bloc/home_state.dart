@@ -1,4 +1,4 @@
-import '../../../../core/entities/main_menu_item.dart';
+import '../../../../core/domain/entities/main_menu_item.dart';
 
 enum HomeStatus { initial, loading, success, failure }
 

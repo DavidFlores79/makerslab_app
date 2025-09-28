@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/entities/instruction.dart';
+import '../../../../core/domain/entities/instruction.dart';
 import '../../../../shared/widgets/instructions/helpers/instruction_actions.dart';
 
 class TemperatureInstructionDetailsPage extends StatelessWidget {

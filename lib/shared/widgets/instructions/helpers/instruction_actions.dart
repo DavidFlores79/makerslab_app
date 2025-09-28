@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:makerslab_app/shared/widgets/index.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/entities/instruction.dart';
+import '../../../../core/domain/entities/instruction.dart';
 
 Future<void> handleInstructionItemTap(
   BuildContext context,

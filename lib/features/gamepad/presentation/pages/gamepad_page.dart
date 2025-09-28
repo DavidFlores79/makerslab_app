@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/widgets/index.dart';
-import '../../../../core/entities/instruction.dart';
-import '../../../../core/entities/material.dart';
-import '../../../../core/entities/module.dart';
+import '../../../../core/domain/entities/instruction.dart';
+import '../../../../core/domain/entities/material.dart';
+import '../../../../core/domain/entities/module.dart';
 import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
 
 class GamepadPage extends StatelessWidget {

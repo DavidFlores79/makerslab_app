@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/entities/instruction.dart';
-import '../../../../core/entities/material.dart';
+import '../../../../core/domain/entities/instruction.dart';
+import '../../../../core/domain/entities/material.dart';
 import '../../../../di/service_locator.dart';
 import '../bloc/temperature_bloc.dart';
 import '../pages/instruction_detail_page.dart';

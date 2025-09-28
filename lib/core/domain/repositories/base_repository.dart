@@ -2,9 +2,9 @@
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import '../error/exceptions.dart';
-import '../error/failure.dart';
-import '../network/api_exceptions.dart'; // opcional si usas un logger central
+import '../../error/exceptions.dart';
+import '../../error/failure.dart';
+import '../../network/api_exceptions.dart'; // opcional si usas un logger central
 
 /// Clase base para repositorios. Centraliza manejo de errores y conversión a Either.
 abstract class BaseRepository {

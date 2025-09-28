@@ -1,190 +1,366 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data'; // <-- Necesario para el tipo de dato del nuevo stream
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bluetooth_classic_serial/flutter_bluetooth_classic.dart'
-    as btcs;
+// Importa la nueva librería de bluetooth con un alias
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as fbs;
+import 'package:makerslab_app/core/domain/repositories/bluetooth_repository.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failure.dart';
-import '../../../../core/services/bluetooth_service.dart';
 import '../../domain/entities/temperature_entity.dart';
 import '../../domain/repositories/temperature_repository.dart';
 import '../datasources/temperature_local_datasource.dart';
 
 class TemperatureRepositoryImpl implements TemperatureRepository {
-  final BluetoothService btService; // tu wrapper, adaptado abajo
+  final BluetoothRepository bluetoothRepository;
   final TemperatureLocalDataSource local;
 
-  String? _connectedDeviceAddress;
   StreamController<Either<Failure, Temperature>>? _controller;
-  StreamSubscription<btcs.BluetoothData>?
-  _dataSub; // suscripción al stream global del plugin
+  StreamSubscription<Either<Failure, Uint8List>>? _dataSub;
+  Timer? _heartbeatTimer;
+  Timer? _timeoutTimer;
+  final StringBuffer _dataBuffer = StringBuffer();
 
-  TemperatureRepositoryImpl({required this.btService, required this.local});
+  TemperatureRepositoryImpl({
+    required this.bluetoothRepository,
+    required this.local,
+  });
 
   @override
-  Future<Either<Failure, List<btcs.BluetoothDevice>>> discoverDevices() async {
-    try {
-      final devices =
-          await btService
-              .getPairedDevices(); // debe devolver List<btcs.BluetoothDevice>
-      // Aquí lo dejamos como Right([]) si no quieres mapearlo a Temperature
-      return Right(devices);
-    } on btcs.BluetoothException catch (e, st) {
-      return Left(BluetoothFailure(e.message, st));
-    } catch (e, st) {
-      return Left(UnknownFailure('Unknown discovery error: $e', st));
-    }
+  Future<Either<Failure, List<fbs.BluetoothDevice>>> discoverDevices() async {
+    final devices = await bluetoothRepository.discoverDevices();
+    return devices;
   }
+
+  // @override
+  // Future<Either<Failure, void>> connectToDevice(String address) async {
+  //   debugPrint('Connecting to device $address');
+  //   try {
+  //     await bluetoothRepository.connect(address);
+  //     debugPrint('Connected to device $address');
+
+  //     await _dataSub?.cancel();
+  //     _controller?.close();
+  //     _heartbeatTimer?.cancel();
+  //     _timeoutTimer?.cancel();
+
+  //     _controller = StreamController<Either<Failure, Temperature>>.broadcast();
+
+  //     final StringBuffer buffer = StringBuffer();
+
+  //     final dataStream = bluetoothRepository.onDataReceived;
+  //     if (dataStream == null) {
+  //       return Left(
+  //         BluetoothFailure(
+  //           'Connection established but data stream is unavailable.',
+  //         ),
+  //       );
+  //     }
+
+  //     _dataSub = dataStream.listen(
+  //       (Uint8List data) {
+  //         _resetTimeout();
+
+  //         try {
+  //           final chunk = utf8.decode(data, allowMalformed: true);
+  //           debugPrint('Chunk recibido: "$chunk"');
+
+  //           if (chunk.trim() == 'K') {
+  //             debugPrint('ACK de heartbeat recibido.');
+  //             return;
+  //           }
+
+  //           buffer.write(chunk);
+  //           final content = buffer.toString();
+  //           final newlineIndex = content.lastIndexOf('\n');
+  //           if (newlineIndex == -1) {
+  //             return;
+  //           }
+
+  //           final complete = content.substring(0, newlineIndex + 1);
+  //           final rest = content.substring(newlineIndex + 1);
+
+  //           for (final line in complete.split(RegExp(r'[\r\n]+'))) {
+  //             final trimmed = line.trim();
+  //             if (trimmed.isEmpty) continue;
+  //             if (trimmed == 'K') {
+  //               debugPrint('ACK de heartbeat procesado en línea.');
+  //               continue;
+  //             }
+  //             debugPrint('Linea completa procesada: "$trimmed"');
+  //             final parsed = _parseLine(trimmed);
+  //             if (parsed != null) {
+  //               local.cacheLastTemperature(parsed);
+  //               _controller!.add(Right(parsed));
+  //             } else {
+  //               debugPrint('Parse devolvió null para: $trimmed');
+  //             }
+  //           }
+  //           buffer.clear();
+  //           buffer.write(rest);
+  //         } catch (e, st) {
+  //           debugPrint('Error al procesar data: $e');
+  //           _controller!.add(Left(UnknownFailure('Parse error: $e', st)));
+  //         }
+  //       },
+  //       onError: (e) {
+  //         debugPrint('Data stream error: $e');
+  //         _controller?.add(Left(BluetoothFailure('Data stream error: $e')));
+  //         _handleDisconnect();
+  //       },
+  //       onDone: () {
+  //         debugPrint('Data stream done (disconnected)');
+  //         _handleDisconnect();
+  //       },
+  //     );
+
+  //     // Iniciar heartbeat y timeout
+  //     _heartbeatTimer = Timer.periodic(
+  //       const Duration(seconds: 5),
+  //       (_) => _sendHeartbeat(),
+  //     );
+  //     _resetTimeout();
+
+  //     debugPrint('Returning from connectToDevice');
+  //     return const Right(null);
+  //   } on BluetoothException catch (e, st) {
+  //     return Left(BluetoothFailure(e.message, st));
+  //   } catch (e, st) {
+  //     return Left(UnknownFailure('Connection error: $e', st));
+  //   }
+  // }
 
   @override
   Future<Either<Failure, void>> connectToDevice(String address) async {
-    debugPrint('Connecting to device $address');
-    try {
-      // Usa la misma instancia que tu BluetoothService expone.
-      final bt = btService;
-      // (Asume que BluetoothService expone la instancia; si no, usa un getter)
+    debugPrint('[TemperatureRepo] Conectando al dispositivo: $address');
 
-      final connected = await btService.connect(address);
-      if (!connected) {
-        debugPrint('Failed to connect to device $address');
-        return Left(BluetoothFailure('Failed to connect to device $address'));
+    // 1. Limpia cualquier conexión o suscripción anterior para evitar fugas.
+    await _cleanupPreviousConnection();
+
+    // 2. Delega el intento de conexión al repositorio core de Bluetooth.
+    final connectionResult = await bluetoothRepository.connect(address);
+
+    // 3. Procesa el resultado de la conexión.
+    return connectionResult.fold(
+      (failure) {
+        // Si la conexión falla, simplemente devuelve el error.
+        debugPrint('[TemperatureRepo] Falló la conexión: ${failure.message}');
+        return Left(failure);
+      },
+      (_) {
+        // Si la conexión es exitosa:
+        debugPrint(
+          '[TemperatureRepo] Conexión exitosa. Configurando stream de datos...',
+        );
+        // a. Configura el listener para los datos de temperatura.
+        _setupDataStream();
+        // b. Inicia el mecanismo de "heartbeat" para mantener la conexión viva.
+        _startHeartbeat();
+        // c. Inicia el temporizador de "timeout" para detectar desconexiones.
+        _resetTimeout();
+        // d. Devuelve éxito.
+        return const Right(null);
+      },
+    );
+  }
+
+  // =======================================================================
+  // SUBFUNCIONES (Helpers)
+  // =======================================================================
+
+  /// Se suscribe al stream de datos crudos del BluetoothRepository y procesa los datos.
+  void _setupDataStream() {
+    _controller = StreamController<Either<Failure, Temperature>>.broadcast();
+
+    _dataSub = bluetoothRepository.dataStream.listen(
+      (eitherData) {
+        // `eitherData` es `Either<Failure, Uint8List>`
+        eitherData.fold(
+          (failure) {
+            // Si el stream de Bluetooth reporta un error, lo propagamos.
+            debugPrint(
+              '[TemperatureRepo] Error en el stream de datos: ${failure.message}',
+            );
+            _controller?.add(Left(failure));
+            _handleDisconnect();
+          },
+          (rawData) {
+            // Al recibir datos crudos, reiniciamos el timeout.
+            _resetTimeout();
+            // Procesamos los bytes recibidos para convertirlos en Temperatura.
+            _processRawData(rawData);
+          },
+        );
+      },
+      onError: (error) {
+        debugPrint('[TemperatureRepo] Error fatal en el stream: $error');
+        _controller?.add(
+          Left(BluetoothFailure('Stream de datos falló: $error')),
+        );
+        _handleDisconnect();
+      },
+      onDone: () {
+        debugPrint('[TemperatureRepo] El stream de datos se cerró (onDone).');
+        _handleDisconnect();
+      },
+    );
+  }
+
+  /// Convierte los bytes crudos en entidades de Temperatura.
+  /// Esta es la lógica específica del feature de temperatura.
+  void _processRawData(Uint8List data) {
+    try {
+      final chunk = utf8.decode(data, allowMalformed: true);
+      debugPrint('[TemperatureRepo] Chunk recibido: "$chunk"');
+
+      // El dispositivo puede enviar una 'K' como respuesta al heartbeat 'P'.
+      if (chunk.trim() == 'K') {
+        debugPrint('[TemperatureRepo] ACK de heartbeat recibido.');
+        return; // No necesita más procesamiento.
       }
 
-      debugPrint('Connected to device $address');
+      _dataBuffer.write(chunk);
+      String content = _dataBuffer.toString();
 
-      _connectedDeviceAddress = address;
+      // Busca líneas completas (terminadas en '\n').
+      while (content.contains('\n')) {
+        final newlineIndex = content.indexOf('\n');
+        final line = content.substring(0, newlineIndex).trim();
+        content = content.substring(newlineIndex + 1);
 
-      // Cierra suscripciones anteriores si las hay
-      await _dataSub?.cancel();
-      _controller?.close();
+        if (line.isEmpty) continue;
 
-      _controller = StreamController<Either<Failure, Temperature>>.broadcast();
+        debugPrint('[TemperatureRepo] Línea completa procesada: "$line"');
+        final parsed = _parseLine(line);
 
-      // buffer por dispositivo para reconstruir líneas si vienen fragmentadas
-      final StringBuffer buffer = StringBuffer();
-
-      _dataSub = bt.onDataReceived
-          .where((bd) => bd.deviceAddress == _connectedDeviceAddress)
-          .listen(
-            (bd) {
-              try {
-                // bd.data es List<int>
-                final bytes = bd.data;
-                final chunk = utf8.decode(bytes, allowMalformed: true);
-                debugPrint(
-                  'Chunk recibido: "$chunk" desde ${bd.deviceAddress}',
-                );
-
-                buffer.write(chunk);
-
-                // procesa por líneas (soporta \n y \r\n)
-                final content = buffer.toString();
-                final lines = content.split(RegExp(r'(\r\n|\n)'));
-                // split devuelve partes intercaladas; mejor reconstruir manualmente:
-                final newlineIndex = content.lastIndexOf('\n');
-                if (newlineIndex == -1) {
-                  // aún sin newline completo, esperar más datos
-                  return;
-                }
-
-                final complete = content.substring(0, newlineIndex + 1);
-                final rest = content.substring(newlineIndex + 1);
-                // procesa cada línea completa
-                for (final line in complete.split(RegExp(r'[\r\n]+'))) {
-                  final trimmed = line.trim();
-                  if (trimmed.isEmpty) continue;
-                  debugPrint('Linea completa procesada: "$trimmed"');
-                  final parsed = _parseLine(trimmed);
-                  if (parsed != null) {
-                    local.cacheLastTemperature(parsed);
-                    _controller!.add(Right(parsed));
-                  } else {
-                    debugPrint('Parse devolvió null para: $trimmed');
-                  }
-                }
-                // deja en buffer lo que quedó después del último newline
-                buffer.clear();
-                buffer.write(rest);
-              } catch (e, st) {
-                debugPrint('Error al procesar data: $e');
-                _controller!.add(Left(UnknownFailure('Parse error: $e', st)));
-              }
-            },
-            onError: (e) {
-              debugPrint('Data stream error: $e');
-              _controller!.add(Left(BluetoothFailure('Data stream error: $e')));
-            },
-            onDone: () {
-              debugPrint('Data stream done');
-              _controller!.close();
-            },
+        if (parsed != null) {
+          // Si el parseo es exitoso:
+          // 1. Guarda la última lectura en el caché local.
+          local.cacheLastTemperature(parsed);
+          // 2. Emite la nueva lectura de temperatura en el stream del repositorio.
+          _controller?.add(Right(parsed));
+        } else {
+          debugPrint(
+            '[TemperatureRepo] El parseo devolvió null para la línea: "$line"',
           );
+        }
+      }
 
-      debugPrint('Returning from connectToDevice');
-      return const Right(null);
-    } on btcs.BluetoothException catch (e, st) {
-      return Left(BluetoothFailure(e.message, st));
+      // Lo que queda en `content` es un fragmento de la siguiente línea.
+      _dataBuffer.clear();
+      _dataBuffer.write(content);
     } catch (e, st) {
-      return Left(UnknownFailure('Connection error: $e', st));
+      debugPrint('[TemperatureRepo] Error al procesar datos: $e');
+      _controller?.add(Left(UnknownFailure('Error de parseo: $e', st)));
     }
+  }
+
+  /// Limpia todos los recursos relacionados con una conexión activa.
+  Future<void> _cleanupPreviousConnection() async {
+    _heartbeatTimer?.cancel();
+    _timeoutTimer?.cancel();
+    await _dataSub?.cancel();
+    if (_controller?.isClosed == false) {
+      await _controller?.close();
+    }
+    _dataBuffer.clear();
+
+    _heartbeatTimer = null;
+    _timeoutTimer = null;
+    _dataSub = null;
+    _controller = null;
+  }
+
+  /// Inicia un temporizador que envía un 'ping' ('P') periódicamente.
+  void _startHeartbeat() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _sendHeartbeat();
+    });
+  }
+
+  /// Envía el carácter de 'ping' al dispositivo.
+  Future<void> _sendHeartbeat() async {
+    debugPrint('[TemperatureRepo] Enviando heartbeat "P"');
+    final result = await bluetoothRepository.sendString('P\n');
+    result.fold((failure) {
+      debugPrint(
+        '[TemperatureRepo] Falló el envío del heartbeat: ${failure.message}',
+      );
+      // Si no podemos enviar, la conexión probablemente se perdió.
+      _handleDisconnect();
+    }, (_) => debugPrint('[TemperatureRepo] Heartbeat enviado con éxito.'));
+  }
+
+  /// Reinicia el temporizador de inactividad. Si no se reciben datos
+  /// en 45 segundos, se asume que la conexión se perdió.
+  void _resetTimeout() {
+    _timeoutTimer?.cancel();
+    _timeoutTimer = Timer(const Duration(seconds: 45), () {
+      debugPrint(
+        '[TemperatureRepo] Timeout: No se recibieron datos en 45 segundos.',
+      );
+      _handleDisconnect();
+    });
+  }
+
+  /// Rutina centralizada para gestionar una desconexión inesperada.
+  void _handleDisconnect() {
+    if (_controller?.isClosed == false) {
+      _controller?.add(Left(BluetoothFailure('Conexión perdida')));
+    }
+    // Llama a la función pública para asegurar una limpieza completa.
+    disconnect();
+  }
+
+  @override
+  Future<bool> isConnected() async {
+    return bluetoothRepository.isConnected;
   }
 
   @override
   Stream<Either<Failure, Temperature>> temperatureStream() {
-    if (_controller != null) return _controller!.stream;
-    final controller = StreamController<Either<Failure, Temperature>>();
-    controller.add(Left(BluetoothFailure('Not connected')));
-    controller.close();
-    return controller.stream;
+    if (_controller != null && !_controller!.isClosed) {
+      return _controller!.stream;
+    }
+    return Stream.value(Left(BluetoothFailure('Not connected')));
   }
 
   @override
   Future<Either<Failure, void>> disconnect() async {
-    try {
-      await _dataSub?.cancel();
-      // usa el wrapper para desconectar (el plugin ofrece disconnect() sin args)
-      final disconnected = await btService.disconnect();
-      _connectedDeviceAddress = null;
+    _heartbeatTimer?.cancel();
+    _timeoutTimer?.cancel();
+    await _dataSub?.cancel();
+    final result = await bluetoothRepository.disconnect();
+    if (_controller?.isClosed == false) {
       _controller?.close();
-      if (!disconnected) {
-        // no fatal, pero reportamos
-        return Left(BluetoothFailure('Disconnect reported failure'));
-      }
-      return const Right(null);
-    } on btcs.BluetoothException catch (e, st) {
-      return Left(BluetoothFailure(e.message, st));
-    } catch (e, st) {
-      return Left(UnknownFailure('Disconnect error: $e', st));
+      _controller = null;
     }
+    return result;
   }
 
   @override
   Future<Either<Failure, Temperature>> readNow() async {
     try {
-      if (_connectedDeviceAddress == null)
-        return Left(BluetoothFailure('Not connected'));
-      // Si el firmware soporta petición, envía comando:
-      // tu BluetoothService debería exponer sendString(address?, message) o sendToConnected(message)
-      final writeOk = await btService.sendString(
-        'R\n',
-      ); // implementa esto en tu BluetoothService
-      if (!writeOk)
-        return Left(BluetoothFailure('Failed to send read command'));
-      // Espera next reading from stream; aquí, como simplificación, devolvemos cached si existe
-      final cached = local.getLastTemperature();
-      if (cached != null) return Right(cached);
-      return Left(
-        BluetoothFailure('No cached reading and no immediate response'),
-      );
+      final sendResult = await bluetoothRepository.sendString('R\n');
+      return sendResult.fold((failure) => Left(failure), (_) {
+        // Después de enviar 'R', la respuesta llegará por el stream.
+        // Aquí, solo podemos devolver la última lectura cacheada.
+        final cached = local.getLastTemperature();
+        if (cached != null) return Right(cached);
+
+        return Left(
+          CacheFailure(
+            'Comando enviado, pero no hay lectura en caché disponible.',
+          ),
+        );
+      });
     } on CacheException catch (e, st) {
       return Left(CacheFailure(e.message, st));
-    } catch (e, st) {
-      return Left(UnknownFailure('ReadNow error: $e', st));
     }
   }
 
-  // Parser privado (igual)
   Temperature? _parseLine(String line) {
     final s = line.trim();
     final reg = RegExp(r'^t([-+]?\d*\.?\d+)h([-+]?\d*\.?\d+)$');

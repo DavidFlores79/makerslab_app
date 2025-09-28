@@ -1,6 +1,6 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:logger/logger.dart';
-import 'package:makerslab_app/core/entities/main_menu_item.dart';
+import 'package:makerslab_app/core/domain/entities/main_menu_item.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../theme/app_color.dart';

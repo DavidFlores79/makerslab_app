@@ -42,7 +42,9 @@ class AppColors {
   // Colores agregados de tu lista
   static const lightGreen = Color(0xFF8BC34A); // Color para Gamepad
   static const blue = Color(0xFF2196F3); // Color para Sensor DHT
+  static const blueAccent = Color(0xFF448AFF); // Color para Sensor DHT (Accent)
   static const red = Color(0xFFF44336); // Color para Servos
+  static const redAccent = Color(0xFFFF5252); // Color para Servos (Accent)
   static const orange = Color(0xFFFF9800); // Color para Control de Luces
   static const purple = Color(0xFF9C27B0); // Color para Chat
 }

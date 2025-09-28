@@ -7,13 +7,15 @@ import 'package:logger/logger.dart';
 import 'package:makerslab_app/features/home/domain/usecases/get_home_menu.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/data/repositories/bluetooth_repository_impl.dart';
+import '../core/domain/repositories/bluetooth_repository.dart';
 import '../core/network/dio_client.dart';
-import '../core/repositories/file_sharing_repository.dart';
-import '../core/services/bluetooth_service.dart';
-import '../core/services/file_sharing_service.dart';
+import '../core/domain/repositories/file_sharing_repository.dart';
+import '../core/data/services/bluetooth_service.dart';
+import '../core/data/services/file_sharing_service.dart';
 import '../core/storage/secure_storage_service.dart';
 import '../core/ui/snackbar_service.dart';
-import '../core/usecases/share_file_usecase.dart';
+import '../core/domain/usecases/share_file_usecase.dart';
 import '../features/auth/data/datasource/auth_local_datasource.dart';
 import '../features/auth/data/datasource/auth_remote_datasource.dart';
 import '../features/auth/data/datasource/auth_token_local_datasource.dart';
@@ -59,7 +61,6 @@ import '../features/temperature/data/repositories/temperature_repository_impl.da
 import '../features/temperature/domain/repositories/temperature_repository.dart';
 import '../features/temperature/domain/usecases/get_temperature_stream_usecase.dart';
 import '../features/temperature/presentation/bloc/temperature_bloc.dart';
-import '../features/temperature/presentation/bloc/temperature_event.dart';
 
 // Importa tus repositorios, usecases, Blocs
 
@@ -139,6 +140,11 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton<FileSharingRepository>(
     () => FileSharingService(),
   );
+
+  getIt.registerLazySingleton<BluetoothRepository>(
+    () => BluetoothRepositoryImpl(btService: getIt<BluetoothService>()),
+  );
+
   getIt.registerLazySingleton<HomeRepository>(
     () => HomeRepositoryImpl(localDatasource: homeLocalDatasource),
   );
@@ -166,7 +172,7 @@ Future<void> setupLocator() async {
   // temperature repository
   getIt.registerLazySingleton<TemperatureRepository>(
     () => TemperatureRepositoryImpl(
-      btService: getIt<BluetoothService>(),
+      bluetoothRepository: getIt<BluetoothRepository>(),
       local: getIt<TemperatureLocalDataSource>(),
     ),
   );
@@ -202,7 +208,9 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => ResendSignUpCode(repository: getIt()));
   getIt.registerLazySingleton(() => ConfirmSignUp(repository: getIt()));
   getIt.registerLazySingleton(() => SendMessageUsecase(repository: getIt()));
-  getIt.registerLazySingleton(() => GetTemperatureStream(repository: getIt()));
+  getIt.registerLazySingleton(
+    () => GetTemperatureStreamUsecase(repository: getIt()),
+  );
 
   // Blocs
   getIt.registerFactory(() => OnboardingBloc(getIt(), getIt()));
@@ -241,7 +249,7 @@ Future<void> setupLocator() async {
   getIt.registerFactory(
     () => TemperatureBloc(
       repository: getIt<TemperatureRepository>(),
-      getTemperatureStream: getIt<GetTemperatureStream>(),
+      getTemperatureStream: getIt<GetTemperatureStreamUsecase>(),
     ),
   );
 }

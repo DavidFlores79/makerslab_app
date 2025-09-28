@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failure.dart';
-import '../../../../core/entities/user.dart';
-import '../../../../core/repositories/base_repository.dart';
+import '../../../../core/domain/entities/user.dart';
+import '../../../../core/domain/repositories/base_repository.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasource/auth_local_datasource.dart';
 import '../datasource/auth_remote_datasource.dart';

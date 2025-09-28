@@ -11,10 +11,11 @@ import 'temperature_state.dart';
 
 class TemperatureBloc extends Bloc<TemperatureEvent, TemperatureState> {
   final TemperatureRepository repository;
-  final GetTemperatureStream getTemperatureStream;
+  final GetTemperatureStreamUsecase getTemperatureStream;
 
   StreamSubscription<Either<Failure, Temperature>>? _streamSub;
   final List<Temperature> _history = [];
+  Timer? _connectionCheckTimer;
 
   TemperatureBloc({
     required this.repository,
@@ -47,9 +48,10 @@ class TemperatureBloc extends Bloc<TemperatureEvent, TemperatureState> {
   ) async {
     emit(TempConnecting());
 
-    // cancelar suscripción previa si existe
+    // cancelar suscripciones previas si existen
     await _streamSub?.cancel();
     _streamSub = null;
+    _connectionCheckTimer?.cancel();
 
     final res = await repository.connectToDevice(event.address);
 
@@ -74,7 +76,20 @@ class TemperatureBloc extends Bloc<TemperatureEvent, TemperatureState> {
           onError: (e) {
             add(TemperatureStreamError(e.toString()));
           },
+          onDone: () {
+            add(TemperatureStreamError('Stream completed unexpectedly'));
+          },
         );
+
+        // Start periodic connection check
+        _connectionCheckTimer = Timer.periodic(const Duration(seconds: 10), (
+          timer,
+        ) async {
+          if (!await repository.isConnected()) {
+            timer.cancel();
+            add(TemperatureStreamError('Connection lost'));
+          }
+        });
 
         emit(
           TempConnected(
@@ -95,7 +110,7 @@ class TemperatureBloc extends Bloc<TemperatureEvent, TemperatureState> {
     Emitter<TemperatureState> emit,
   ) async {
     _history.add(event.temperature);
-    if (_history.length > 100) _history.removeAt(0);
+    if (_history.length > 5) _history.removeAt(0);
     emit(
       TempConnected(latest: event.temperature, history: List.from(_history)),
     );
@@ -106,6 +121,7 @@ class TemperatureBloc extends Bloc<TemperatureEvent, TemperatureState> {
     Emitter<TemperatureState> emit,
   ) async {
     emit(TempError(event.message));
+    await _onStop(StopTemperature(), emit);
   }
 
   Future<void> _onReadNow(
@@ -125,6 +141,7 @@ class TemperatureBloc extends Bloc<TemperatureEvent, TemperatureState> {
     StopTemperature event,
     Emitter<TemperatureState> emit,
   ) async {
+    _connectionCheckTimer?.cancel();
     await _streamSub?.cancel();
     final res = await repository.disconnect();
     res.fold(
@@ -136,6 +153,7 @@ class TemperatureBloc extends Bloc<TemperatureEvent, TemperatureState> {
   @override
   Future<void> close() {
     _streamSub?.cancel();
+    _connectionCheckTimer?.cancel();
     return super.close();
   }
 }

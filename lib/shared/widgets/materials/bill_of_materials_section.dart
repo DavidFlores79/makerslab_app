@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:makerslab_app/shared/widgets/index.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/entities/material.dart';
+import '../../../core/domain/entities/material.dart';
 import '../../../theme/app_color.dart';
 
 class BillOfMaterialsSection extends StatelessWidget {

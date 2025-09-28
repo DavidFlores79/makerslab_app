@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:makerslab_app/core/entities/main_menu_item.dart';
+import 'package:makerslab_app/core/domain/entities/main_menu_item.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failure.dart';
