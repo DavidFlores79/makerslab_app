@@ -16,7 +16,7 @@ class BluetoothService {
   bool get isConnected => _connection != null && _connection!.isConnected;
 
   /// Devuelve la lista de dispositivos Bluetooth previamente emparejados.
-  Future<List<BluetoothDevice>> getPairedDevices() async {
+  Future<List<BluetoothDevice>> discoverDevices() async {
     try {
       return await _bluetoothSerial.getBondedDevices();
     } catch (e, st) {

@@ -6,11 +6,6 @@ class TempInitial extends TemperatureState {}
 
 class TempLoading extends TemperatureState {}
 
-class DevicesLoaded extends TemperatureState {
-  final List<dynamic> devices; // cambia a List<BluetoothDevice> si lo adaptas
-  DevicesLoaded(this.devices);
-}
-
 class TempConnecting extends TemperatureState {}
 
 class TempConnected extends TemperatureState {

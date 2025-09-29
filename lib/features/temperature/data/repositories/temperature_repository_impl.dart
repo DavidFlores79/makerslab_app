@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data'; // <-- Necesario para el tipo de dato del nuevo stream
+import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
-// Importa la nueva librería de bluetooth con un alias
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as fbs;
-import 'package:makerslab_app/core/domain/repositories/bluetooth_repository.dart';
+
+import '../../../../core/domain/repositories/bluetooth_repository.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failure.dart';
 import '../../domain/entities/temperature_entity.dart';
@@ -25,7 +25,10 @@ class TemperatureRepositoryImpl implements TemperatureRepository {
   TemperatureRepositoryImpl({
     required this.bluetoothRepository,
     required this.local,
-  });
+  }) {
+    _setupDataStream();
+    // Constructor
+  }
 
   @override
   Future<Either<Failure, List<fbs.BluetoothDevice>>> discoverDevices() async {
@@ -33,133 +36,23 @@ class TemperatureRepositoryImpl implements TemperatureRepository {
     return devices;
   }
 
-  // @override
-  // Future<Either<Failure, void>> connectToDevice(String address) async {
-  //   debugPrint('Connecting to device $address');
-  //   try {
-  //     await bluetoothRepository.connect(address);
-  //     debugPrint('Connected to device $address');
-
-  //     await _dataSub?.cancel();
-  //     _controller?.close();
-  //     _heartbeatTimer?.cancel();
-  //     _timeoutTimer?.cancel();
-
-  //     _controller = StreamController<Either<Failure, Temperature>>.broadcast();
-
-  //     final StringBuffer buffer = StringBuffer();
-
-  //     final dataStream = bluetoothRepository.onDataReceived;
-  //     if (dataStream == null) {
-  //       return Left(
-  //         BluetoothFailure(
-  //           'Connection established but data stream is unavailable.',
-  //         ),
-  //       );
-  //     }
-
-  //     _dataSub = dataStream.listen(
-  //       (Uint8List data) {
-  //         _resetTimeout();
-
-  //         try {
-  //           final chunk = utf8.decode(data, allowMalformed: true);
-  //           debugPrint('Chunk recibido: "$chunk"');
-
-  //           if (chunk.trim() == 'K') {
-  //             debugPrint('ACK de heartbeat recibido.');
-  //             return;
-  //           }
-
-  //           buffer.write(chunk);
-  //           final content = buffer.toString();
-  //           final newlineIndex = content.lastIndexOf('\n');
-  //           if (newlineIndex == -1) {
-  //             return;
-  //           }
-
-  //           final complete = content.substring(0, newlineIndex + 1);
-  //           final rest = content.substring(newlineIndex + 1);
-
-  //           for (final line in complete.split(RegExp(r'[\r\n]+'))) {
-  //             final trimmed = line.trim();
-  //             if (trimmed.isEmpty) continue;
-  //             if (trimmed == 'K') {
-  //               debugPrint('ACK de heartbeat procesado en línea.');
-  //               continue;
-  //             }
-  //             debugPrint('Linea completa procesada: "$trimmed"');
-  //             final parsed = _parseLine(trimmed);
-  //             if (parsed != null) {
-  //               local.cacheLastTemperature(parsed);
-  //               _controller!.add(Right(parsed));
-  //             } else {
-  //               debugPrint('Parse devolvió null para: $trimmed');
-  //             }
-  //           }
-  //           buffer.clear();
-  //           buffer.write(rest);
-  //         } catch (e, st) {
-  //           debugPrint('Error al procesar data: $e');
-  //           _controller!.add(Left(UnknownFailure('Parse error: $e', st)));
-  //         }
-  //       },
-  //       onError: (e) {
-  //         debugPrint('Data stream error: $e');
-  //         _controller?.add(Left(BluetoothFailure('Data stream error: $e')));
-  //         _handleDisconnect();
-  //       },
-  //       onDone: () {
-  //         debugPrint('Data stream done (disconnected)');
-  //         _handleDisconnect();
-  //       },
-  //     );
-
-  //     // Iniciar heartbeat y timeout
-  //     _heartbeatTimer = Timer.periodic(
-  //       const Duration(seconds: 5),
-  //       (_) => _sendHeartbeat(),
-  //     );
-  //     _resetTimeout();
-
-  //     debugPrint('Returning from connectToDevice');
-  //     return const Right(null);
-  //   } on BluetoothException catch (e, st) {
-  //     return Left(BluetoothFailure(e.message, st));
-  //   } catch (e, st) {
-  //     return Left(UnknownFailure('Connection error: $e', st));
-  //   }
-  // }
-
   @override
   Future<Either<Failure, void>> connectToDevice(String address) async {
     debugPrint('[TemperatureRepo] Conectando al dispositivo: $address');
-
-    // 1. Limpia cualquier conexión o suscripción anterior para evitar fugas.
     await _cleanupPreviousConnection();
-
-    // 2. Delega el intento de conexión al repositorio core de Bluetooth.
     final connectionResult = await bluetoothRepository.connect(address);
-
-    // 3. Procesa el resultado de la conexión.
     return connectionResult.fold(
       (failure) {
-        // Si la conexión falla, simplemente devuelve el error.
         debugPrint('[TemperatureRepo] Falló la conexión: ${failure.message}');
         return Left(failure);
       },
       (_) {
-        // Si la conexión es exitosa:
         debugPrint(
           '[TemperatureRepo] Conexión exitosa. Configurando stream de datos...',
         );
-        // a. Configura el listener para los datos de temperatura.
         _setupDataStream();
-        // b. Inicia el mecanismo de "heartbeat" para mantener la conexión viva.
         _startHeartbeat();
-        // c. Inicia el temporizador de "timeout" para detectar desconexiones.
         _resetTimeout();
-        // d. Devuelve éxito.
         return const Right(null);
       },
     );
@@ -370,5 +263,13 @@ class TemperatureRepositoryImpl implements TemperatureRepository {
     final h = double.tryParse(m.group(2)!);
     if (t == null || h == null) return null;
     return Temperature(celsius: t, humidity: h);
+  }
+
+  @override
+  void dispose() {
+    _heartbeatTimer?.cancel();
+    _timeoutTimer?.cancel();
+    _dataSub?.cancel();
+    _controller?.close();
   }
 }

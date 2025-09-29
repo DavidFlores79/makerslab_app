@@ -1,7 +1,4 @@
 // lib/core/bluetooth/data/repositories/bluetooth_repository_impl.dart
-
-// (Importaciones necesarias)
-
 import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 
@@ -18,12 +15,10 @@ class BluetoothRepositoryImpl implements BluetoothRepository {
   @override
   Stream<Either<Failure, Uint8List>> get dataStream {
     if (btService.onDataReceived == null) {
-      // Retorna un stream con un error si no hay conexión
-      return Stream.value(
-        Left(BluetoothFailure('Not connected or stream unavailable.')),
+      return Stream.error(
+        BluetoothFailure('Not connected or stream unavailable.'),
       );
     }
-    // Mapea el stream de datos crudos a nuestro tipo Either
     return btService.onDataReceived!
         .map((data) => Right<Failure, Uint8List>(data))
         .handleError(
@@ -39,8 +34,9 @@ class BluetoothRepositoryImpl implements BluetoothRepository {
   @override
   Future<Either<Failure, List<BluetoothDeviceEntity>>> discoverDevices() async {
     try {
-      // Asumimos que getPairedDevices es el método principal de descubrimiento
-      final devices = await btService.getPairedDevices();
+      final devices =
+          await btService
+              .discoverDevices(); // Cambié a discoverDevices; ajusta si es getPairedDevices
       return Right(devices);
     } on BluetoothException catch (e, st) {
       return Left(BluetoothFailure(e.message, st));

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:logger/logger.dart';
+import 'core/presentation/bloc/bluetooth/bluetooth_bloc.dart';
 import 'core/router/app_router.dart';
 import 'core/ui/snackbar_service.dart';
 import 'di/service_locator.dart';
@@ -31,6 +32,7 @@ void main() async {
           create: (_) => getIt<AuthBloc>()..add(CheckAuthStatus()),
           lazy: false,
         ),
+        BlocProvider(create: (_) => getIt<BluetoothBloc>()),
         BlocProvider(create: (_) => getIt<ChatBloc>()),
       ],
       child: const MyApp(),

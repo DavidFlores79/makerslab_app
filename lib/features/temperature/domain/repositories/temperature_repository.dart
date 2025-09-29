@@ -10,4 +10,5 @@ abstract class TemperatureRepository {
   Future<Either<Failure, void>> disconnect();
   Future<Either<Failure, Temperature>> readNow();
   Future<bool> isConnected();
+  void dispose();
 }

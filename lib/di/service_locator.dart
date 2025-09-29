@@ -9,10 +9,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/data/repositories/bluetooth_repository_impl.dart';
 import '../core/domain/repositories/bluetooth_repository.dart';
+import '../core/domain/usecases/bluetooth/connect_device.dart';
+import '../core/domain/usecases/bluetooth/disconnect_device.dart';
+import '../core/domain/usecases/bluetooth/discover_devices.dart';
+import '../core/domain/usecases/bluetooth/get_bluetooth_data_stream.dart';
+import '../core/domain/usecases/bluetooth/send_bluetooth_string.dart';
 import '../core/network/dio_client.dart';
 import '../core/domain/repositories/file_sharing_repository.dart';
 import '../core/data/services/bluetooth_service.dart';
 import '../core/data/services/file_sharing_service.dart';
+import '../core/presentation/bloc/bluetooth/bluetooth_bloc.dart';
 import '../core/storage/secure_storage_service.dart';
 import '../core/ui/snackbar_service.dart';
 import '../core/domain/usecases/share_file_usecase.dart';
@@ -35,7 +41,6 @@ import '../features/auth/domain/usecases/signin_with_phone.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/auth/presentation/bloc/otp/otp_bloc.dart';
 import '../features/auth/presentation/bloc/register/register_cubit.dart';
-import '../features/chat/data/datasources/chat_local_datasource.dart';
 import '../features/chat/data/datasources/chat_local_datasource_impl.dart';
 import '../features/chat/data/datasources/chat_remote_datasource.dart';
 import '../features/chat/data/repositories/chat_repository_impl.dart';
@@ -59,7 +64,6 @@ import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import '../features/temperature/data/datasources/temperature_local_datasource.dart';
 import '../features/temperature/data/repositories/temperature_repository_impl.dart';
 import '../features/temperature/domain/repositories/temperature_repository.dart';
-import '../features/temperature/domain/usecases/get_temperature_stream_usecase.dart';
 import '../features/temperature/presentation/bloc/temperature_bloc.dart';
 
 // Importa tus repositorios, usecases, Blocs
@@ -67,7 +71,8 @@ import '../features/temperature/presentation/bloc/temperature_bloc.dart';
 final getIt = GetIt.instance;
 
 Future<void> setupLocator() async {
-  final logger = Logger();
+  getIt.registerSingleton<Logger>(Logger());
+  final logger = getIt<Logger>();
   final homeLocalDatasource = HomeLocalDatasourceImpl(logger: logger);
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(sharedPreferences);
@@ -148,9 +153,6 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton<HomeRepository>(
     () => HomeRepositoryImpl(localDatasource: homeLocalDatasource),
   );
-  getIt.registerLazySingleton<LocalChatDataSource>(
-    () => LocalChatDataSourceImpl(logger: getIt<Logger>()),
-  );
   getIt.registerLazySingleton<OnboardingRepository>(
     () =>
         OnboardingRepositoryImpl(sharedPreferences: getIt<SharedPreferences>()),
@@ -182,6 +184,21 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => MarkOnboardingCompletedUseCase(getIt()));
   getIt.registerLazySingleton(() => ShouldShowOnboardingUseCase(getIt()));
   getIt.registerLazySingleton(() => GetHomeMenu(repository: getIt()));
+  // Bluetooth usecases
+  getIt.registerLazySingleton(
+    () => DiscoverDevicesUseCase(repository: getIt()),
+  );
+  getIt.registerLazySingleton(() => ConnectDeviceUseCase(repository: getIt()));
+  getIt.registerLazySingleton(
+    () => DisconnectDeviceUseCase(repository: getIt()),
+  );
+  getIt.registerLazySingleton(
+    () => GetBluetoothDataStreamUseCase(repository: getIt()),
+  );
+  getIt.registerLazySingleton(
+    () => SendBluetoothStringUseCase(repository: getIt()),
+  );
+
   getIt.registerLazySingleton(
     () => GetChatDataUseCase(getIt<ChatRepository>()),
   );
@@ -208,9 +225,6 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => ResendSignUpCode(repository: getIt()));
   getIt.registerLazySingleton(() => ConfirmSignUp(repository: getIt()));
   getIt.registerLazySingleton(() => SendMessageUsecase(repository: getIt()));
-  getIt.registerLazySingleton(
-    () => GetTemperatureStreamUsecase(repository: getIt()),
-  );
 
   // Blocs
   getIt.registerFactory(() => OnboardingBloc(getIt(), getIt()));
@@ -232,6 +246,14 @@ Future<void> setupLocator() async {
     () => OtpBloc(resendSignUpCode: getIt(), confirmSignUp: getIt()),
   );
 
+  getIt.registerLazySingleton(
+    () => BluetoothBloc(
+      discoverDevicesUseCase: getIt(),
+      connectDeviceUseCase: getIt(),
+      disconnectDeviceUseCase: getIt(),
+    ),
+  );
+
   getIt.registerFactory(() => HomeBloc(getHomeMenuItems: getIt()));
   getIt.registerFactory(
     () => ChatBloc(
@@ -246,10 +268,12 @@ Future<void> setupLocator() async {
     ),
   );
 
-  getIt.registerFactory(
+  getIt.registerFactory<TemperatureBloc>(
     () => TemperatureBloc(
-      repository: getIt<TemperatureRepository>(),
-      getTemperatureStream: getIt<GetTemperatureStreamUsecase>(),
+      getDataStreamUseCase: getIt<GetBluetoothDataStreamUseCase>(),
+      sendStringUseCase: getIt<SendBluetoothStringUseCase>(),
+      localDataSource: getIt<TemperatureLocalDataSource>(),
+      bluetoothBloc: getIt<BluetoothBloc>(),
     ),
   );
 }

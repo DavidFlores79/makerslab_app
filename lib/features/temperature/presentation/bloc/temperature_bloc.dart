@@ -1,159 +1,207 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart';
-
+import '../../../../core/domain/usecases/bluetooth/get_bluetooth_data_stream.dart';
+import '../../../../core/domain/usecases/bluetooth/send_bluetooth_string.dart';
 import '../../../../core/error/failure.dart';
+import '../../../../core/presentation/bloc/bluetooth/bluetooth_bloc.dart';
+import '../../../../core/presentation/bloc/bluetooth/bluetooth_state.dart';
+import '../../data/datasources/temperature_local_datasource.dart';
 import '../../domain/entities/temperature_entity.dart';
-import '../../domain/repositories/temperature_repository.dart';
-import '../../domain/usecases/get_temperature_stream_usecase.dart';
 import 'temperature_event.dart';
 import 'temperature_state.dart';
 
 class TemperatureBloc extends Bloc<TemperatureEvent, TemperatureState> {
-  final TemperatureRepository repository;
-  final GetTemperatureStreamUsecase getTemperatureStream;
-
-  StreamSubscription<Either<Failure, Temperature>>? _streamSub;
+  final GetBluetoothDataStreamUseCase getDataStreamUseCase;
+  final SendBluetoothStringUseCase sendStringUseCase;
+  final TemperatureLocalDataSource localDataSource; // Agrega para cache
+  final BluetoothBloc bluetoothBloc;
+  StreamSubscription? _bluetoothStateSubscription;
+  StreamSubscription<Either<Failure, Uint8List>>? _dataSubscription;
+  Timer? _heartbeatTimer;
+  Timer? _timeoutTimer;
+  final StringBuffer _dataBuffer = StringBuffer();
   final List<Temperature> _history = [];
-  Timer? _connectionCheckTimer;
 
   TemperatureBloc({
-    required this.repository,
-    required this.getTemperatureStream,
+    required this.getDataStreamUseCase,
+    required this.sendStringUseCase,
+    required this.localDataSource,
+    required this.bluetoothBloc,
   }) : super(TempInitial()) {
-    on<StartScan>(_onStartScan);
-    on<SelectDevice>(_onSelectDevice);
-    on<StopTemperature>(_onStop);
-    on<ReadNowEvent>(_onReadNow);
-    on<TemperatureReceived>(_onTemperatureReceived);
-    on<TemperatureStreamError>(_onTemperatureStreamError);
+    on<StartMonitoring>(_onStartMonitoring);
+    on<StopMonitoring>(_onStopMonitoring);
+    on<ReadNow>(_onReadNow);
+    on<TemperatureDataReceived>(_onTemperatureDataReceived);
+    on<TemperatureStreamFailed>(_onTemperatureStreamFailed);
+    _subscribeToBluetoothState();
   }
 
-  Future<void> _onStartScan(
-    StartScan event,
+  void _subscribeToBluetoothState() {
+    _bluetoothStateSubscription = bluetoothBloc.stream.listen((state) {
+      if (state is BluetoothConnected) {
+        add(StartMonitoring());
+      } else if (state is BluetoothDisconnected || state is BluetoothError) {
+        add(StopMonitoring());
+      }
+    });
+  }
+
+  Future<void> _onStartMonitoring(
+    StartMonitoring event,
     Emitter<TemperatureState> emit,
   ) async {
+    await _cleanup();
     emit(TempLoading());
-    // ejemplo: discovery; repo.discoverDevices() -> Either
-    final result = await repository.discoverDevices();
-    result.fold(
-      (failure) => emit(TempError(failure.message)),
-      (devices) => emit(DevicesLoaded(devices)),
-    );
-  }
 
-  Future<void> _onSelectDevice(
-    SelectDevice event,
-    Emitter<TemperatureState> emit,
-  ) async {
-    emit(TempConnecting());
-
-    // cancelar suscripciones previas si existen
-    await _streamSub?.cancel();
-    _streamSub = null;
-    _connectionCheckTimer?.cancel();
-
-    final res = await repository.connectToDevice(event.address);
-
-    res.fold(
-      (failure) {
-        emit(TempError(failure.message));
-      },
-      (r) {
-        // Nos suscribimos, pero NO emitimos aquí; reenviamos eventos al Bloc
-        _streamSub = repository.temperatureStream().listen(
-          (either) {
-            either.fold(
-              (failure) {
-                // reemitir como evento de error
-                add(TemperatureStreamError(failure.message));
-              },
-              (temp) {
-                add(TemperatureReceived(temp));
-              },
-            );
-          },
-          onError: (e) {
-            add(TemperatureStreamError(e.toString()));
-          },
-          onDone: () {
-            add(TemperatureStreamError('Stream completed unexpectedly'));
+    final stream = getDataStreamUseCase();
+    _dataSubscription = stream.listen(
+      (either) {
+        either.fold(
+          (failure) => add(TemperatureStreamFailed(failure.message)),
+          (rawData) {
+            _resetTimeout();
+            _processRawData(rawData);
           },
         );
-
-        // Start periodic connection check
-        _connectionCheckTimer = Timer.periodic(const Duration(seconds: 10), (
-          timer,
-        ) async {
-          if (!await repository.isConnected()) {
-            timer.cancel();
-            add(TemperatureStreamError('Connection lost'));
-          }
-        });
-
-        emit(
-          TempConnected(
-            latest: Temperature(
-              celsius: 0,
-              humidity: 0,
-              timestamp: DateTime.now(),
-            ),
-            history: List.from(_history),
-          ),
-        ); // o un estado conectado inicial
       },
+      onError: (e) => add(TemperatureStreamFailed(e.toString())),
+      // onDone: () => emit(TempDisconnected()),
+      onDone: () => add(StopMonitoring()),
+    );
+
+    _startHeartbeat();
+    _resetTimeout();
+    emit(
+      TempConnected(
+        latest: Temperature(celsius: 0, humidity: 0),
+        history: List.from(_history),
+      ),
     );
   }
 
-  Future<void> _onTemperatureReceived(
-    TemperatureReceived event,
+  Future<void> _onStopMonitoring(
+    StopMonitoring event,
     Emitter<TemperatureState> emit,
   ) async {
+    await _cleanup();
+    _history.clear();
+    emit(TempDisconnected());
+  }
+
+  Future<void> _onTemperatureDataReceived(
+    TemperatureDataReceived event,
+    Emitter<TemperatureState> emit,
+  ) async {
+    localDataSource.cacheLastTemperature(event.temperature); // Cachea
     _history.add(event.temperature);
-    if (_history.length > 5) _history.removeAt(0);
+    if (_history.length > 10) _history.removeAt(0);
     emit(
       TempConnected(latest: event.temperature, history: List.from(_history)),
     );
   }
 
-  Future<void> _onTemperatureStreamError(
-    TemperatureStreamError event,
+  Future<void> _onTemperatureStreamFailed(
+    TemperatureStreamFailed event,
     Emitter<TemperatureState> emit,
   ) async {
     emit(TempError(event.message));
-    await _onStop(StopTemperature(), emit);
   }
 
-  Future<void> _onReadNow(
-    ReadNowEvent event,
-    Emitter<TemperatureState> emit,
-  ) async {
-    emit(TempLoading());
-    final res = await repository.readNow();
-    res.fold((failure) => emit(TempError(failure.message)), (temp) {
-      _history.add(temp);
-      if (_history.length > 100) _history.removeAt(0);
-      emit(TempConnected(latest: temp, history: List.from(_history)));
+  Future<void> _onReadNow(ReadNow event, Emitter<TemperatureState> emit) async {
+    if (bluetoothBloc.state is BluetoothConnected) {
+      final result = await sendStringUseCase('R\n');
+      result.fold((failure) => emit(TempError(failure.message)), (_) {
+        // Respuesta via stream; retorna cached si no
+        final cached = localDataSource.getLastTemperature();
+        if (cached != null) {
+          add(TemperatureDataReceived(cached));
+        } else {
+          emit(TempError('Comando enviado, pero no hay lectura en caché.'));
+        }
+      });
+    } else {
+      emit(TempError("No se puede leer: Dispositivo no conectado."));
+    }
+  }
+
+  // Lógica movida de repository: Procesamiento raw
+  void _processRawData(Uint8List data) {
+    try {
+      final chunk = String.fromCharCodes(data);
+      if (chunk.trim() == 'K') {
+        return; // ACK heartbeat
+      }
+
+      _dataBuffer.write(chunk);
+      String content = _dataBuffer.toString();
+
+      while (content.contains('\n')) {
+        final newlineIndex = content.indexOf('\n');
+        final line = content.substring(0, newlineIndex).trim();
+        content = content.substring(newlineIndex + 1);
+
+        if (line.isEmpty) continue;
+
+        final parsed = _parseLine(line);
+        if (parsed != null) {
+          add(TemperatureDataReceived(parsed));
+        }
+      }
+
+      _dataBuffer.clear();
+      _dataBuffer.write(content);
+    } catch (e) {
+      add(TemperatureStreamFailed('Error de parseo: $e'));
+    }
+  }
+
+  // Parseo específico (de tu repo)
+  Temperature? _parseLine(String line) {
+    final s = line.trim();
+    final reg = RegExp(r'^t([-+]?\d*\.?\d+)h([-+]?\d*\.?\d+)$');
+    final m = reg.firstMatch(s);
+    if (m == null) return null;
+    final t = double.tryParse(m.group(1)!);
+    final h = double.tryParse(m.group(2)!);
+    if (t == null || h == null) return null;
+    return Temperature(celsius: t, humidity: h);
+  }
+
+  void _startHeartbeat() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      final result = await sendStringUseCase('P\n');
+      result.fold(
+        (failure) =>
+            add(TemperatureStreamFailed('Heartbeat falló: ${failure.message}')),
+        (_) {},
+      );
     });
   }
 
-  Future<void> _onStop(
-    StopTemperature event,
-    Emitter<TemperatureState> emit,
-  ) async {
-    _connectionCheckTimer?.cancel();
-    await _streamSub?.cancel();
-    final res = await repository.disconnect();
-    res.fold(
-      (failure) => emit(TempError(failure.message)),
-      (_) => emit(TempDisconnected()),
-    );
+  void _resetTimeout() {
+    _timeoutTimer?.cancel();
+    _timeoutTimer = Timer(const Duration(seconds: 45), () {
+      add(StopMonitoring());
+    });
+  }
+
+  Future<void> _cleanup() async {
+    _heartbeatTimer?.cancel();
+    _timeoutTimer?.cancel();
+    await _dataSubscription?.cancel();
+    _dataBuffer.clear();
+    _heartbeatTimer = null;
+    _timeoutTimer = null;
+    _dataSubscription = null;
   }
 
   @override
   Future<void> close() {
-    _streamSub?.cancel();
-    _connectionCheckTimer?.cancel();
+    _bluetoothStateSubscription?.cancel();
+    _cleanup();
     return super.close();
   }
 }

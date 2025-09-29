@@ -1,25 +1,22 @@
+// lib/features/temperature/presentation/bloc/temperature_event.dart
 import '../../domain/entities/temperature_entity.dart';
 
 abstract class TemperatureEvent {}
 
-class StartScan extends TemperatureEvent {}
+// Eventos que la UI puede disparar
+class StartMonitoring extends TemperatureEvent {}
 
-class SelectDevice extends TemperatureEvent {
-  final String address;
-  SelectDevice(this.address);
-}
+class StopMonitoring extends TemperatureEvent {}
 
-class StopTemperature extends TemperatureEvent {}
+class ReadNow extends TemperatureEvent {}
 
-class ReadNowEvent extends TemperatureEvent {}
-
-// Eventos nuevos
-class TemperatureReceived extends TemperatureEvent {
+// Eventos internos que el BLoC usa para procesar datos del stream
+class TemperatureDataReceived extends TemperatureEvent {
   final Temperature temperature;
-  TemperatureReceived(this.temperature);
+  TemperatureDataReceived(this.temperature);
 }
 
-class TemperatureStreamError extends TemperatureEvent {
+class TemperatureStreamFailed extends TemperatureEvent {
   final String message;
-  TemperatureStreamError(this.message);
+  TemperatureStreamFailed(this.message);
 }
