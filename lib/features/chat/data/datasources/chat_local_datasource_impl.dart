@@ -1,20 +1,21 @@
 import 'dart:async';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
-import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/data/services/logger_service.dart';
 import '../datasources/chat_local_datasource.dart';
 
 class LocalChatDataSourceImpl implements LocalChatDataSource {
-  final Logger logger;
+  final ILogger logger;
   final _controller = StreamController<List<Message>>.broadcast();
   final List<Message> _messages = [];
   final _uuid = const Uuid();
 
-  LocalChatDataSourceImpl({Logger? logger}) : logger = logger ?? Logger() {
+  LocalChatDataSourceImpl({ILogger? logger})
+    : logger = logger ?? LoggerService() {
     // push initial empty list
     _controller.add(_messages);
-    this.logger.d('LocalChatDataSource initialized');
+    this.logger.info('LocalChatDataSource initialized');
   }
 
   @override
@@ -26,9 +27,9 @@ class LocalChatDataSourceImpl implements LocalChatDataSource {
       // simple in-memory store; later persist to sqlite/hive if needed
       _messages.insert(0, message);
       _controller.add(List.unmodifiable(_messages));
-      logger.d('Saved message locally: ${message.id}');
+      logger.info('Saved message locally: ${message.id}');
     } catch (e, s) {
-      logger.e('Failed saving message locally', error: e, stackTrace: s);
+      logger.error('Failed saving message locally', e, s);
       rethrow;
     }
   }

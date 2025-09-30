@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
-import 'package:logger/logger.dart';
 
+import '../../../../core/data/services/logger_service.dart';
 import '../../../../core/error/failure.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../../domain/usecases/get_chat_data_usecase.dart';
@@ -24,7 +24,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final SendFileMessageUseCase sendFileUseCase;
   final StartChatSessionUseCase startChatSession;
   final SendMessageUsecase sendMessageUsecase;
-  final Logger logger;
+  final ILogger logger;
 
   final InMemoryChatController chatController = InMemoryChatController();
 
@@ -38,8 +38,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     required this.sendImageUseCase,
     required this.sendFileUseCase,
     required this.sendMessageUsecase,
-    Logger? logger,
-  }) : logger = logger ?? Logger(),
+    ILogger? logger,
+  }) : logger = logger ?? LoggerService(),
        super(ChatState.initial()) {
     on<StartChatSessionEvent>(_onStartChatSession);
     on<LoadMessages>(_onInit);
@@ -58,7 +58,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     final Either<Failure, String> res = await startChatSession(event.moduleKey);
     res.fold(
       (failure) {
-        logger.e('StartChatSession failed: ${failure.message}');
+        logger.error('StartChatSession failed: ${failure.message}');
         emit(
           state.copyWith(
             status: ChatStatus.failure,
@@ -85,7 +85,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     );
     res.fold(
       (failure) {
-        logger.e('InitChat: getChatData failed: ${failure.message}');
+        logger.error('InitChat: getChatData failed: ${failure.message}');
         emit(
           state.copyWith(
             status: ChatStatus.failure,
@@ -121,7 +121,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     );
     res.fold(
       (failure) {
-        logger.e('sendMessage failed: ${failure.message}');
+        logger.error(
+          'sendMessage failed: ${failure.message}',
+          failure,
+          StackTrace.current,
+        );
         emit(
           state.copyWith(
             status: ChatStatus.failure,
@@ -166,7 +170,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     );
     res.fold(
       (failure) {
-        logger.e('sendText failed: ${failure.message}');
+        logger.error(
+          'sendText failed: ${failure.message}',
+          failure,
+          StackTrace.current,
+        );
         emit(
           state.copyWith(
             status: ChatStatus.failure,
@@ -192,7 +200,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     );
     res.fold(
       (failure) {
-        logger.e('sendImage failed: ${failure.message}');
+        logger.error(
+          'sendImage failed: ${failure.message}',
+          failure,
+          StackTrace.current,
+        );
         emit(
           state.copyWith(
             status: ChatStatus.failure,
@@ -217,7 +229,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     );
     res.fold(
       (failure) {
-        logger.e('sendFile failed: ${failure.message}');
+        logger.error(
+          'sendFile failed: ${failure.message}',
+          failure,
+          StackTrace.current,
+        );
         emit(
           state.copyWith(
             status: ChatStatus.failure,
@@ -243,7 +259,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         }
       }
     } catch (e, s) {
-      logger.w('pushMessagesToController failed', error: e, stackTrace: s);
+      logger.error('pushMessagesToController failed', e, s);
     }
   }
 

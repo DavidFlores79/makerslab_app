@@ -1,7 +1,7 @@
 import 'package:community_material_icon/community_material_icon.dart';
-import 'package:logger/logger.dart';
 import 'package:makerslab_app/core/domain/entities/main_menu_item.dart';
 
+import '../../../../core/data/services/logger_service.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../theme/app_color.dart';
 import '../../../gamepad/presentation/pages/gamepad_page.dart';
@@ -11,7 +11,7 @@ import '../../../temperature/presentation/pages/temperature_page.dart';
 import 'home_local_datasource.dart';
 
 class HomeLocalDatasourceImpl implements HomeLocalDatasource {
-  final Logger logger;
+  final ILogger logger;
 
   HomeLocalDatasourceImpl({required this.logger});
 
@@ -20,10 +20,10 @@ class HomeLocalDatasourceImpl implements HomeLocalDatasource {
   Future<List<MainMenuItem>> getMainMenu() async {
     try {
       await Future.delayed(const Duration(milliseconds: 200));
-      logger.i("Obteniendo menu localmente...");
+      logger.info("Obteniendo menu localmente...");
       return mainMenu;
     } catch (e, stackTrace) {
-      logger.e('Error getting local balance', error: e, stackTrace: stackTrace);
+      logger.error('Error getting local balance', e, stackTrace);
       throw CacheException('Error al obtener balance local', stackTrace);
     }
   }

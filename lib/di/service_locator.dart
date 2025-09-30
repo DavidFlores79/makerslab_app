@@ -8,6 +8,7 @@ import 'package:makerslab_app/features/home/domain/usecases/get_home_menu.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/data/repositories/bluetooth_repository_impl.dart';
+import '../core/data/services/logger_service.dart';
 import '../core/domain/repositories/bluetooth_repository.dart';
 import '../core/domain/usecases/bluetooth/connect_device.dart';
 import '../core/domain/usecases/bluetooth/disconnect_device.dart';
@@ -74,8 +75,8 @@ import '../features/temperature/presentation/bloc/temperature_bloc.dart';
 final getIt = GetIt.instance;
 
 Future<void> setupLocator() async {
-  getIt.registerSingleton<Logger>(Logger());
-  final logger = getIt<Logger>();
+  getIt.registerSingleton<ILogger>(LoggerService());
+  final logger = getIt<ILogger>();
   final homeLocalDatasource = HomeLocalDatasourceImpl(logger: logger);
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(sharedPreferences);

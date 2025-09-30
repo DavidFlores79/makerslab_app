@@ -10,6 +10,7 @@ import 'package:makerslab_app/shared/widgets/index.dart'; // Para los widgets de
 import 'package:makerslab_app/theme/app_color.dart';
 
 import '../../../../core/presentation/bloc/bluetooth/bluetooth_bloc.dart';
+import '../../../../core/presentation/bloc/bluetooth/bluetooth_event.dart';
 import '../../../../core/presentation/bloc/bluetooth/bluetooth_state.dart';
 import '../bloc/light_control_bloc.dart';
 
@@ -58,7 +59,7 @@ class _LightControlInterfacePageState extends State<LightControlInterfacePage> {
         },
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Control de LED'),
+            title: const Text('Control de Luz'),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
@@ -118,6 +119,14 @@ class _LightControlInterfacePageState extends State<LightControlInterfacePage> {
                   if (state is LightControlConnected) {
                     return _ConnectedView(isLightOn: state.isLightOn);
                   }
+
+                  if (state is LightControlDisconnected) {
+                    context.read<BluetoothBloc>().add(
+                      BluetoothDisconnectRequested(),
+                    );
+                    return const DisconnectedView();
+                  }
+
                   if (state is LightControlError) {
                     return ErrorView(
                       message: state.message,
@@ -170,24 +179,6 @@ class _ConnectedView extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 40),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.description_outlined),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-              ),
-              onPressed: () {
-                // TODO: Implementar la lógica para mostrar las instrucciones
-                SnackbarService().show(message: 'Mostrar instrucciones (TODO)');
-              },
-              label: const Text('Ver Instrucciones'),
-            ),
-            const SizedBox(height: 30),
           ],
         ),
       ),
@@ -219,10 +210,7 @@ class _LightToggleButton extends StatelessWidget {
             end: Alignment.bottomLeft,
             colors:
                 isLightOn
-                    ? [
-                      const Color.fromARGB(255, 9, 241, 86),
-                      const Color.fromARGB(255, 72, 184, 75),
-                    ]
+                    ? [AppColors.lightGreen, AppColors.lightGreenAccent]
                     : [Colors.black54, Colors.grey],
           ),
         ),
@@ -250,7 +238,7 @@ class _InnerCirclePowerIcon extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       child: Container(
         decoration: const BoxDecoration(
-          color: Color(0xFFE0E0E0), // Un gris claro para el fondo
+          color: AppColors.gray300, // Un gris claro para el fondo
           shape: BoxShape.circle,
         ),
         child: Center(
@@ -258,17 +246,17 @@ class _InnerCirclePowerIcon extends StatelessWidget {
             height: parentSize * 0.3,
             width: parentSize * 0.3,
             decoration: BoxDecoration(
-              color: const Color(0xFFEEEEEE),
+              color: AppColors.gray300,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.shade500,
+                  color: AppColors.blackAlpha30,
                   offset: const Offset(4, 4),
                   blurRadius: 15,
                   spreadRadius: 1,
                 ),
                 const BoxShadow(
-                  color: Colors.white,
+                  color: AppColors.white,
                   offset: Offset(-4, -4),
                   blurRadius: 15,
                   spreadRadius: 1,
@@ -278,10 +266,7 @@ class _InnerCirclePowerIcon extends StatelessWidget {
             child: Icon(
               Icons.power_settings_new_outlined,
               size: parentSize * 0.15,
-              color:
-                  isLedOn
-                      ? const Color.fromARGB(255, 9, 241, 86)
-                      : Colors.grey.shade600,
+              color: isLedOn ? AppColors.lightGreen : AppColors.gray600,
             ),
           ),
         ),

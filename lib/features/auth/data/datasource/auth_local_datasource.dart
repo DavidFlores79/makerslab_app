@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/data/services/logger_service.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/mocks/mock_data.dart';
 import '../../../../core/storage/secure_storage_service.dart';
@@ -33,7 +33,7 @@ abstract class AuthLocalDataSource {
 
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final ISecureStorageService secureStorage;
-  final Logger logger;
+  final ILogger logger;
 
   AuthLocalDataSourceImpl({required this.secureStorage, required this.logger});
 
@@ -45,7 +45,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     try {
       // Mock data
       await Future.delayed(const Duration(milliseconds: 500));
-      logger.i("Haciendo Login localmente...");
+      logger.info("Haciendo Login localmente...");
 
       debugPrint('$phone ------- $password');
 
@@ -57,11 +57,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
       return LoginResponseModel.fromJson({'jwt': _jwt, 'data': user});
     } catch (e, stackTrace) {
-      logger.e(
-        'Error haciendo Login localmente...',
-        error: e,
-        stackTrace: stackTrace,
-      );
+      logger.error('Error haciendo Login localmente...', e, stackTrace);
       throw CacheException(
         'Usuario o contraseña no válidos. Por favor ingresar la información correctamente...',
         stackTrace,
@@ -81,7 +77,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     try {
       // Mock data
       await Future.delayed(const Duration(milliseconds: 500));
-      logger.i("Haciendo Registro localmente...");
+      logger.info("Haciendo Registro localmente...");
       if (users.any((u) => u['phone'] == phone)) {
         throw Exception('Phone already exists');
       }
@@ -104,29 +100,10 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
           }).toJson();
       users.add(user);
 
-      //add balance with this userId
-      // final balanceId = Uuid().v4();
-      // final newClabe = 'clabe_${Random().nextInt(999999)}';
-      // balances.add({
-      //   "id": balanceId,
-      //   "userId": id,
-      //   "currentBalance": "0.00",
-      //   "currency": "MXN",
-      //   "lastUpdatedAt": DateTime.now().toIso8601String(),
-      //   "createdAt": DateTime.now().toIso8601String(),
-      //   "updatedAt": DateTime.now().toIso8601String(),
-      // });
-      // Map CLABE to Balance ID
-      // clabeToBalanceIdMock[newClabe] = balanceId;
-
       _jwt = 'token_${Random().nextInt(999999)}';
       return LoginResponseModel.fromJson({'jwt': _jwt, 'user': user});
     } catch (e, stackTrace) {
-      logger.e(
-        'Error haciendo Registro localmente...',
-        error: e,
-        stackTrace: stackTrace,
-      );
+      logger.error('Error haciendo Registro localmente...', e, stackTrace);
       throw CacheException(
         e.toString().replaceFirst('Exception: ', ''),
         stackTrace,
@@ -139,16 +116,16 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     try {
       // Mock data
       await Future.delayed(const Duration(milliseconds: 500));
-      logger.i("Cambiando contraseña localmente...");
+      logger.info("Cambiando contraseña localmente...");
 
       final index = users.indexWhere((u) => u['password'] == oldPassword);
       if (index == -1) throw Exception('Old password is incorrect');
       users[index]['password'] = newPassword;
     } catch (e, stackTrace) {
-      logger.e(
+      logger.error(
         'Error haciendo Cambio de contraseña localmente...',
-        error: e,
-        stackTrace: stackTrace,
+        e,
+        stackTrace,
       );
       throw CacheException(
         'Error al hacer Cambio de contraseña localmente...',
@@ -162,16 +139,16 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     try {
       // Mock data
       await Future.delayed(const Duration(milliseconds: 500));
-      logger.i("Recuperando contraseña localmente...");
+      logger.info("Recuperando contraseña localmente...");
 
       if (!users.any((u) => u['phone'] == '52$phone')) {
         throw Exception('Phone not found');
       }
     } catch (e, stackTrace) {
-      logger.e(
+      logger.error(
         'Error haciendo Recuperación de contraseña localmente...',
-        error: e,
-        stackTrace: stackTrace,
+        e,
+        stackTrace,
       );
       throw CacheException(
         'Error al hacer Recuperación de contraseña localmente...',
@@ -192,7 +169,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
     _jwt = 'token_${Random().nextInt(999999)}';
     final user = users.last;
-    logger.i("Confirmando registro localmente...");
+    logger.info("Confirmando registro localmente...");
 
     return LoginResponseModel.fromJson({"jwt": _jwt, "user": user});
   }
@@ -200,7 +177,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<void> resendSignUpCode({required String userId}) async {
     await Future.delayed(Duration(milliseconds: 500));
-    logger.i("Reenviando código de registro localmente...");
+    logger.info("Reenviando código de registro localmente...");
     unawaited(
       Future.delayed(Duration(milliseconds: 500), () {
         otpCode = '111111';
@@ -214,6 +191,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<List<UserModel>> getUsers() async {
     await Future.delayed(const Duration(milliseconds: 500));
+    logger.info("Obteniendo usuarios localmente...");
     return users.map((u) => UserModel.fromJson(u)).toList();
   }
 }

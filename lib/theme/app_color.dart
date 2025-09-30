@@ -41,6 +41,12 @@ class AppColors {
 
   // Colores agregados de tu lista
   static const lightGreen = Color(0xFF8BC34A); // Color para Gamepad
+  // const Color.fromARGB(255, 9, 241, 86),
+  // const Color.fromARGB(255, 72, 184, 75)
+  static const lightGreenAccent = Color(
+    0xFFCDDC39,
+  ); // Color para Gamepad (Accent)
+
   static const blue = Color(0xFF2196F3); // Color para Sensor DHT
   static const blueAccent = Color(0xFF448AFF); // Color para Sensor DHT (Accent)
   static const red = Color(0xFFF44336); // Color para Servos

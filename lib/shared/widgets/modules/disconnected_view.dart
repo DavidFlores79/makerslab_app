@@ -19,7 +19,7 @@ class DisconnectedView extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            'Presiona el ícono de Bluetooth para reconectar',
+            'Presiona el ícono de Bluetooth para reconectar (DV)',
             textAlign: TextAlign.center,
           ),
         ],

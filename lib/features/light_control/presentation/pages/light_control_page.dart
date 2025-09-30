@@ -11,7 +11,7 @@ class LightControlPage extends StatelessWidget {
   LightControlPage({super.key});
 
   final MainModule mainModule = MainModule(
-    title: 'Control de Led',
+    title: 'Control de Luz',
     description: '',
     moduleRoute: LightControlPage.routeName,
     interfaceRoute: LightControlInterfacePage.routeName,

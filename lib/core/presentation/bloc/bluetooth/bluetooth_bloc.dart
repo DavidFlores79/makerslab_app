@@ -1,6 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart'
-    show BluetoothDevice;
 import '../../../domain/usecases/bluetooth/discover_devices.dart';
 import '../../../domain/usecases/bluetooth/connect_device.dart';
 import '../../../domain/usecases/bluetooth/disconnect_device.dart';

@@ -66,7 +66,6 @@ class LightControlBloc extends Bloc<LightControlEvent, LightControlState> {
       onDone: () => add(StopMonitoring()),
     );
 
-    _startHeartbeat();
     _resetTimeout();
     // Inicia con el LED apagado por defecto
     emit(LightControlConnected(isLightOn: false));
@@ -160,19 +159,6 @@ class LightControlBloc extends Bloc<LightControlEvent, LightControlState> {
       return false;
     }
     return null;
-  }
-
-  void _startHeartbeat() {
-    _heartbeatTimer?.cancel();
-    _heartbeatTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
-      // Envía un 'ping' ('P\n') para mantener la conexión activa.
-      final result = await sendStringUseCase('P\n');
-      result.fold(
-        (failure) =>
-            add(_LightStreamFailed('Heartbeat falló: ${failure.message}')),
-        (_) {},
-      );
-    });
   }
 
   void _resetTimeout() {

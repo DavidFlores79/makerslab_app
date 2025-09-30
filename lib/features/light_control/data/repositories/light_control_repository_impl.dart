@@ -5,12 +5,14 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as fbs;
 
+import '../../../../core/data/services/logger_service.dart';
 import '../../../../core/domain/repositories/bluetooth_repository.dart';
 import '../../../../core/error/failure.dart';
 import '../../domain/repositories/light_control_repository.dart';
 
 class LightControlRepositoryImpl implements LightControlRepository {
   final BluetoothRepository bluetoothRepository;
+  final ILogger logger = LoggerService();
 
   // El StreamController ahora maneja `bool` para el estado del LED.
   StreamController<Either<Failure, bool>>? _controller;
@@ -39,20 +41,22 @@ class LightControlRepositoryImpl implements LightControlRepository {
 
   @override
   Future<Either<Failure, void>> connectToDevice(String address) async {
-    debugPrint('[LightControlRepo] Conectando al dispositivo: $address');
+    logger.info('[LightControlRepo] Conectando al dispositivo: $address');
     await _cleanupPreviousConnection();
     final connectionResult = await bluetoothRepository.connect(address);
     return connectionResult.fold(
       (failure) {
-        debugPrint('[LightControlRepo] Falló la conexión: ${failure.message}');
+        logger.error(
+          '[LightControlRepo] Falló la conexión: ${failure.message}',
+        );
         return Left(failure);
       },
       (_) {
-        debugPrint(
+        logger.info(
           '[LightControlRepo] Conexión exitosa. Configurando stream...',
         );
         _setupDataStream();
-        _startHeartbeat();
+        // _startHeartbeat();
         _resetTimeout();
         return const Right(null);
       },
@@ -62,9 +66,13 @@ class LightControlRepositoryImpl implements LightControlRepository {
   @override
   Stream<Either<Failure, bool>> lightStateStream() {
     if (_controller != null && !_controller!.isClosed) {
+      logger.info('[LightControlRepo] Escuchando el estado de la luz...');
       return _controller!.stream;
     }
     // Si no está conectado, devuelve un stream con un error.
+    logger.warning(
+      '[LightControlRepo] Intento de escuchar el estado de la luz sin conexión.',
+    );
     return Stream.value(Left(BluetoothFailure('No conectado')));
   }
 
@@ -72,12 +80,13 @@ class LightControlRepositoryImpl implements LightControlRepository {
   Future<Either<Failure, void>> toggleLight(bool isCurrentlyOn) async {
     // Si el LED está encendido, enviamos '0' para apagarlo. Si está apagado, enviamos '1'.
     final command = isCurrentlyOn ? '0\n' : '1\n';
-    debugPrint('[LightControlRepo] Enviando comando: "$command"');
+    logger.info('[LightControlRepo] Enviando comando: "$command"');
     return bluetoothRepository.sendString(command);
   }
 
   @override
   Future<Either<Failure, void>> disconnect() async {
+    logger.info('[LightControlRepo] Desconectando del dispositivo...');
     await _cleanupPreviousConnection();
     return bluetoothRepository.disconnect();
   }
@@ -108,13 +117,14 @@ class LightControlRepositoryImpl implements LightControlRepository {
         );
       },
       onError: (error) {
+        logger.error('[LightControlRepo] Error en el stream de datos: $error');
         _controller?.add(
           Left(BluetoothFailure('Stream de datos falló: $error')),
         );
         _handleDisconnect();
       },
       onDone: () {
-        debugPrint('[LightControlRepo] El stream de datos se cerró (onDone).');
+        logger.info('[LightControlRepo] El stream de datos se cerró (onDone).');
         _handleDisconnect();
       },
     );
@@ -196,20 +206,20 @@ class LightControlRepositoryImpl implements LightControlRepository {
   }
 
   Future<void> _sendHeartbeat() async {
-    debugPrint('[LightControlRepo] Enviando heartbeat "P"');
+    logger.info('[LightControlRepo] Enviando heartbeat "P"');
     final result = await bluetoothRepository.sendString('P\n');
     result.fold((failure) {
-      debugPrint(
+      logger.error(
         '[LightControlRepo] Falló el envío del heartbeat: ${failure.message}',
       );
       _handleDisconnect();
-    }, (_) => debugPrint('[LightControlRepo] Heartbeat enviado con éxito.'));
+    }, (_) => logger.info('[LightControlRepo] Heartbeat enviado con éxito.'));
   }
 
   void _resetTimeout() {
     _timeoutTimer?.cancel();
     _timeoutTimer = Timer(const Duration(seconds: 45), () {
-      debugPrint(
+      logger.warning(
         '[LightControlRepo] Timeout: No se recibieron datos en 45 segundos.',
       );
       _handleDisconnect();

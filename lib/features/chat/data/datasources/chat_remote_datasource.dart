@@ -2,13 +2,14 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
-import 'package:logger/logger.dart';
 import 'package:makerslab_app/features/chat/data/models/send_message_response.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:ui' as ui;
 
 import 'package:makerslab_app/features/chat/data/models/get_messages_response.dart';
 import 'package:makerslab_app/features/chat/data/models/message_model.dart';
+
+import '../../../../core/data/services/logger_service.dart';
 
 abstract class RemoteChatDataSource {
   Future<String> startChatSession(String moduleKey);
@@ -22,12 +23,12 @@ abstract class RemoteChatDataSource {
 
 class ChatRemoteDataSourceImpl implements RemoteChatDataSource {
   final Dio dio;
-  final Logger logger;
+  final ILogger logger;
   final Uuid _uuid = const Uuid();
   final String _currentUserId = 'unknownUser';
 
   ChatRemoteDataSourceImpl({required this.dio, required this.logger}) {
-    logger.d('ChatRemoteDataSource initialized');
+    logger.info('ChatRemoteDataSource initialized');
   }
 
   @override
@@ -46,7 +47,7 @@ class ChatRemoteDataSourceImpl implements RemoteChatDataSource {
       final response = await dio.get('/api/chat/$conversationId');
       final messages = GetMessagesResponse.fromJson(response.data).messages;
 
-      logger.d('Fetched messages raw: $messages');
+      logger.info('Fetched messages raw: $messages');
 
       if (messages == null) return [];
 
@@ -129,7 +130,7 @@ class ChatRemoteDataSourceImpl implements RemoteChatDataSource {
                   }
                 } catch (e, st) {
                   // no rompemos el flujo: dejamos los campos opcionales nulos/0 y mostramos la imagen por URL
-                  logger.w(
+                  logger.warning(
                     'No se pudo descargar/decodificar imagen $imageUrl: $e\n$st',
                   );
                 }
@@ -168,19 +169,19 @@ class ChatRemoteDataSourceImpl implements RemoteChatDataSource {
               );
             }
           } else {
-            logger.w(
+            logger.warning(
               'Message content is empty for message with createdAt ${message.createdAt}',
             );
           }
         } catch (e, st) {
-          logger.e('Error mapeando mensaje: $e\n$st');
+          logger.error('Error mapeando mensaje: $e\n$st');
           // continuamos con los demás mensajes
         }
       }
 
       return result;
     } catch (e, st) {
-      logger.e('Error fetching messages: $e\n$st');
+      logger.error('Error fetching messages: $e\n$st');
       return [];
     }
   }
