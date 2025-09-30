@@ -9,6 +9,7 @@ import 'package:makerslab_app/shared/widgets/index.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import '../../../../core/presentation/bloc/bluetooth/bluetooth_bloc.dart';
+import '../../../../core/presentation/bloc/bluetooth/bluetooth_event.dart';
 import '../../../../core/presentation/bloc/bluetooth/bluetooth_state.dart';
 import '../../../../core/ui/bluetooth_dialogs.dart';
 import '../../../../di/service_locator.dart';
@@ -119,6 +120,14 @@ class _TemperatureInterfacePageState extends State<TemperatureInterfacePage> {
                   )) {
                     return const ConnectingView();
                   }
+
+                  if (state is TempDisconnected) {
+                    context.read<BluetoothBloc>().add(
+                      BluetoothDisconnectRequested(),
+                    );
+                    return const DisconnectedView();
+                  }
+
                   if (state is TempConnected) {
                     return _ConnectedView(
                       latest: state.latest,

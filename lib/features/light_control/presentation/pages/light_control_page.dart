@@ -17,7 +17,7 @@ class LightControlPage extends StatelessWidget {
     interfaceRoute: LightControlInterfacePage.routeName,
     image: 'assets/images/static/light_control/light_control.png',
     videoId: 'kJpdoBLSmHs',
-    inoFile: 'assets/files/esp32_bt_temp.ino',
+    inoFile: 'assets/files/esp32_bt_light_control.ino',
     instructions: [
       InstructionItem(
         title:
