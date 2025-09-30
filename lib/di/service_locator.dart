@@ -56,6 +56,9 @@ import '../features/home/data/datasources/home_local_datasource_impl.dart';
 import '../features/home/data/repository/home_repository_impl.dart';
 import '../features/home/domain/repositories/home_repository.dart';
 import '../features/home/presentation/bloc/home_bloc.dart';
+import '../features/light_control/data/repositories/light_control_repository_impl.dart';
+import '../features/light_control/domain/repositories/light_control_repository.dart';
+import '../features/light_control/presentation/bloc/light_control_bloc.dart';
 import '../features/onboarding/data/repository/onboarding_repository_impl.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/onboarding/domain/usecases/mark_onboarding_completed_usecase.dart';
@@ -178,6 +181,11 @@ Future<void> setupLocator() async {
       local: getIt<TemperatureLocalDataSource>(),
     ),
   );
+  getIt.registerLazySingleton<LightControlRepository>(
+    () => LightControlRepositoryImpl(
+      bluetoothRepository: getIt<BluetoothRepository>(),
+    ),
+  );
 
   // Use cases
   getIt.registerLazySingleton(() => ShareFileUseCase(getIt()));
@@ -273,6 +281,14 @@ Future<void> setupLocator() async {
       getDataStreamUseCase: getIt<GetBluetoothDataStreamUseCase>(),
       sendStringUseCase: getIt<SendBluetoothStringUseCase>(),
       localDataSource: getIt<TemperatureLocalDataSource>(),
+      bluetoothBloc: getIt<BluetoothBloc>(),
+    ),
+  );
+
+  getIt.registerFactory<LightControlBloc>(
+    () => LightControlBloc(
+      getDataStreamUseCase: getIt<GetBluetoothDataStreamUseCase>(),
+      sendStringUseCase: getIt<SendBluetoothStringUseCase>(),
       bluetoothBloc: getIt<BluetoothBloc>(),
     ),
   );

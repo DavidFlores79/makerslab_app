@@ -11,6 +11,7 @@ import '../../../gamepad/presentation/bloc/gamepad_bloc.dart';
 import '../../../gamepad/presentation/pages/gamepad_page.dart';
 import '../../../light_control/presentation/pages/light_control_page.dart';
 import '../../../light_control/presentation/bloc/light_control_bloc.dart';
+import '../../../light_control/presentation/routes/light_control_routes.dart';
 import '../../../servo/presentation/pages/servo_page.dart';
 import '../../../servo/presentation/bloc/servo_bloc.dart';
 import '../../../temperature/presentation/routes/temperature_routes.dart';
@@ -35,15 +36,16 @@ final mainStaticRoutes = [
           child: ServoPage(),
         ),
   ),
-  GoRoute(
-    path: LightControlPage.routeName,
-    name: LightControlPage.routeName,
-    builder:
-        (context, state) => BlocProvider(
-          create: (_) => getIt<LightControlsBloc>(),
-          child: LightControlPage(),
-        ),
-  ),
+  // GoRoute(
+  //   path: LightControlPage.routeName,
+  //   name: LightControlPage.routeName,
+  //   builder:
+  //       (context, state) => BlocProvider(
+  //         create: (_) => getIt<LightControlBloc>(),
+  //         child: LightControlPage(),
+  //       ),
+  // ),
+  ...lightControlRoutes,
 
   //validate if there is a session open if not redirect to login
   GoRoute(

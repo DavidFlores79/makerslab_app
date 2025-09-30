@@ -19,3 +19,7 @@ export 'px_step_title.dart';
 export 'video/full_videoplayer.dart';
 export 'video/youtube_player.dart';
 export 'px_section_title.dart';
+export 'modules/disconnected_view.dart';
+export 'modules/initial_view.dart';
+export 'modules/connecting_view.dart';
+export 'modules/error_view.dart';

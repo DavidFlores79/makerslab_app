@@ -16,8 +16,15 @@ class LightControlLocalDatasourceImpl implements LightControlLocalDatasource {
       logger.i("Obteniendo light_controls localmente...");
       return sampleLightControls;
     } catch (e, stackTrace) {
-      logger.e('Error getting local data for light_control', error: e, stackTrace: stackTrace);
-      throw CacheException('Error al obtener light_controls locales', stackTrace);
+      logger.e(
+        'Error getting local data for light_control',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      throw CacheException(
+        'Error al obtener light_controls locales',
+        stackTrace,
+      );
     }
   }
 }

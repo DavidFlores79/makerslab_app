@@ -3,18 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:makerslab_app/core/ui/snackbar_service.dart';
+import 'package:keep_screen_on/keep_screen_on.dart';
+import 'package:intl/intl.dart';
+import 'package:makerslab_app/shared/widgets/index.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import '../../../../core/presentation/bloc/bluetooth/bluetooth_bloc.dart';
-import '../../../../core/presentation/bloc/bluetooth/bluetooth_event.dart';
 import '../../../../core/presentation/bloc/bluetooth/bluetooth_state.dart';
+import '../../../../core/ui/bluetooth_dialogs.dart';
 import '../../../../di/service_locator.dart';
 import '../../../../theme/app_color.dart';
 import '../../domain/entities/temperature_entity.dart';
 import '../bloc/temperature_bloc.dart';
 import '../bloc/temperature_state.dart';
-import 'package:intl/intl.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart'; // For SfRadialGauge
-import 'package:keep_screen_on/keep_screen_on.dart'; // Assuming you have this package for keep screen on
 
 class TemperatureInterfacePage extends StatefulWidget {
   static const String routeName = '/temperature/interface';
@@ -38,338 +39,6 @@ class _TemperatureInterfacePageState extends State<TemperatureInterfacePage> {
     super.dispose();
   }
 
-  void _showDisconnectDialog(
-    BuildContext pageContext, {
-    bool popPageAfter = false,
-  }) {
-    final theme = Theme.of(pageContext).textTheme;
-
-    showDialog(
-      context: pageContext,
-      builder:
-          (dialogContext) => AlertDialog(
-            title: Text(
-              '¿Desconectar?',
-              textAlign: TextAlign.center,
-              style: theme.titleLarge,
-            ),
-            content: Text(
-              '¿Estás seguro de que quieres desconectarte del dispositivo?',
-              textAlign: TextAlign.center,
-              style: theme.bodyMedium,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Paso 1: Inicia la desconexión
-                  pageContext.read<BluetoothBloc>().add(
-                    BluetoothDisconnectRequested(),
-                  );
-
-                  // Paso 2: Cierra el diálogo
-                  Navigator.of(dialogContext).pop();
-
-                  // --- LÓGICA CONDICIONAL ---
-                  // Paso 3 (Opcional): Cierra la página solo si se especificó.
-                  if (popPageAfter) {
-                    pageContext.pop();
-                  }
-                },
-                child: const Text('Desconectar'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  // Actualiza la función _showDeviceSelectionModal en _TemperatureInterfacePageState
-  void _showDeviceSelectionModal(BuildContext context) {
-    final bluetoothBloc = context.read<BluetoothBloc>();
-    bluetoothBloc.add(BluetoothScanRequested());
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (modalContext) {
-        final theme = Theme.of(modalContext).textTheme;
-        return BlocProvider<BluetoothBloc>.value(
-          value: bluetoothBloc,
-          child: BlocListener<BluetoothBloc, BluetoothState>(
-            listener: (context, state) {
-              if (state is BluetoothError) {
-                SnackbarService().show(
-                  message: 'Error: ${state.message}',
-                  // isError: true,
-                );
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(
-                16.0,
-              ), // Aumenta el padding para mejor legibilidad
-              child: SizedBox(
-                height: MediaQuery.of(modalContext).size.height * 0.6,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Encabezado educativo
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            'Dispositivos Bluetooth Disponibles',
-                            style: theme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.refresh,
-                            color: AppColors.gray600, // Gris medio
-                          ),
-                          onPressed:
-                              () => context.read<BluetoothBloc>().add(
-                                BluetoothScanRequested(),
-                              ),
-                          tooltip: 'Actualizar lista',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Selecciona tu sensor ESP32 para conectar y aprender sobre temperatura y humedad.',
-                      style: theme.bodyMedium?.copyWith(
-                        color: AppColors.gray600,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Divider(
-                      color: AppColors.gray300,
-                    ), // Divider para separación limpia
-                    Expanded(
-                      child: BlocBuilder<BluetoothBloc, BluetoothState>(
-                        builder: (context, state) {
-                          if (state is BluetoothScanning ||
-                              state is BluetoothConnecting) {
-                            return const Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation(
-                                      AppColors.gray600, // Gris discreto
-                                    ),
-                                  ),
-                                  SizedBox(height: 16),
-                                  Text(
-                                    'Buscando dispositivos...',
-                                    style: TextStyle(color: AppColors.gray500),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                          if (state is BluetoothScanLoaded) {
-                            final devices = state.devices;
-
-                            // 1. Creamos una copia mutable de la lista para poder ordenarla.
-                            final sortedDevices = List.of(
-                              state.devices,
-                            ); // <--- NUEVO
-
-                            // 2. Ordenamos la lista.
-                            sortedDevices.sort((a, b) {
-                              // <--- NUEVO
-                              final aIsESP32 =
-                                  a.name?.toLowerCase().contains('esp32') ??
-                                  false;
-                              final bIsESP32 =
-                                  b.name?.toLowerCase().contains('esp32') ??
-                                  false;
-
-                              if (aIsESP32 && !bIsESP32) {
-                                return -1; // 'a' (ESP32) va antes que 'b'.
-                              } else if (!aIsESP32 && bIsESP32) {
-                                return 1; // 'b' (ESP32) va antes que 'a'.
-                              } else {
-                                return 0; // Son iguales, se mantiene el orden relativo.
-                              }
-                            });
-
-                            if (sortedDevices.isEmpty) {
-                              return Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.search_off,
-                                      size: 50,
-                                      color: AppColors.gray500,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    const Text(
-                                      'No se encontraron dispositivos.\nAsegúrate de que tu ESP32 esté encendido y visible.',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: AppColors.gray500,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            AppColors
-                                                .gray600, // Gris oscuro para botón
-                                        foregroundColor: AppColors.white,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                      ),
-                                      onPressed:
-                                          () => context
-                                              .read<BluetoothBloc>()
-                                              .add(BluetoothScanRequested()),
-                                      child: const Text('Reintentar búsqueda'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }
-                            return ListView.separated(
-                              itemCount: sortedDevices.length,
-                              separatorBuilder:
-                                  (_, __) =>
-                                      const Divider(color: AppColors.gray300),
-                              itemBuilder: (context, index) {
-                                final d = sortedDevices[index];
-                                final name =
-                                    (d.name != null && d.name!.isNotEmpty)
-                                        ? d.name!
-                                        : 'Dispositivo desconocido';
-                                final subtitle = d.address;
-                                final isESP32 = name.toLowerCase().contains(
-                                  'esp32',
-                                ); // Resalta si es ESP32 para fines educativos
-                                return Card(
-                                  elevation:
-                                      1, // Elevación baja para discreción
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  color:
-                                      isESP32
-                                          ? AppColors
-                                              .gray200 // Gris claro para highlight sutil
-                                          : AppColors.gray100, // Gris muy claro
-                                  child: ListTile(
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 8,
-                                    ), // Padding para evitar desbordes
-                                    leading: Icon(
-                                      Icons.bluetooth,
-                                      color:
-                                          isESP32
-                                              ? AppColors
-                                                  .gray700 // Gris oscuro
-                                              : AppColors.gray600,
-                                      size: 32,
-                                    ),
-                                    title: Text(
-                                      name,
-                                      style: theme.bodyLarge?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                    subtitle: Text(
-                                      subtitle,
-                                      style: theme.bodyMedium?.copyWith(
-                                        color: AppColors.gray600,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                    trailing:
-                                        isESP32
-                                            ? const Chip(
-                                              //border color
-                                              side: BorderSide(
-                                                color: AppColors.primaryLight,
-                                              ),
-                                              label: Text('Recomendado'),
-                                              backgroundColor:
-                                                  AppColors
-                                                      .primary, // Gris medio
-                                              labelStyle: TextStyle(
-                                                color: AppColors.white,
-                                              ),
-                                            )
-                                            : null,
-                                    onTap: () {
-                                      context.read<BluetoothBloc>().add(
-                                        BluetoothDeviceSelected(d),
-                                      );
-                                      context.pop();
-                                    },
-                                  ),
-                                );
-                              },
-                            );
-                          }
-                          if (state is BluetoothError) {
-                            return Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.error_outline,
-                                    color:
-                                        AppColors
-                                            .gray600, // Gris en lugar de rojo
-                                    size: 50,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'Error: ${state.message}',
-                                    style: theme.bodySmall?.copyWith(
-                                      color: AppColors.gray600,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                          return const Center(
-                            child: Text('Iniciando búsqueda...'),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     const backgroundColor = AppColors.gray200;
@@ -386,30 +55,24 @@ class _TemperatureInterfacePageState extends State<TemperatureInterfacePage> {
           } else if (state is BluetoothError) {
             SnackbarService().show(
               message: 'Error de conexión: ${state.message}',
-              // isError: true,
             );
           }
         },
         child: Scaffold(
           backgroundColor: backgroundColor,
           appBar: AppBar(
-            // Assuming you have PxBackAppBar or replace with standard AppBar
             title: const Text('Temperatura'),
-            backgroundColor: backgroundColor,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
                 final bluetoothState = context.read<BluetoothBloc>().state;
-                debugPrint(
-                  'Back button pressed. Bluetooth state is $bluetoothState',
-                );
-
-                // Comprueba si el estado es BluetoothConnected.
                 if (bluetoothState is BluetoothConnected) {
-                  _showDisconnectDialog(context, popPageAfter: true);
+                  // Llama al método estático
+                  BluetoothDialogs.showDisconnectDialog(
+                    context,
+                    popPageAfter: true,
+                  );
                 } else {
-                  // Si no está conectado, simplemente navega hacia atrás.
-                  // Usamos GoRouter.pop() en este caso.
                   context.pop();
                 }
               },
@@ -429,9 +92,13 @@ class _TemperatureInterfacePageState extends State<TemperatureInterfacePage> {
                     ),
                     onPressed: () {
                       if (isConnected) {
-                        _showDisconnectDialog(context);
+                        BluetoothDialogs.showDisconnectDialog(context);
                       } else {
-                        _showDeviceSelectionModal(context);
+                        BluetoothDialogs.showDeviceSelectionModal(
+                          context,
+                          instructionalText:
+                              'Selecciona tu sensor ESP32 para conectar y aprender sobre temperatura y humedad.',
+                        );
                       }
                     },
                   );
@@ -450,7 +117,7 @@ class _TemperatureInterfacePageState extends State<TemperatureInterfacePage> {
                   if (context.select(
                     (BluetoothBloc b) => b.state is BluetoothConnecting,
                   )) {
-                    return const _ConnectingView();
+                    return const ConnectingView();
                   }
                   if (state is TempConnected) {
                     return _ConnectedView(
@@ -459,15 +126,20 @@ class _TemperatureInterfacePageState extends State<TemperatureInterfacePage> {
                     );
                   }
                   if (state is TempError) {
-                    return _ErrorView(
+                    return ErrorView(
                       message: state.message,
-                      onRetry: () => _showDeviceSelectionModal(context),
+                      onRetry:
+                          () => BluetoothDialogs.showDeviceSelectionModal(
+                            context,
+                            instructionalText:
+                                'Selecciona tu sensor ESP32 para conectar y aprender sobre temperatura y humedad.',
+                          ),
                     );
                   }
                   if (state is TempDisconnected) {
-                    return const _DisconnectedView();
+                    return const DisconnectedView();
                   }
-                  return const _InitialView();
+                  return const InitialView();
                 },
               ),
             ),
@@ -790,112 +462,6 @@ class _HistoryLogView extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-// =========================================================================
-//                        WIDGETS DE ESTADO
-// =========================================================================
-class _ConnectingView extends StatelessWidget {
-  const _ConnectingView();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('Conectando al dispositivo...'),
-        ],
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.error_outline, color: AppColors.redAccent, size: 50),
-          const SizedBox(height: 16),
-          Text(
-            'Error: $message',
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.blueAccent,
-              foregroundColor: AppColors.white,
-            ),
-            onPressed: onRetry,
-            child: const Text('Reintentar'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DisconnectedView extends StatelessWidget {
-  const _DisconnectedView();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.bluetooth_disabled, size: 50, color: AppColors.gray600),
-          SizedBox(height: 16),
-          Text(
-            'Desconectado',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Presiona el ícono de Bluetooth para reconectar',
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InitialView extends StatelessWidget {
-  const _InitialView();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.bluetooth_searching,
-            size: 50,
-            color: AppColors.blueAccent,
-          ),
-          SizedBox(height: 16),
-          Text(
-            'Presiona el ícono de Bluetooth para conectar con el ESP32',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18),
-          ),
-        ],
-      ),
     );
   }
 }

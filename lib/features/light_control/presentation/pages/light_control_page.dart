@@ -4,14 +4,17 @@ import '../../../../core/domain/entities/instruction.dart';
 import '../../../../core/domain/entities/material.dart';
 import '../../../../core/domain/entities/module.dart';
 import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
+import '../widgets/light_control_interface_page.dart';
 
 class LightControlPage extends StatelessWidget {
-  static const String routeName = '/light_control';
+  static const String routeName = '/light-control';
   LightControlPage({super.key});
 
   final MainModule mainModule = MainModule(
-    title: 'title',
-    description: 'description',
+    title: 'Control de Led',
+    description: '',
+    moduleRoute: LightControlPage.routeName,
+    interfaceRoute: LightControlInterfacePage.routeName,
     image: 'assets/images/static/light_control/light_control.png',
     videoId: 'kJpdoBLSmHs',
     inoFile: 'assets/files/esp32_bt_temp.ino',
