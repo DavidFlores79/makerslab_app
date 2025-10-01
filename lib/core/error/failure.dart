@@ -41,11 +41,13 @@ class ServerFailure extends Failure {
 }
 
 class NetworkFailure extends Failure {
-  const NetworkFailure(String message, [StackTrace? stackTrace])
-    : super(message, stackTrace);
+  const NetworkFailure(super.message, [super.stackTrace]);
 }
 
 class ValidationFailure extends Failure {
-  const ValidationFailure(String message, [StackTrace? stackTrace])
-    : super(message, stackTrace);
+  const ValidationFailure(super.message, [super.stackTrace]);
+}
+
+class PermissionFailure extends Failure {
+  const PermissionFailure(super.message, [super.stackTrace]);
 }

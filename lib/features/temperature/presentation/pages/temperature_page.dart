@@ -13,7 +13,7 @@ class TemperaturePage extends StatelessWidget {
 
   final MainModule mainModule = MainModule(
     title: 'Sensor Temperatura',
-    description: 'description',
+    description: '',
     moduleRoute: TemperaturePage.routeName,
     interfaceRoute: TemperatureInterfacePage.routeName,
     image: 'assets/images/static/temperature/esp32DHT11.png',

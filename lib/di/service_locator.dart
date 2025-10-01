@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/data/repositories/bluetooth_repository_impl.dart';
 import '../core/data/services/logger_service.dart';
+import '../core/data/services/permission_handler.dart';
 import '../core/domain/repositories/bluetooth_repository.dart';
 import '../core/domain/usecases/bluetooth/connect_device.dart';
 import '../core/domain/usecases/bluetooth/disconnect_device.dart';
@@ -80,6 +81,9 @@ Future<void> setupLocator() async {
   final homeLocalDatasource = HomeLocalDatasourceImpl(logger: logger);
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(sharedPreferences);
+  getIt.registerLazySingleton<PermissionService>(
+    () => PermissionService(logger: getIt<ILogger>()),
+  );
 
   // Flutter Secure Storage
   getIt.registerLazySingleton(() => const FlutterSecureStorage());
@@ -260,6 +264,7 @@ Future<void> setupLocator() async {
       discoverDevicesUseCase: getIt(),
       connectDeviceUseCase: getIt(),
       disconnectDeviceUseCase: getIt(),
+      permissionService: getIt(),
     ),
   );
 
