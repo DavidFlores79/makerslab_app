@@ -89,6 +89,7 @@ flutter:
     - assets/
     - assets/images/
     - assets/images/brand/
+    - assets/images/modules/
     - assets/images/static/
     - assets/images/static/materials/
     - assets/images/static/temperature/

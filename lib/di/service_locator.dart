@@ -66,6 +66,11 @@ import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/onboarding/domain/usecases/mark_onboarding_completed_usecase.dart';
 import '../features/onboarding/domain/usecases/should_show_onboarding_usecase.dart';
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
+import '../features/servo/data/repositories/servo_repository_impl.dart';
+import '../features/servo/domain/repositories/servo_repository.dart';
+import '../features/servo/domain/usecases/get_servo_position_usecase.dart';
+import '../features/servo/domain/usecases/send_servo_position_usecase.dart';
+import '../features/servo/presentation/bloc/servo_bloc.dart';
 import '../features/temperature/data/datasources/temperature_local_datasource.dart';
 import '../features/temperature/data/repositories/temperature_repository_impl.dart';
 import '../features/temperature/domain/repositories/temperature_repository.dart';
@@ -191,6 +196,10 @@ Future<void> setupLocator() async {
       bluetoothRepository: getIt<BluetoothRepository>(),
     ),
   );
+  getIt.registerLazySingleton<ServoRepository>(
+    () =>
+        ServoRepositoryImpl(bluetoothRepository: getIt<BluetoothRepository>()),
+  );
 
   // Use cases
   getIt.registerLazySingleton(() => ShareFileUseCase(getIt()));
@@ -238,6 +247,12 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => ResendSignUpCode(repository: getIt()));
   getIt.registerLazySingleton(() => ConfirmSignUp(repository: getIt()));
   getIt.registerLazySingleton(() => SendMessageUsecase(repository: getIt()));
+  getIt.registerLazySingleton(
+    () => GetServoPositionUseCase(repository: getIt()),
+  );
+  getIt.registerLazySingleton(
+    () => SendServoPositionUseCase(repository: getIt()),
+  );
 
   // Blocs
   getIt.registerFactory(() => OnboardingBloc(getIt(), getIt()));
@@ -293,6 +308,14 @@ Future<void> setupLocator() async {
 
   getIt.registerFactory<LightControlBloc>(
     () => LightControlBloc(
+      getDataStreamUseCase: getIt<GetBluetoothDataStreamUseCase>(),
+      sendStringUseCase: getIt<SendBluetoothStringUseCase>(),
+      bluetoothBloc: getIt<BluetoothBloc>(),
+    ),
+  );
+
+  getIt.registerFactory<ServoBloc>(
+    () => ServoBloc(
       getDataStreamUseCase: getIt<GetBluetoothDataStreamUseCase>(),
       sendStringUseCase: getIt<SendBluetoothStringUseCase>(),
       bluetoothBloc: getIt<BluetoothBloc>(),

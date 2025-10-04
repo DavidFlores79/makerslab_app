@@ -4,6 +4,7 @@ import '../../../../core/domain/entities/instruction.dart';
 import '../../../../core/domain/entities/material.dart';
 import '../../../../core/domain/entities/module.dart';
 import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
+import '../widgets/servo_interface_page.dart';
 
 class ServoPage extends StatelessWidget {
   static const String routeName = '/servo';
@@ -15,6 +16,8 @@ class ServoPage extends StatelessWidget {
     image: 'assets/images/static/servo/servo2.png',
     videoId: 'kJpdoBLSmHs',
     inoFile: 'assets/files/esp32_bt_temp.ino',
+    moduleRoute: ServoPage.routeName,
+    interfaceRoute: ServoInterfacePage.routeName,
     instructions: [
       InstructionItem(
         title:

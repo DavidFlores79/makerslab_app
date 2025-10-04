@@ -22,6 +22,8 @@ class PXCustomTextField extends StatefulWidget {
   controller; // opcional si quieres control externo
   final int? maxLines;
   final bool readOnly;
+  final TextAlign? textAlign;
+  final FocusNode? focusNode;
 
   const PXCustomTextField({
     super.key,
@@ -41,6 +43,8 @@ class PXCustomTextField extends StatefulWidget {
     this.controller,
     this.maxLines,
     this.readOnly = false,
+    this.textAlign,
+    this.focusNode,
   });
 
   @override
@@ -76,6 +80,7 @@ class _PXCustomTextFieldState extends State<PXCustomTextField> {
     final theme = Theme.of(context);
 
     return TextFormField(
+      focusNode: widget.focusNode,
       readOnly: widget.readOnly,
       controller: widget.controller,
       keyboardType: widget.keyboardType,
@@ -126,6 +131,7 @@ class _PXCustomTextFieldState extends State<PXCustomTextField> {
       style: widget.style ?? theme.textTheme.bodyLarge,
       onChanged: _onChanged,
       maxLines: widget.maxLines ?? 1,
+      textAlign: widget.textAlign ?? TextAlign.start,
       maxLength:
           widget.maxLength ??
           (widget.keyboardType == TextInputType.phone ? 10 : null),

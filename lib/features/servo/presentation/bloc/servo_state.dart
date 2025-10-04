@@ -1,20 +1,20 @@
-import '../../domain/entities/servo_entity.dart';
+part of 'servo_bloc.dart';
 
-abstract class ServosState {}
+abstract class ServoState {}
 
-class InitialDataLoading extends ServosState {}
+class ServoInitial extends ServoState {}
 
-class ServosLoading extends ServosState {}
+class ServoLoading extends ServoState {}
 
-class ServosLoaded extends ServosState {
-  final List<ServoEntity> data; // CAMBIO AQU�: 'data' en lugar de 'investments'
-
-  ServosLoaded({
-    required this.data,
-  }); // CAMBIO AQU�: 'data' en lugar de 'investments'
+/// Estado conectado, con la posición actual del servo (0..180).
+class ServoConnected extends ServoState {
+  final double position;
+  ServoConnected({required this.position});
 }
 
-class ServosError extends ServosState {
+class ServoDisconnected extends ServoState {}
+
+class ServoError extends ServoState {
   final String message;
-  ServosError(this.message);
+  ServoError(this.message);
 }
