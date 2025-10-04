@@ -1,21 +1,20 @@
-import '../../domain/entities/gamepad_entity.dart';
+part of 'gamepad_bloc.dart';
 
-abstract class GamepadsState {}
+abstract class GamepadState {}
 
-class InitialDataLoading extends GamepadsState {}
+class GamepadInitial extends GamepadState {}
 
-class GamepadsLoading extends GamepadsState {}
+class GamepadLoading extends GamepadState {}
 
-class GamepadsLoaded extends GamepadsState {
-  final List<GamepadEntity>
-  data; // CAMBIO AQU�: 'data' en lugar de 'investments'
-
-  GamepadsLoaded({
-    required this.data,
-  }); // CAMBIO AQU�: 'data' en lugar de 'investments'
+/// Estado conectado. Puede contener datos de telemetría opcionales.
+class GamepadConnected extends GamepadState {
+  final String? lastTelemetryLine;
+  GamepadConnected({this.lastTelemetryLine});
 }
 
-class GamepadsError extends GamepadsState {
+class GamepadDisconnected extends GamepadState {}
+
+class GamepadError extends GamepadState {
   final String message;
-  GamepadsError(this.message);
+  GamepadError(this.message);
 }

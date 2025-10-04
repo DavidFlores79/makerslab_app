@@ -241,6 +241,9 @@ class _ServoConnectedView extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final servoImageHeight = 200.0;
 
+    //calculate servo image width based on height
+    final servoImageWidth = servoImageHeight * 0.5;
+
     return Center(
       child: SingleChildScrollView(
         child: Column(
@@ -266,9 +269,10 @@ class _ServoConnectedView extends StatelessWidget {
                   // Horn rotatorio
                   Positioned(
                     top: servoImageHeight * 0.2,
-                    left: (size.width * 0.5) - 50,
+                    left: (size.width * 0.5) - (servoImageWidth * 0.5),
                     child: Transform.rotate(
-                      angle: pi * angle / 180,
+                      //rotate the other way to match the servo rotation
+                      angle: -pi * angle / 180,
                       alignment: Alignment.centerLeft,
                       origin: const Offset(25, 0),
                       child: Image.asset(

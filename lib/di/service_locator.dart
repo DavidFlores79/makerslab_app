@@ -54,6 +54,9 @@ import '../features/chat/domain/usecases/send_message_usecase.dart';
 import '../features/chat/domain/usecases/send_text_message_usecase.dart';
 import '../features/chat/domain/usecases/start_chat_session_usecase.dart';
 import '../features/chat/presentation/bloc/chat_bloc.dart';
+import '../features/gamepad/data/repositories/gamepad_repository_impl.dart';
+import '../features/gamepad/domain/repositories/gamepad_repository.dart';
+import '../features/gamepad/presentation/bloc/gamepad_bloc.dart';
 import '../features/home/data/datasources/home_local_datasource_impl.dart';
 import '../features/home/data/repository/home_repository_impl.dart';
 import '../features/home/domain/repositories/home_repository.dart';
@@ -200,6 +203,11 @@ Future<void> setupLocator() async {
     () =>
         ServoRepositoryImpl(bluetoothRepository: getIt<BluetoothRepository>()),
   );
+  getIt.registerLazySingleton<GamepadRepository>(
+    () => GamepadRepositoryImpl(
+      bluetoothRepository: getIt<BluetoothRepository>(),
+    ),
+  );
 
   // Use cases
   getIt.registerLazySingleton(() => ShareFileUseCase(getIt()));
@@ -316,6 +324,14 @@ Future<void> setupLocator() async {
 
   getIt.registerFactory<ServoBloc>(
     () => ServoBloc(
+      getDataStreamUseCase: getIt<GetBluetoothDataStreamUseCase>(),
+      sendStringUseCase: getIt<SendBluetoothStringUseCase>(),
+      bluetoothBloc: getIt<BluetoothBloc>(),
+    ),
+  );
+
+  getIt.registerFactory<GamepadBloc>(
+    () => GamepadBloc(
       getDataStreamUseCase: getIt<GetBluetoothDataStreamUseCase>(),
       sendStringUseCase: getIt<SendBluetoothStringUseCase>(),
       bluetoothBloc: getIt<BluetoothBloc>(),
