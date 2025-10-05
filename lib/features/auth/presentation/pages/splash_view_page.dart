@@ -66,12 +66,12 @@ class _SplashViewPageState extends State<SplashViewPage>
       children: [
         // Fondo de imagen
         Positioned.fill(
-          child: Image.asset(UtilImage.SIGN_IN_BACKGROUND_2, fit: BoxFit.cover),
+          child: Image.asset(UtilImage.SIGN_IN_BACKGROUND_1, fit: BoxFit.cover),
         ),
 
         // Overlay oscuro
         Positioned.fill(
-          child: Container(color: AppColors.black3.withOpacity(0.7)),
+          child: Container(color: AppColors.black3.withValues(alpha: 0.7)),
         ),
 
         // Logo animado
@@ -89,7 +89,7 @@ class _SplashViewPageState extends State<SplashViewPage>
             },
             child: Image.asset(
               UtilImage.PAISAMEX_LOGO_WHITE,
-              width: size.width * 0.6,
+              width: size.width * 0.4,
               fit: BoxFit.contain,
             ),
           ),

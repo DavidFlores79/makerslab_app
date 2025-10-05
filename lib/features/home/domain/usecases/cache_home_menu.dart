@@ -4,12 +4,12 @@ import '../../../../core/error/failure.dart';
 import '../../data/models/main_menu_item_model.dart';
 import '../repositories/home_repository.dart';
 
-class GetHomeMenu {
+class CacheHomeMenu {
   final HomeRepository repository;
 
-  GetHomeMenu({required this.repository});
+  CacheHomeMenu(this.repository);
 
-  Future<Either<Failure, List<MainMenuItemModel>>> call() {
-    return repository.getMainMenu();
+  Future<Either<Failure, void>> call(List<MainMenuItemModel> menu) async {
+    return repository.cacheMainMenu(menu);
   }
 }

@@ -3,10 +3,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
-import 'package:logger/logger.dart';
 import 'package:makerslab_app/features/home/domain/usecases/get_home_menu.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/config/home_modules_seed.dart';
 import '../core/data/repositories/bluetooth_repository_impl.dart';
 import '../core/data/services/logger_service.dart';
 import '../core/data/services/permission_handler.dart';
@@ -24,7 +24,6 @@ import '../core/presentation/bloc/bluetooth/bluetooth_bloc.dart';
 import '../core/storage/secure_storage_service.dart';
 import '../core/ui/snackbar_service.dart';
 import '../core/domain/usecases/share_file_usecase.dart';
-import '../features/auth/data/datasource/auth_local_datasource.dart';
 import '../features/auth/data/datasource/auth_remote_datasource.dart';
 import '../features/auth/data/datasource/auth_token_local_datasource.dart';
 import '../features/auth/data/datasource/auth_user_local_datasource.dart';
@@ -86,9 +85,11 @@ final getIt = GetIt.instance;
 Future<void> setupLocator() async {
   getIt.registerSingleton<ILogger>(LoggerService());
   final logger = getIt<ILogger>();
-  final homeLocalDatasource = HomeLocalDatasourceImpl(logger: logger);
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(sharedPreferences);
+
+  await seedDefaultModulesIfNeeded(sharedPreferences);
+
   getIt.registerLazySingleton<PermissionService>(
     () => PermissionService(logger: getIt<ILogger>()),
   );
@@ -115,9 +116,6 @@ Future<void> setupLocator() async {
   getIt.registerSingleton<SnackbarService>(SnackbarService());
 
   //LocalDataSources
-  getIt.registerLazySingleton<AuthLocalDataSourceImpl>(
-    () => AuthLocalDataSourceImpl(secureStorage: getIt(), logger: logger),
-  );
   getIt.registerLazySingleton<AuthUserLocalDataSourceImpl>(
     () => AuthUserLocalDataSourceImpl(secureStorage: getIt()),
   );
@@ -128,15 +126,15 @@ Future<void> setupLocator() async {
     () => LocalChatDataSourceImpl(),
   );
 
-  final authLocalDataSource = AuthLocalDataSourceImpl(
-    logger: logger,
-    secureStorage: getIt(),
-  );
   final authTokenDataSource = AuthTokenLocalDataSourceImpl(
     secureStorage: getIt(),
   );
   final userLocalDataSource = AuthUserLocalDataSourceImpl(
     secureStorage: getIt(),
+  );
+  final homeLocalDatasource = HomeLocalDatasourceImpl(
+    logger: logger,
+    prefs: sharedPreferences,
   );
   final chatLocalDataSource = LocalChatDataSourceImpl(logger: logger);
 
@@ -175,7 +173,6 @@ Future<void> setupLocator() async {
   );
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
-      localDataSource: authLocalDataSource,
       tokenLocalDataSource: authTokenDataSource,
       userLocalDataSource: userLocalDataSource,
       remoteDataSource: getIt<AuthRemoteDataSource>(),

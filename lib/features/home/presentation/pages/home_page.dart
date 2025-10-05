@@ -1,11 +1,14 @@
+import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/domain/entities/main_menu_item.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_color.dart';
-import '../../../../utils/formatters.dart';
+import '../../../../utils/color_utils.dart';
+import '../../../../utils/util_image.dart';
+import '../../data/models/main_menu_item_model.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
@@ -42,7 +45,7 @@ class _HomePageState extends State<HomePage> {
               );
             }
             if (state.status == HomeStatus.success) {
-              final List<MainMenuItem> menu = state.mainMenuItems ?? [];
+              final List<MainMenuItemModel> menu = state.mainMenuItems ?? [];
 
               return Scrollbar(
                 thickness: 3,
@@ -67,6 +70,11 @@ class _HomePageState extends State<HomePage> {
                                 mainAxisSpacing: 10.0,
                               ),
                           itemBuilder: (BuildContext context, int index) {
+                            final m = menu[index];
+                            final bgColor = colorFromHex(
+                              m.colorHex ?? '#000000',
+                            );
+
                             return Card(
                               color: AppColors.gray300,
                               elevation: 3,
@@ -74,7 +82,9 @@ class _HomePageState extends State<HomePage> {
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               child: InkWell(
-                                onTap: () => context.push(menu[index].route),
+                                onTap:
+                                    () =>
+                                        context.push(menu[index].route ?? '/'),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 10,
@@ -84,16 +94,12 @@ class _HomePageState extends State<HomePage> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: <Widget>[
-                                      Icon(
-                                        menu[index].icon,
-                                        size: 50,
-                                        color: menu[index].iconColor,
-                                      ),
+                                      Center(child: UtilImage.buildIcon(m)),
                                       const SizedBox(height: 20),
                                       Text(
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
-                                        menu[index].title,
+                                        menu[index].title ?? '',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           fontSize: 20,
@@ -117,58 +123,6 @@ class _HomePageState extends State<HomePage> {
             return const SizedBox(); // estado inicial
           },
         ),
-      ),
-    );
-  }
-}
-
-class BalanceCard extends StatelessWidget {
-  const BalanceCard({super.key, required this.balance});
-  final double balance;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 30),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text('Saldo disponible', style: theme.textTheme.bodyMedium),
-          const SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                AppFormatters.formatCurrency(balance),
-                style: theme.textTheme.displayMedium,
-              ),
-              Text('MXN', style: theme.textTheme.bodyMedium),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: MainAppButton(
-                  label: 'Depositar',
-                  onPressed: () {},
-                  expand: true,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: MainAppButton(
-                  label: 'Invertir',
-                  variant: ButtonVariant.outlined,
-                  onPressed: () => context.go('/investments'),
-                  expand: true,
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }

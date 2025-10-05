@@ -6,7 +6,6 @@ import '../../../../core/error/failure.dart';
 import '../../../../core/domain/entities/user.dart';
 import '../../../../core/domain/repositories/base_repository.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../datasource/auth_local_datasource.dart';
 import '../datasource/auth_remote_datasource.dart';
 import '../datasource/auth_token_local_datasource.dart';
 import '../datasource/auth_user_local_datasource.dart';
@@ -14,13 +13,11 @@ import '../models/forgot_password_response_model.dart';
 import '../models/login_response_model.dart';
 
 class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
-  final AuthLocalDataSource localDataSource;
   final AuthTokenLocalDataSource tokenLocalDataSource;
   final AuthUserLocalDataSource userLocalDataSource;
   final AuthRemoteDataSource remoteDataSource;
 
   AuthRepositoryImpl({
-    required this.localDataSource,
     required this.tokenLocalDataSource,
     required this.userLocalDataSource,
     required this.remoteDataSource,
@@ -68,15 +65,16 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
     required String confirmPassword,
   }) {
     return safeCall<User>(() async {
-      final response = await localDataSource.signUp(
-        phone: phone,
-        password: password,
-        confirmPassword: confirmPassword,
-        firstName: firstName,
-        firstSurname: firstSurname,
-        secondSurname: secondSurname,
-      );
-      return response.data!;
+      // final response = await localDataSource.signUp(
+      //   phone: phone,
+      //   password: password,
+      //   confirmPassword: confirmPassword,
+      //   firstName: firstName,
+      //   firstSurname: firstSurname,
+      //   secondSurname: secondSurname,
+      // );
+      // return response.data!;
+      throw UnimplementedError('signUp is not implemented');
     });
   }
 

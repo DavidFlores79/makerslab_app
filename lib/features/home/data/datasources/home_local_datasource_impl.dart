@@ -1,57 +1,49 @@
-import 'package:community_material_icon/community_material_icon.dart';
-import 'package:makerslab_app/core/domain/entities/main_menu_item.dart';
+import 'dart:convert';
+
+import 'package:makerslab_app/core/mocks/main_menu_mock.dart';
+import 'package:makerslab_app/features/home/data/models/main_menu_item_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/data/services/logger_service.dart';
 import '../../../../core/error/exceptions.dart';
-import '../../../../theme/app_color.dart';
-import '../../../gamepad/presentation/pages/gamepad_page.dart';
-import '../../../light_control/presentation/pages/light_control_page.dart';
-import '../../../servo/presentation/pages/servo_page.dart';
-import '../../../temperature/presentation/pages/temperature_page.dart';
 import 'home_local_datasource.dart';
 
+const _kModulesKey = 'CACHED_MODULES_v1';
+
 class HomeLocalDatasourceImpl implements HomeLocalDatasource {
+  final SharedPreferences prefs;
   final ILogger logger;
 
-  HomeLocalDatasourceImpl({required this.logger});
+  HomeLocalDatasourceImpl({required this.logger, required this.prefs});
 
   @override
-  @override
-  Future<List<MainMenuItem>> getMainMenu() async {
+  Future<void> cacheModules(List<MainMenuItemModel> modules) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 200));
-      logger.info("Obteniendo menu localmente...");
-      return mainMenu;
+      final jsonStr = json.encode(modules.map((m) => m.toJson()).toList());
+      await prefs.setString(_kModulesKey, jsonStr);
+      logger.info("Saving initial menu: ${modules.length}");
     } catch (e, stackTrace) {
-      logger.error('Error getting local balance', e, stackTrace);
-      throw CacheException('Error al obtener balance local', stackTrace);
+      logger.error('Error saving initial menu', e, stackTrace);
+      throw CacheException('Error saving initial menu', stackTrace);
     }
   }
 
-  final List<MainMenuItem> mainMenu = [
-    MainMenuItem(
-      CommunityMaterialIcons.controller_classic_outline,
-      'Gamepad',
-      GamepadPage.routeName,
-      AppColors.lightGreen,
-    ),
-    MainMenuItem(
-      CommunityMaterialIcons.thermometer_low,
-      'Sensor DHT',
-      TemperaturePage.routeName,
-      AppColors.blue,
-    ),
-    MainMenuItem(
-      CommunityMaterialIcons.robot_industrial,
-      'Servos',
-      ServoPage.routeName,
-      AppColors.red,
-    ),
-    MainMenuItem(
-      CommunityMaterialIcons.light_switch,
-      'Control de Luces',
-      LightControlPage.routeName,
-      AppColors.orange,
-    ),
-  ];
+  @override
+  Future<List<MainMenuItemModel>> getCachedModules() async {
+    try {
+      logger.info("Obtaining cached modules...");
+      final raw = prefs.getString(_kModulesKey);
+
+      if (raw == null) return Future.value([]);
+      final parsed = json.decode(raw) as List<dynamic>;
+
+      logger.info("Cached modules obtained: ${parsed.length}");
+      return parsed
+          .map((e) => MainMenuItemModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e, stackTrace) {
+      logger.error('Error obtaining cached modules', e, stackTrace);
+      throw CacheException('Error obtaining cached modules', stackTrace);
+    }
+  }
 }

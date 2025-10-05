@@ -1,5 +1,6 @@
-import '../../../../core/domain/entities/main_menu_item.dart';
+import '../models/main_menu_item_model.dart';
 
 abstract class HomeLocalDatasource {
-  Future<List<MainMenuItem>> getMainMenu();
+  Future<List<MainMenuItemModel>> getCachedModules();
+  Future<void> cacheModules(List<MainMenuItemModel> modules);
 }
