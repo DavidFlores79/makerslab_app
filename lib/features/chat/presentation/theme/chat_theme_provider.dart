@@ -10,8 +10,11 @@ class ChatThemeProvider {
   static final Map<String, Color> moduleColors = {
     'temperature_sensor': AppColors.blue,
     'gamepad': AppColors.lightGreen,
+    'joystick_control': AppColors.lightGreen, // Gamepad module uses this key
     'servo': AppColors.red,
+    'servo_control': AppColors.red, // Servo module uses this key
     'light_control': AppColors.orange,
+    'led_control': AppColors.orange, // Light control module uses this key
     'chat': AppColors.purple,
   };
 
