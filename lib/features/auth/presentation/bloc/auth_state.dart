@@ -27,6 +27,8 @@ class AuthError extends AuthState {
 
 class Unauthenticated extends AuthState {}
 
+class SessionClosed extends AuthState {}
+
 class AuthSessionValid extends AuthState {}
 
 //forgot password

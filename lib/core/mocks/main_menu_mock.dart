@@ -1,3 +1,5 @@
+// TODO : Translate menu to english
+
 const List<Map<String, dynamic>> mainMenuMock = [
   {
     "id": "1",
@@ -11,7 +13,7 @@ const List<Map<String, dynamic>> mainMenuMock = [
   },
   {
     "id": "2",
-    "title": "Temperatura y Humedad",
+    "title": "Temperatura",
     "route": "/temperature",
     "colorHex": "#FF2196F3",
     "assetPath": "assets/images/brand/humidity.png",
@@ -31,8 +33,8 @@ const List<Map<String, dynamic>> mainMenuMock = [
   },
   {
     "id": "4",
-    "title": "Control de Luces",
-    "route": "/light_control",
+    "title": "Led",
+    "route": "/light-control",
     "colorHex": "#FFFF9800",
     "assetPath": "assets/images/brand/light-bulb.png",
     "imageUrl": "",

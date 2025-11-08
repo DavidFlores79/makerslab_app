@@ -3,6 +3,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:makerslab_app/features/home/domain/usecases/get_combined_menu.dart';
 import 'package:makerslab_app/features/home/domain/usecases/get_home_menu.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -57,8 +58,10 @@ import '../features/gamepad/data/repositories/gamepad_repository_impl.dart';
 import '../features/gamepad/domain/repositories/gamepad_repository.dart';
 import '../features/gamepad/presentation/bloc/gamepad_bloc.dart';
 import '../features/home/data/datasources/home_local_datasource_impl.dart';
+import '../features/home/data/datasources/home_remote_datesource.dart';
 import '../features/home/data/repository/home_repository_impl.dart';
 import '../features/home/domain/repositories/home_repository.dart';
+import '../features/home/domain/usecases/get_remote_home_menu.dart';
 import '../features/home/presentation/bloc/home_bloc.dart';
 import '../features/light_control/data/repositories/light_control_repository_impl.dart';
 import '../features/light_control/domain/repositories/light_control_repository.dart';
@@ -136,6 +139,7 @@ Future<void> setupLocator() async {
     logger: logger,
     prefs: sharedPreferences,
   );
+  final homeRemoteDatasource = HomeRemoteDataSourceImpl(dio: getIt());
   final chatLocalDataSource = LocalChatDataSourceImpl(logger: logger);
 
   // temperature local datasource
@@ -146,6 +150,9 @@ Future<void> setupLocator() async {
   //remote data sources
   getIt.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(dio: getIt()),
+  );
+  getIt.registerLazySingleton<HomeRemoteDataSource>(
+    () => HomeRemoteDataSourceImpl(dio: getIt()),
   );
 
   getIt.registerLazySingleton<RemoteChatDataSource>(
@@ -165,7 +172,10 @@ Future<void> setupLocator() async {
   );
 
   getIt.registerLazySingleton<HomeRepository>(
-    () => HomeRepositoryImpl(localDatasource: homeLocalDatasource),
+    () => HomeRepositoryImpl(
+      localDatasource: homeLocalDatasource,
+      remoteDatasource: homeRemoteDatasource,
+    ),
   );
   getIt.registerLazySingleton<OnboardingRepository>(
     () =>
@@ -211,6 +221,10 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => MarkOnboardingCompletedUseCase(getIt()));
   getIt.registerLazySingleton(() => ShouldShowOnboardingUseCase(getIt()));
   getIt.registerLazySingleton(() => GetHomeMenu(repository: getIt()));
+  getIt.registerLazySingleton(() => GetRemoteHomeMenu(repository: getIt()));
+  getIt.registerLazySingleton(
+    () => GetCombinedMenu(homeRepository: getIt(), checkSession: getIt()),
+  );
   // Bluetooth usecases
   getIt.registerLazySingleton(
     () => DiscoverDevicesUseCase(repository: getIt()),
@@ -288,7 +302,7 @@ Future<void> setupLocator() async {
     ),
   );
 
-  getIt.registerFactory(() => HomeBloc(getHomeMenuItems: getIt()));
+  getIt.registerFactory(() => HomeBloc(getCombinedMenu: getIt()));
   getIt.registerFactory(
     () => ChatBloc(
       repository: getIt<ChatRepository>(),

@@ -12,6 +12,9 @@ class ApiConfig {
   static const String confirmSignUpEndpoint = '/auth/phone-verify';
   static const String resendSignUpCodeEndpoint = '/auth/resend-code';
 
+  // Endpoints del menú principal
+  static const String mainMenuEndpoint = '/api/modules';
+
   // Endpoints de usuarios
   static const String usersEndpoint = '/users';
 }

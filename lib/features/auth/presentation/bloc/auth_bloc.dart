@@ -82,7 +82,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthError(failure.message));
       },
       (user) {
-        debugPrint(">>> signinWithPhone exitoso: ${user.name}");
+        debugPrint(">>> signinWithPhone exitoso: ${user.phone}");
         emit(Authenticated(user: user));
       },
     );
@@ -201,10 +201,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     // Borra tokens y usuario en caché
     final result = await logoutUser(); // inyectado UseCase
-    result.fold(
-      (failure) => emit(AuthError(failure.message)),
-      (_) => emit(Unauthenticated()),
-    );
+    result.fold((failure) => emit(AuthError(failure.message)), (_) {
+      emit(SessionClosed());
+      emit(Unauthenticated());
+    });
   }
 
   Future<void> _onAuthUserChanged(
