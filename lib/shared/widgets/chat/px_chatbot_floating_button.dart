@@ -97,43 +97,39 @@ class _PxChatBotBottomSheetState extends State<_PxChatBotBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.vertical(top: Radius.circular(16));
-    return SafeArea(
-      bottom: false,
+    return Padding(
+      padding: const EdgeInsets.only(top: 24.0), // Larger gap from top
       child: ClipRRect(
         borderRadius: borderRadius,
-        child: Container(
-          height: MediaQuery.of(context).size.height * 0.92,
-          color: Theme.of(context).canvasColor,
-          child: DraggableScrollableSheet(
-            controller: _draggableController,
-            initialChildSize: _initial,
-            minChildSize: _min,
-            maxChildSize: _max,
-            expand: false,
-            builder: (context, scrollController) {
-              return Material(
-                color: Theme.of(context).canvasColor,
-                child: Column(
-                  children: [
-                    // Use ChatModalHeader instead of custom row
-                    ChatModalHeader(
-                      moduleKey: widget.moduleKey,
-                      onMinimize: _minimize,
-                      onClose: () => context.pop(),
-                    ),
+        child: DraggableScrollableSheet(
+          controller: _draggableController,
+          initialChildSize: _initial,
+          minChildSize: _min,
+          maxChildSize: _max,
+          expand: false,
+          builder: (context, scrollController) {
+            return Material(
+              color: Theme.of(context).canvasColor,
+              child: Column(
+                children: [
+                  // Use ChatModalHeader instead of custom row
+                  ChatModalHeader(
+                    moduleKey: widget.moduleKey,
+                    onMinimize: _minimize,
+                    onClose: () => context.pop(),
+                  ),
 
-                    // contenido del chat (reusa ChatContent)
-                    Expanded(
-                      child: ChatContent(
-                        moduleKey: widget.moduleKey,
-                        externalScrollController: scrollController,
-                      ),
+                  // contenido del chat (reusa ChatContent)
+                  Expanded(
+                    child: ChatContent(
+                      moduleKey: widget.moduleKey,
+                      externalScrollController: scrollController,
                     ),
-                  ],
-                ),
-              );
-            },
-          ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

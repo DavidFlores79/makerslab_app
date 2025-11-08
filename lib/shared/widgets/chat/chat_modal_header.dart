@@ -24,10 +24,13 @@ class ChatModalHeader extends StatelessWidget {
       case 'temperature_sensor':
         return Symbols.thermostat;
       case 'gamepad':
+      case 'joystick_control':
         return Symbols.sports_esports;
       case 'servo':
+      case 'servo_control':
         return Symbols.precision_manufacturing;
       case 'light_control':
+      case 'led_control':
         return Symbols.light_mode;
       case 'chat':
         return Symbols.smart_toy;
@@ -42,10 +45,13 @@ class ChatModalHeader extends StatelessWidget {
       case 'temperature_sensor':
         return 'Sensor de Temperatura';
       case 'gamepad':
+      case 'joystick_control':
         return 'Control de Juego';
       case 'servo':
+      case 'servo_control':
         return 'Control de Servos';
       case 'light_control':
+      case 'led_control':
         return 'Control de Luces';
       case 'chat':
         return 'Asistente IA';
@@ -75,69 +81,66 @@ class ChatModalHeader extends StatelessWidget {
         ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: SafeArea(
-        bottom: false,
-        child: Row(
-          children: [
-            // Module Icon/Avatar
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                _getModuleIcon(moduleKey),
-                color: Colors.white,
-                size: 24,
-              ),
+      child: Row(
+        children: [
+          // Module Icon/Avatar
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(width: 12),
+            child: Icon(
+              _getModuleIcon(moduleKey),
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
 
-            // Title
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Chat',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
+          // Title
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Chat',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
                   ),
-                  Text(
-                    _getModuleName(moduleKey),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                ),
+                Text(
+                  _getModuleName(moduleKey),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
-            // Action Buttons
-            IconButton(
-              icon: const Icon(Icons.expand_more, color: Colors.white),
-              onPressed: onMinimize,
-              tooltip: 'Minimizar',
-              padding: const EdgeInsets.all(8),
-              constraints: const BoxConstraints(),
-            ),
-            const SizedBox(width: 4),
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.white),
-              onPressed: onClose,
-              tooltip: 'Cerrar',
-              padding: const EdgeInsets.all(8),
-              constraints: const BoxConstraints(),
-            ),
-          ],
-        ),
+          // Action Buttons
+          IconButton(
+            icon: const Icon(Icons.expand_more, color: Colors.white),
+            onPressed: onMinimize,
+            tooltip: 'Minimizar',
+            padding: const EdgeInsets.all(8),
+            constraints: const BoxConstraints(),
+          ),
+          const SizedBox(width: 4),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.white),
+            onPressed: onClose,
+            tooltip: 'Cerrar',
+            padding: const EdgeInsets.all(8),
+            constraints: const BoxConstraints(),
+          ),
+        ],
       ),
     );
   }
