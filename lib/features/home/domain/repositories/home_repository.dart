@@ -1,11 +1,10 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/entities/main_menu_item.dart';
 import '../../../../core/error/failure.dart';
-import '../../../../core/entities/balance.dart';
+import '../../data/models/main_menu_item_model.dart';
 
 abstract class HomeRepository {
-  // Future<Either<Failure, List<Remittance>>> getRemittances();
-  Future<Either<Failure, Balance>> getBalance();
-  Future<Either<Failure, List<MainMenuItem>>> getMainMenu();
+  Future<Either<Failure, void>> cacheMainMenu(List<MainMenuItemModel> menu);
+  Future<Either<Failure, List<MainMenuItemModel>>> getMainMenu();
+  Future<Either<Failure, List<MainMenuItemModel>>> getRemoteMenuItems();
 }

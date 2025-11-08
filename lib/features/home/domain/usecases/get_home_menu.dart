@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/entities/main_menu_item.dart';
 import '../../../../core/error/failure.dart';
+import '../../data/models/main_menu_item_model.dart';
 import '../repositories/home_repository.dart';
 
 class GetHomeMenu {
@@ -9,7 +9,7 @@ class GetHomeMenu {
 
   GetHomeMenu({required this.repository});
 
-  Future<Either<Failure, List<MainMenuItem>>> call() {
+  Future<Either<Failure, List<MainMenuItemModel>>> call() {
     return repository.getMainMenu();
   }
 }

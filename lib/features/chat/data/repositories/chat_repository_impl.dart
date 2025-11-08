@@ -10,18 +10,60 @@ import 'dart:ui' as ui;
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failure.dart';
+import '../../../../core/domain/repositories/base_repository.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../datasources/chat_local_datasource.dart';
+import '../datasources/chat_remote_datasource.dart';
 
-class ChatRepositoryImpl implements ChatRepository {
+class ChatRepositoryImpl extends BaseRepository implements ChatRepository {
   final LocalChatDataSource localDataSource;
+  final RemoteChatDataSource remoteDataSource;
   final Logger logger;
 
-  ChatRepositoryImpl({required this.localDataSource, Logger? logger})
-    : logger = logger ?? Logger();
+  ChatRepositoryImpl({
+    required this.localDataSource,
+    required this.remoteDataSource,
+    Logger? logger,
+  }) : logger = logger ?? Logger();
 
   final _uuid = const Uuid();
 
+  @override
+  Future<Either<Failure, String>> startChatSession(String moduleKey) async {
+    return safeCall<String>(() async {
+      final conversationId = await remoteDataSource.startChatSession(moduleKey);
+      return conversationId;
+    });
+  }
+
+  @override
+  Future<Either<Failure, List<Message>>> fetchMessages(
+    String conversationId,
+  ) async {
+    return safeCall<List<Message>>(() async {
+      final messages = await remoteDataSource.fetchMessages(conversationId);
+      return messages;
+    });
+  }
+
+  @override
+  Future<Either<Failure, String>> sendMessage(
+    String conversationId,
+    String content,
+    String imageUrl,
+  ) {
+    return safeCall<String>(() async {
+      final result = await remoteDataSource.sendMessage(
+        conversationId,
+        content,
+        imageUrl,
+      );
+      return result;
+    });
+  }
+
+  ///////////////////////////////////   local data source   ///////////////////////////////////
+  ///
   @override
   Future<Either<Failure, void>> sendText(String authorId, String text) async {
     final msg = TextMessage(
@@ -86,16 +128,6 @@ class ChatRepositoryImpl implements ChatRepository {
 
       await localDataSource.saveMessage(msg);
       return const Right(null);
-    } on CacheException catch (e, stackTrace) {
-      return Left(CacheFailure(e.message, stackTrace));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<Message>>> getChatData() async {
-    try {
-      final messages = await localDataSource.messages().first;
-      return Right(messages);
     } on CacheException catch (e, stackTrace) {
       return Left(CacheFailure(e.message, stackTrace));
     }

@@ -24,7 +24,7 @@ class PxBottomNavigationBar extends StatelessWidget {
         ) {
           if (states.contains(WidgetState.selected)) {
             return TextStyle(
-              color: AppColors.primary,
+              color: AppColors.gray600,
               fontWeight: FontWeight.w500,
             );
           }

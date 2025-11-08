@@ -1,11 +1,10 @@
-import 'package:logger/logger.dart';
-
+import '../../../../core/data/services/logger_service.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/gamepad_entity.dart';
 import '../datasources/gamepad_local_datasource.dart';
 
 class GamepadLocalDatasourceImpl implements GamepadLocalDatasource {
-  final Logger logger;
+  final ILogger logger;
 
   GamepadLocalDatasourceImpl({required this.logger});
 
@@ -13,10 +12,10 @@ class GamepadLocalDatasourceImpl implements GamepadLocalDatasource {
   Future<List<GamepadEntity>> getGamepadData() async {
     try {
       await Future.delayed(const Duration(milliseconds: 500));
-      logger.i("Obteniendo gamepads localmente...");
+      logger.info("Obteniendo gamepads localmente...");
       return sampleGamepads;
     } catch (e, stackTrace) {
-      logger.e('Error getting local data for gamepad', error: e, stackTrace: stackTrace);
+      logger.error('Error getting local data for gamepad', e, stackTrace);
       throw CacheException('Error al obtener gamepads locales', stackTrace);
     }
   }

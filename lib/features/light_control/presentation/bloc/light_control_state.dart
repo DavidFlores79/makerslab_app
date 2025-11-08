@@ -1,21 +1,20 @@
-import '../../domain/entities/light_control_entity.dart';
+// lib/features/light_control/presentation/bloc/light_control_state.dart
+part of 'light_control_bloc.dart';
 
-abstract class LightControlsState {}
+abstract class LightControlState {}
 
-class InitialDataLoading extends LightControlsState {}
+class LightControlInitial extends LightControlState {}
 
-class LightControlsLoading extends LightControlsState {}
+class LightControlLoading extends LightControlState {}
 
-class LightControlsLoaded extends LightControlsState {
-  final List<LightControlEntity>
-  data; // CAMBIO AQU�: 'data' en lugar de 'investments'
-
-  LightControlsLoaded({
-    required this.data,
-  }); // CAMBIO AQU�: 'data' en lugar de 'investments'
+class LightControlConnected extends LightControlState {
+  final bool isLightOn;
+  LightControlConnected({required this.isLightOn});
 }
 
-class LightControlsError extends LightControlsState {
+class LightControlDisconnected extends LightControlState {}
+
+class LightControlError extends LightControlState {
   final String message;
-  LightControlsError(this.message);
+  LightControlError(this.message);
 }

@@ -1,8 +1,6 @@
-import '../../../../core/entities/balance.dart';
-import '../../../../core/entities/main_menu_item.dart';
+import '../models/main_menu_item_model.dart';
 
 abstract class HomeLocalDatasource {
-  // Future<List<Remittance>> getRemittances();
-  Future<Balance> getBalance();
-  Future<List<MainMenuItem>> getMainMenu();
+  Future<List<MainMenuItemModel>> getCachedModules();
+  Future<void> cacheModules(List<MainMenuItemModel> modules);
 }

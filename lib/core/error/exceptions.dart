@@ -22,6 +22,15 @@ class CacheException implements Exception {
   String toString() => 'CacheException: $message';
 }
 
+class BluetoothException implements Exception {
+  final String message;
+  final StackTrace? stackTrace;
+  BluetoothException(this.message, [this.stackTrace]);
+
+  @override
+  String toString() => 'BluetoothException: $message';
+}
+
 // Extensión para convertir excepciones en Failures
 extension FailureMapper on Exception {
   Failure toFailure() {

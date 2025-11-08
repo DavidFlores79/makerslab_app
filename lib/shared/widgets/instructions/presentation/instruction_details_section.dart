@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/entities/instruction.dart';
+import '../../../../core/domain/entities/instruction.dart';
 
 class InstructionDetailsSection extends StatelessWidget {
   final InstructionItem instruction;

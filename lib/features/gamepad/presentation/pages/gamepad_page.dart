@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../../../../../shared/widgets/index.dart';
-import '../../../../core/entities/instruction.dart';
-import '../../../../core/entities/material.dart';
-import '../../../../core/entities/module.dart';
+import '../../../../core/domain/entities/instruction.dart';
+import '../../../../core/domain/entities/material.dart';
+import '../../../../core/domain/entities/module.dart';
+import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
+import '../widgets/gamepad_interface_page.dart';
 
 class GamepadPage extends StatelessWidget {
   static const String routeName = '/gamepad';
@@ -13,7 +16,9 @@ class GamepadPage extends StatelessWidget {
     description: 'description',
     image: 'assets/images/static/gamepad/gamepad.png',
     videoId: 'kJpdoBLSmHs',
-    inoFile: 'assets/files/Gamepad_Arduino_ESP32.ino',
+    inoFile: 'assets/files/esp32_bt_servo.ino',
+    moduleRoute: GamepadPage.routeName,
+    interfaceRoute: GamepadInterfacePage.routeName,
     instructions: [
       InstructionItem(
         title:
@@ -114,6 +119,9 @@ class GamepadPage extends StatelessWidget {
             ]),
           ),
         ],
+      ),
+      floatingActionButton: const PxChatBotFloatingButton(
+        moduleKey: 'joystick_control',
       ),
     );
   }

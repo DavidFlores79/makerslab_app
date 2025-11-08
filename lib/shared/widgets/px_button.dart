@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_color.dart';
 
-/// PXButton (Paisamex Button)
+/// MainAppButton (Paisamex Button)
 /// Un botón reutilizable con variantes `filled`, `outlined` y `text`.
 /// * Soporta icono o imagen a la izquierda.
 /// * Maneja estado de carga.
@@ -137,5 +137,5 @@ class MainAppButton extends StatelessWidget {
   }
 }
 
-// Variantes visuales admitidas por [PXButton].
+// Variantes visuales admitidas por [MainAppButton].
 enum ButtonVariant { filled, outlined, text }

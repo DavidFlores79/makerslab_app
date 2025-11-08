@@ -9,7 +9,7 @@ class GetChatDataUseCase {
 
   GetChatDataUseCase(this.repository);
 
-  Future<Either<Failure, List<Message>>> call() async {
-    return await repository.getChatData();
+  Future<Either<Failure, List<Message>>> call(String conversationId) async {
+    return await repository.fetchMessages(conversationId);
   }
 }

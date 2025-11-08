@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/entities/material.dart';
+import '../../../core/domain/entities/material.dart';
 import '../../../theme/app_color.dart';
 
 class MaterialDetailsPage extends StatelessWidget {

@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+
 import '../../../../../shared/widgets/index.dart';
-import '../../../../core/entities/instruction.dart';
-import '../../../../core/entities/material.dart';
-import '../../../../core/entities/module.dart';
+import '../../../../core/domain/entities/instruction.dart';
+import '../../../../core/domain/entities/material.dart';
+import '../../../../core/domain/entities/module.dart';
+import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
+import '../widgets/temperature_interface_page.dart';
 
 class TemperaturePage extends StatelessWidget {
   static const String routeName = '/temperature';
   TemperaturePage({super.key});
 
   final MainModule mainModule = MainModule(
-    title: 'title',
-    description: 'description',
+    title: 'Sensor Temperatura',
+    description: '',
+    moduleRoute: TemperaturePage.routeName,
+    interfaceRoute: TemperatureInterfacePage.routeName,
     image: 'assets/images/static/temperature/esp32DHT11.png',
     videoId: 'kJpdoBLSmHs',
-    inoFile: 'assets/files/DHT11_Arduino_ESP32.ino',
+    inoFile: 'assets/files/esp32_bt_temp.ino',
     instructions: [
       InstructionItem(
         title:
@@ -106,7 +111,7 @@ class TemperaturePage extends StatelessWidget {
             assetImagePath:
                 mainModule.image ?? 'assets/images/static/placeholder.png',
             centerTitle: true,
-            backLabel: 'DHT11 Temperatura',
+            backLabel: mainModule.title,
           ),
           SliverList(
             delegate: SliverChildListDelegate([
@@ -115,6 +120,10 @@ class TemperaturePage extends StatelessWidget {
             ]),
           ),
         ],
+      ),
+      floatingActionButton: const PxChatBotFloatingButton(
+        moduleKey:
+            'temperature_sensor', //aqui eventualmente llaman al chat content
       ),
     );
   }

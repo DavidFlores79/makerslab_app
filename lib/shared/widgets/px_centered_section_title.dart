@@ -13,6 +13,7 @@ class PXCenteredSectionTitle extends StatelessWidget {
     this.icon,
     this.iconBackground = AppColors.gray300,
     this.padding = const EdgeInsets.symmetric(vertical: 30),
+    this.textAlignSubtitle = TextAlign.left,
   });
 
   final String title;
@@ -20,6 +21,7 @@ class PXCenteredSectionTitle extends StatelessWidget {
   final IconData? icon;
   final Color iconBackground;
   final EdgeInsetsGeometry padding;
+  final TextAlign textAlignSubtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +53,7 @@ class PXCenteredSectionTitle extends StatelessWidget {
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSecondaryContainer,
               ),
+              textAlign: textAlignSubtitle,
             ),
           ],
         ),

@@ -1,44 +1,50 @@
 import 'package:dartz/dartz.dart';
-import 'package:makerslab_app/core/entities/main_menu_item.dart';
 
-import '../../../../core/entities/balance.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failure.dart';
 import '../../domain/repositories/home_repository.dart';
 import '../datasources/home_local_datasource.dart';
+import '../datasources/home_remote_datesource.dart';
+import '../models/main_menu_item_model.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
   final HomeLocalDatasource localDatasource;
+  final HomeRemoteDataSource remoteDatasource;
 
-  HomeRepositoryImpl({required this.localDatasource});
-
-  @override
-  Future<Either<Failure, Balance>> getBalance() async {
-    try {
-      final balance = await localDatasource.getBalance();
-      return Right(balance);
-    } on CacheException catch (e, stackTrace) {
-      return Left(CacheFailure(e.message, stackTrace));
-    }
-  }
+  HomeRepositoryImpl({
+    required this.localDatasource,
+    required this.remoteDatasource,
+  });
 
   @override
-  Future<Either<Failure, List<MainMenuItem>>> getMainMenu() async {
+  Future<Either<Failure, List<MainMenuItemModel>>> getMainMenu() async {
     try {
-      final mainMenu = await localDatasource.getMainMenu();
+      final mainMenu = await localDatasource.getCachedModules();
       return Right(mainMenu);
     } on CacheException catch (e, stackTrace) {
       return Left(CacheFailure(e.message, stackTrace));
     }
   }
 
-  // @override
-  // Future<Either<Failure, List<Remittance>>> getRemittances() async {
-  //   try {
-  //     final remittances = await localDatasource.getRemittances();
-  //     return Right(remittances);
-  //   } on CacheException catch (e, stackTrace) {
-  //     return Left(CacheFailure(e.message, stackTrace));
-  //   }
-  // }
+  @override
+  Future<Either<Failure, void>> cacheMainMenu(
+    List<MainMenuItemModel> menu,
+  ) async {
+    try {
+      await localDatasource.cacheModules(menu);
+      return const Right(null);
+    } on CacheException catch (e, stackTrace) {
+      return Left(CacheFailure(e.message, stackTrace));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<MainMenuItemModel>>> getRemoteMenuItems() async {
+    try {
+      final remoteMenu = await remoteDatasource.getRemoteMenuItems();
+      return Right(remoteMenu);
+    } on ServerException catch (e, stackTrace) {
+      return Left(ServerFailure(e.message, e.statusCode, stackTrace));
+    }
+  }
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/widgets/index.dart';
-import '../../../../core/entities/instruction.dart';
-import '../../../../core/entities/material.dart';
-import '../../../../core/entities/module.dart';
+import '../../../../core/domain/entities/instruction.dart';
+import '../../../../core/domain/entities/material.dart';
+import '../../../../core/domain/entities/module.dart';
+import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
+import '../widgets/servo_interface_page.dart';
 
 class ServoPage extends StatelessWidget {
   static const String routeName = '/servo';
@@ -13,7 +15,9 @@ class ServoPage extends StatelessWidget {
     description: 'description',
     image: 'assets/images/static/servo/servo2.png',
     videoId: 'kJpdoBLSmHs',
-    inoFile: 'assets/files/DHT11_Arduino_ESP32.ino',
+    inoFile: 'assets/files/esp32_bt_servo.ino',
+    moduleRoute: ServoPage.routeName,
+    interfaceRoute: ServoInterfacePage.routeName,
     instructions: [
       InstructionItem(
         title:
@@ -114,6 +118,9 @@ class ServoPage extends StatelessWidget {
             ]),
           ),
         ],
+      ),
+      floatingActionButton: const PxChatBotFloatingButton(
+        moduleKey: 'servo_control',
       ),
     );
   }

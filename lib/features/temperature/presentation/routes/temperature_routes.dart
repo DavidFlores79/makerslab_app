@@ -1,13 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/entities/instruction.dart';
-import '../../../../core/entities/material.dart';
+import '../../../../core/domain/entities/instruction.dart';
+import '../../../../core/domain/entities/material.dart';
 import '../../../../di/service_locator.dart';
 import '../bloc/temperature_bloc.dart';
 import '../pages/instruction_detail_page.dart';
 import '../pages/material_details_page.dart';
 import '../pages/temperature_page.dart';
+import '../widgets/temperature_interface_page.dart';
 
 final temperatureRoutes = [
   GoRoute(
@@ -19,6 +20,18 @@ final temperatureRoutes = [
           child: TemperaturePage(),
         ),
     routes: [
+      GoRoute(
+        path: TemperatureInterfacePage.routeName,
+        name: TemperatureInterfacePage.routeName,
+        pageBuilder: (context, state) {
+          return NoTransitionPage(
+            child: BlocProvider<TemperatureBloc>(
+              create: (_) => getIt<TemperatureBloc>(),
+              child: const TemperatureInterfacePage(),
+            ),
+          );
+        },
+      ),
       GoRoute(
         path: TemperatureInstructionDetailsPage.routeName,
         name: TemperatureInstructionDetailsPage.routeName,

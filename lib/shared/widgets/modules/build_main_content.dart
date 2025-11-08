@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../../core/entities/module.dart';
-import '../../../core/usecases/share_file_usecase.dart';
+import '../../../core/domain/entities/module.dart';
+import '../../../core/domain/usecases/share_file_usecase.dart';
 import '../../../di/service_locator.dart';
 import '../index.dart';
 
@@ -20,7 +21,13 @@ class BuildMainContent extends StatelessWidget {
           child: Row(
             children: [
               Flexible(
-                child: MainAppButton(label: 'Interfaz', onPressed: () {}),
+                child: MainAppButton(
+                  label: 'Interfaz',
+                  onPressed:
+                      () => context.push(
+                        '${mainModule.moduleRoute}${mainModule.interfaceRoute}',
+                      ),
+                ),
               ),
               const SizedBox(width: 10),
               Flexible(

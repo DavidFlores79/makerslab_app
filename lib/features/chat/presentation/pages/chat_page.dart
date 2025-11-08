@@ -66,6 +66,8 @@ class _ChatPageState extends State<ChatPage> {
       id: _uuid.v4(),
       authorId: _currentUserId,
       createdAt: DateTime.now().toUtc(),
+      sentAt: DateTime.now().toUtc(),
+      seenAt: DateTime.now().toUtc(),
       text: text,
     );
     _chatController.insertMessage(msg);
@@ -85,10 +87,6 @@ class _ChatPageState extends State<ChatPage> {
     final Uint8List bytes = await picked.readAsBytes();
     final ui.Image decoded = await decodeImageFromList(bytes);
 
-    // DEPENDIENDO de tu versión usan 'uri' o 'source'.
-    // Si tu ImageMessage acepta 'source' usa source: picked.path
-    // Aquí intento crear ambos para ser seguro: primero pruebo source, si no compila cambia a uri.
-    // Ejemplo con 'source' (si tu versión lo requiere):
     final msg = ImageMessage(
       id: _uuid.v4(),
       authorId: _currentUserId,
@@ -115,9 +113,7 @@ class _ChatPageState extends State<ChatPage> {
       authorId: _currentUserId,
       createdAt: DateTime.now().toUtc(),
       size: f.size,
-      // usa source para compatibilidad. Si tu versión necesita 'uri' cambia por uri: f.path
       source: f.path ?? '',
-      // name podría no existir en tu modelo; pero el builder usa _extractName
       name: f.name,
     );
 
@@ -125,7 +121,6 @@ class _ChatPageState extends State<ChatPage> {
     _localMessages.insert(0, msg);
   }
 
-  // resolveUser
   Future<User> _resolveUser(UserID id) async {
     return User(id: id, name: id == _currentUserId ? 'Tú' : 'IA Bot');
   }
@@ -142,6 +137,20 @@ class _ChatPageState extends State<ChatPage> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Chat(
             builders: Builders(
+              textMessageBuilder: (
+                context,
+                message,
+                index, {
+                required bool isSentByMe,
+                MessageGroupStatus? groupStatus,
+              }) {
+                return SimpleTextMessage(
+                  message: message,
+                  index: index,
+                  receivedBackgroundColor: AppColors.lightGreen,
+                  sentBackgroundColor: AppColors.red,
+                );
+              },
               imageMessageBuilder: (
                 context,
                 message,
@@ -150,8 +159,9 @@ class _ChatPageState extends State<ChatPage> {
                 MessageGroupStatus? groupStatus,
               }) {
                 final source = _extractSource(message);
-                if (source == null || source.isEmpty)
+                if (source == null || source.isEmpty) {
                   return const SizedBox.shrink();
+                }
 
                 if (_isRemote(source)) {
                   // remoto -> widget oficial (cached)
@@ -233,64 +243,47 @@ class _ChatPageState extends State<ChatPage> {
             currentUserId: _currentUserId,
             resolveUser: _resolveUser,
             onMessageSend: _onMessageSend,
-            onAttachmentTap: () async {
-              final choice = await showModalBottomSheet<String>(
-                context: context,
-                builder:
-                    (_) => SafeArea(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ListTile(
-                            leading: const Icon(Icons.photo),
-                            title: const Text('Imagen'),
-                            onTap: () => Navigator.pop(context, 'image'),
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.attach_file),
-                            title: const Text('Archivo'),
-                            onTap: () => Navigator.pop(context, 'file'),
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.close),
-                            title: const Text('Cancelar'),
-                            onTap: () => Navigator.pop(context, null),
-                          ),
-                        ],
-                      ),
-                    ),
-              );
-
-              if (choice == 'image') {
-                await _handleImageSelection();
-              } else if (choice == 'file') {
-                await _handleFileSelection();
-              }
-            },
+            onAttachmentTap: _onAttachmentTap,
           ),
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   tooltip: 'Ver mensajes locales (debug)',
-      //   child: const Icon(Icons.list),
-      //   onPressed: () {
-      //     showModalBottomSheet(
-      //       context: context,
-      //       builder:
-      //           (_) => ListView.builder(
-      //             itemCount: _localMessages.length,
-      //             itemBuilder: (_, i) {
-      //               final m = _localMessages[i];
-      //               return ListTile(
-      //                 title: Text('${m.runtimeType} — id: ${m.id}'),
-      //                 subtitle: Text('authorId: ${m.authorId}'),
-      //               );
-      //             },
-      //           ),
-      //     );
-      //   },
-      // ),
     );
+  }
+
+  // manejar tap en icono adjuntar
+  void _onAttachmentTap() async {
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      builder:
+          (_) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo),
+                  title: const Text('Imagen'),
+                  onTap: () => Navigator.pop(context, 'image'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.attach_file),
+                  title: const Text('Archivo'),
+                  onTap: () => Navigator.pop(context, 'file'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.close),
+                  title: const Text('Cancelar'),
+                  onTap: () => Navigator.pop(context, null),
+                ),
+              ],
+            ),
+          ),
+    );
+
+    if (choice == 'image') {
+      await _handleImageSelection();
+    } else if (choice == 'file') {
+      await _handleFileSelection();
+    }
   }
 
   // pequeño helper UI para archivos locales

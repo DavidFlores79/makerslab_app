@@ -13,6 +13,8 @@ class AppColors {
   static const white = Color(0xFFFFFFFF);
   static const white2 = Color(0xFFFAFAFA);
   static const white3 = Color(0xFFFFFBFE);
+  static const whiteAlpha10 = Color(0x1AFFFFFF); // 10% opacity
+  static const whiteAlpha20 = Color(0x33FFFFFF); // 20% opacity
 
   static const gray100 = Color(0xFFF9FAFB);
   static const gray200 = Color(0xFFF3F4F6);
@@ -26,9 +28,8 @@ class AppColors {
   static const gray950 = Color(0xFF111827);
 
   static const primary = Color(0xFF247BA0); // Tu nuevo primary color
-  static const primaryLight = Color(
-    0xFFA8D0E6,
-  ); // Versión más clara del primary
+  static const primaryLight = Color(0xFFA8D0E6);
+  static const primaryDark = Color(0xFF004F7A);
   static const greenDark = Color(0xFF00461A);
   static const greenLight = Color(0xFFE8F6EC);
   static const greenLightAlpha5 = Color(0x0DE8F6EC); // 5% opacity
@@ -41,8 +42,16 @@ class AppColors {
 
   // Colores agregados de tu lista
   static const lightGreen = Color(0xFF8BC34A); // Color para Gamepad
+  // const Color.fromARGB(255, 9, 241, 86),
+  // const Color.fromARGB(255, 72, 184, 75)
+  static const lightGreenAccent = Color(
+    0xFFCDDC39,
+  ); // Color para Gamepad (Accent)
+
   static const blue = Color(0xFF2196F3); // Color para Sensor DHT
+  static const blueAccent = Color(0xFF448AFF); // Color para Sensor DHT (Accent)
   static const red = Color(0xFFF44336); // Color para Servos
+  static const redAccent = Color(0xFFFF5252); // Color para Servos (Accent)
   static const orange = Color(0xFFFF9800); // Color para Control de Luces
   static const purple = Color(0xFF9C27B0); // Color para Chat
 }

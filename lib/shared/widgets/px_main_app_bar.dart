@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:makerslab_app/core/app_keys.dart';
 
 import '../../theme/app_color.dart';
 import '../../utils/date_utils.dart';
@@ -33,6 +34,10 @@ class PxMainAppBar extends StatelessWidget implements PreferredSizeWidget {
           isLoggedIn
               ? Row(
                 children: [
+                  IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
+                  ),
                   CircleAvatar(
                     radius: 26,
                     backgroundImage: AssetImage(
@@ -75,6 +80,10 @@ class PxMainAppBar extends StatelessWidget implements PreferredSizeWidget {
               )
               : Row(
                 children: [
+                  IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
+                  ),
                   const Icon(
                     Icons.waving_hand_rounded,
                     color: AppColors.orange,
