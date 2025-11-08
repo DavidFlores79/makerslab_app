@@ -16,6 +16,8 @@ import '../../../../theme/app_color.dart';
 import '../bloc/chat_bloc.dart';
 import '../bloc/chat_event.dart';
 import '../bloc/chat_state.dart';
+import '../theme/chat_theme_provider.dart';
+import '../widgets/custom_message_bubble.dart';
 
 class ChatContent extends StatefulWidget {
   final String moduleKey;
@@ -391,7 +393,14 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
                             (message as dynamic).metadata
                                 as Map<String, dynamic>?;
                         if (meta != null && meta['isTyping'] == true) {
-                          // Mostrar exactamente tu _threeDots() dentro de la burbuja
+                          final theme = Theme.of(context);
+                          final isDark = theme.brightness == Brightness.dark;
+                          final moduleColor = ChatThemeProvider.getModuleColor(
+                            widget.moduleKey,
+                            isDarkMode: isDark,
+                          );
+                          
+                          // Mostrar typing indicator con module color
                           return Align(
                             alignment:
                                 isSentByMe
@@ -402,15 +411,18 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
                                 vertical: 8,
                                 horizontal: 12,
                               ),
-                              margin: const EdgeInsets.symmetric(vertical: 4),
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color:
-                                    isSentByMe
-                                        ? Colors.blue.shade50
-                                        : Colors.grey.shade100,
+                                    isDark
+                                        ? AppColors.gray800
+                                        : AppColors.gray200,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: _threeDots(),
+                              child: _threeDots(color: moduleColor),
                             ),
                           );
                         }
@@ -418,15 +430,13 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
                         // ignore
                       }
 
-                      // default renderer (tu implementación previa)
-                      return Container(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width * 0.75,
-                        ),
-                        child: fcui.SimpleTextMessage(
-                          message: message,
-                          index: index,
-                        ),
+                      // Use custom message bubble
+                      return CustomTextMessageBubble(
+                        message: message,
+                        index: index,
+                        isSentByMe: isSentByMe,
+                        moduleKey: widget.moduleKey,
+                        groupStatus: groupStatus,
                       );
                     },
 
@@ -704,18 +714,20 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
   }
 }
 
-Widget _threeDots() {
+Widget _threeDots({Color? color}) {
   return Row(
     mainAxisSize: MainAxisSize.min,
     children: List.generate(3, (i) {
-      return AnimatedDot(delay: i * 150);
+      return AnimatedDot(delay: i * 150, color: color ?? AppColors.primary);
     }),
   );
 }
 
 class AnimatedDot extends StatefulWidget {
   final int delay;
-  const AnimatedDot({Key? key, required this.delay}) : super(key: key);
+  final Color color;
+  const AnimatedDot({Key? key, required this.delay, required this.color})
+      : super(key: key);
   @override
   State<AnimatedDot> createState() => _AnimatedDotState();
 }
@@ -753,7 +765,7 @@ class _AnimatedDotState extends State<AnimatedDot>
           width: 6,
           height: 6,
           decoration: BoxDecoration(
-            color: AppColors.primary,
+            color: widget.color,
             shape: BoxShape.circle,
           ),
         ),
