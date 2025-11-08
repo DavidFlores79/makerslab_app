@@ -58,7 +58,10 @@ class ChatModalHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final moduleColor = ChatThemeProvider.getModuleColor(moduleKey, isDarkMode: isDark);
+    final moduleColor = ChatThemeProvider.getModuleColor(
+      moduleKey,
+      isDarkMode: isDark,
+    );
 
     return Container(
       decoration: BoxDecoration(

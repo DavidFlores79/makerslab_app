@@ -28,17 +28,23 @@ class CustomTextMessageBubble extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     // Get colors from theme provider
-    final backgroundColor = isSentByMe
-        ? ChatThemeProvider.getSentMessageColor(moduleKey, isDarkMode: isDark)
-        : ChatThemeProvider.getReceivedMessageColor(isDarkMode: isDark);
+    final backgroundColor =
+        isSentByMe
+            ? ChatThemeProvider.getSentMessageColor(
+              moduleKey,
+              isDarkMode: isDark,
+            )
+            : ChatThemeProvider.getReceivedMessageColor(isDarkMode: isDark);
 
-    final textColor = isSentByMe
-        ? ChatThemeProvider.getSentMessageTextColor(isDarkMode: isDark)
-        : ChatThemeProvider.getReceivedMessageTextColor(isDarkMode: isDark);
+    final textColor =
+        isSentByMe
+            ? ChatThemeProvider.getSentMessageTextColor(isDarkMode: isDark)
+            : ChatThemeProvider.getReceivedMessageTextColor(isDarkMode: isDark);
 
-    final timestampColor = isSentByMe
-        ? ChatThemeProvider.getSentTimestampColor(isDarkMode: isDark)
-        : ChatThemeProvider.getReceivedTimestampColor(isDarkMode: isDark);
+    final timestampColor =
+        isSentByMe
+            ? ChatThemeProvider.getSentTimestampColor(isDarkMode: isDark)
+            : ChatThemeProvider.getReceivedTimestampColor(isDarkMode: isDark);
 
     return Align(
       alignment: isSentByMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -50,7 +56,9 @@ class CustomTextMessageBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: ChatThemeProvider.getMessageBorderRadius(isSentByMe: isSentByMe),
+          borderRadius: ChatThemeProvider.getMessageBorderRadius(
+            isSentByMe: isSentByMe,
+          ),
           boxShadow: ChatThemeProvider.getMessageShadow(isDarkMode: isDark),
         ),
         child: Column(

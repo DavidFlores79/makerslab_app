@@ -399,7 +399,7 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
                             widget.moduleKey,
                             isDarkMode: isDark,
                           );
-                          
+
                           // Mostrar typing indicator con module color
                           return Align(
                             alignment:
@@ -727,7 +727,7 @@ class AnimatedDot extends StatefulWidget {
   final int delay;
   final Color color;
   const AnimatedDot({Key? key, required this.delay, required this.color})
-      : super(key: key);
+    : super(key: key);
   @override
   State<AnimatedDot> createState() => _AnimatedDotState();
 }

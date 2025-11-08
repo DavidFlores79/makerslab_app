@@ -22,7 +22,10 @@ class ChatThemeProvider {
   }
 
   /// Get the background color for sent messages
-  static Color getSentMessageColor(String moduleKey, {bool isDarkMode = false}) {
+  static Color getSentMessageColor(
+    String moduleKey, {
+    bool isDarkMode = false,
+  }) {
     return getModuleColor(moduleKey, isDarkMode: isDarkMode);
   }
 
@@ -72,11 +75,15 @@ class ChatThemeProvider {
   }
 
   /// Text styles for messages
-  static TextStyle getMessageTextStyle({bool isDarkMode = false, required bool isSentByMe}) {
+  static TextStyle getMessageTextStyle({
+    bool isDarkMode = false,
+    required bool isSentByMe,
+  }) {
     return TextStyle(
-      color: isSentByMe 
-          ? getSentMessageTextColor(isDarkMode: isDarkMode)
-          : getReceivedMessageTextColor(isDarkMode: isDarkMode),
+      color:
+          isSentByMe
+              ? getSentMessageTextColor(isDarkMode: isDarkMode)
+              : getReceivedMessageTextColor(isDarkMode: isDarkMode),
       fontSize: 15,
       fontWeight: FontWeight.w400,
       height: 1.5,
@@ -84,11 +91,15 @@ class ChatThemeProvider {
   }
 
   /// Text styles for timestamps
-  static TextStyle getTimestampTextStyle({bool isDarkMode = false, required bool isSentByMe}) {
+  static TextStyle getTimestampTextStyle({
+    bool isDarkMode = false,
+    required bool isSentByMe,
+  }) {
     return TextStyle(
-      color: isSentByMe
-          ? getSentTimestampColor(isDarkMode: isDarkMode)
-          : getReceivedTimestampColor(isDarkMode: isDarkMode),
+      color:
+          isSentByMe
+              ? getSentTimestampColor(isDarkMode: isDarkMode)
+              : getReceivedTimestampColor(isDarkMode: isDarkMode),
       fontSize: 11,
       fontWeight: FontWeight.w400,
     );
@@ -128,7 +139,9 @@ class ChatThemeProvider {
 
   /// Get border radius based on who sent the message
   static BorderRadius getMessageBorderRadius({required bool isSentByMe}) {
-    return isSentByMe ? getUserMessageBorderRadius() : getAssistantMessageBorderRadius();
+    return isSentByMe
+        ? getUserMessageBorderRadius()
+        : getAssistantMessageBorderRadius();
   }
 
   /// Get box shadow for message bubbles
