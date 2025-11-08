@@ -62,6 +62,14 @@ class ChatRepositoryImpl extends BaseRepository implements ChatRepository {
     });
   }
 
+  @override
+  Future<Either<Failure, String>> uploadFile(Uint8List bytes, String filename) {
+    return safeCall<String>(() async {
+      final url = await remoteDataSource.uploadFile(bytes, filename);
+      return url;
+    });
+  }
+
   ///////////////////////////////////   local data source   ///////////////////////////////////
   ///
   @override

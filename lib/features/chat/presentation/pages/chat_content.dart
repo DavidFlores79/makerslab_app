@@ -12,7 +12,9 @@ import 'package:uuid/uuid.dart';
 // import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart' as fcui;
 
+import '../../../../di/service_locator.dart';
 import '../../../../theme/app_color.dart';
+import '../../domain/usecases/upload_file_usecase.dart';
 import '../bloc/chat_bloc.dart';
 import '../bloc/chat_event.dart';
 import '../bloc/chat_state.dart';
@@ -193,10 +195,18 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
     return User(id: id, name: id == _currentUserId ? 'Tú' : 'IA Bot');
   }
 
-  // Stub: implementa la subida a tu servidor / storage y retorna la URL (o null si no subes)
-  Future<String?> uploadPendingFileToServer(File file) async {
-    // TODO: subir a tu backend y retornar la URL pública
-    return null;
+  // Upload file using the UploadFile use case
+  Future<String?> uploadPendingFileToServer(
+    Uint8List bytes,
+    String filename,
+  ) async {
+    final uploadFile = getIt<UploadFile>();
+    final result = await uploadFile(bytes, filename);
+
+    return result.fold((failure) {
+      debugPrint('Error uploading file: ${failure.message}');
+      return null;
+    }, (url) => url);
   }
 
   void _onMessageSend(String text) async {
@@ -212,9 +222,26 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
         return;
       }
 
-      // intenta subir primero (opcional)
+      // Upload file to get Cloudinary URL using the bytes we already have
       String? source = _pendingFile!.path;
-      final uploadedUrl = await uploadPendingFileToServer(_pendingFile!);
+      final uploadedUrl = await uploadPendingFileToServer(
+        _pendingBytes!,
+        _pendingName!,
+      );
+
+      if (uploadedUrl == null && _pendingIsImage) {
+        // Show error if upload failed for images (required for API)
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Error al subir la imagen. Intenta de nuevo.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
       if (uploadedUrl != null) source = uploadedUrl;
 
       if (_pendingIsImage) {
@@ -225,7 +252,7 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
           size: _pendingSize ?? 0,
           width: _pendingWidth ?? 0,
           height: _pendingHeight ?? 0,
-          source: source ?? '',
+          source: source,
         );
 
         _chatController.insertMessage(imgMsg);
@@ -245,13 +272,37 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
 
         _chatController.insertMessage(textMsg);
         _localMessages.insert(0, textMsg);
+
+        // Send message to API with image URL
+        context.read<ChatBloc>().add(
+          SendMessageEvent(
+            conversationId: conversationId,
+            content: trimmed,
+            imageUrl: uploadedUrl!,
+          ),
+        );
+
+        // Insert typing indicator for AI response
+        final typingId = 'typing-${_uuid.v4()}';
+        final typingMsg = TextMessage(
+          id: typingId,
+          authorId: 'assistant',
+          createdAt: DateTime.now().toUtc(),
+          sentAt: DateTime.now().toUtc(),
+          text: '',
+          metadata: {'isTyping': true, 'moduleKey': widget.moduleKey},
+        );
+
+        _typingMessageId = typingId;
+        _chatController.insertMessage(typingMsg);
+        _localMessages.insert(0, typingMsg);
       } else {
         final fileMsg = FileMessage(
           id: _uuid.v4(),
           authorId: _currentUserId,
           createdAt: DateTime.now().toUtc(),
           size: _pendingSize ?? 0,
-          source: source ?? '',
+          source: source,
           name: _pendingName ?? 'archivo',
         );
 
@@ -272,6 +323,15 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
 
         _chatController.insertMessage(textMsg);
         _localMessages.insert(0, textMsg);
+
+        // Send message to API (files don't need imageUrl)
+        context.read<ChatBloc>().add(
+          SendMessageEvent(
+            conversationId: conversationId,
+            content: trimmed,
+            imageUrl: '',
+          ),
+        );
       }
 
       _removePendingAttachment();
@@ -365,8 +425,6 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
       top: false,
       child: BlocConsumer<ChatBloc, ChatState>(
         builder: (context, state) {
-          final size = MediaQuery.of(context).size;
-
           if (state.status == ChatStatus.failure) {
             return const Center(child: Text('Error al cargar el chat'));
           }

@@ -19,6 +19,7 @@ abstract class RemoteChatDataSource {
     String imageUrl,
   );
   Future<List<Message>> fetchMessages(String conversationId);
+  Future<String> uploadFile(Uint8List bytes, String filename);
 }
 
 class ChatRemoteDataSourceImpl implements RemoteChatDataSource {
@@ -202,5 +203,38 @@ class ChatRemoteDataSourceImpl implements RemoteChatDataSource {
     );
     return SendMessageResponse.fromJson(response.data).assistant ??
         'No se obtuvo respuesta';
+  }
+
+  @override
+  Future<String> uploadFile(Uint8List bytes, String filename) async {
+    try {
+      logger.info('Uploading file: $filename (${bytes.length} bytes)');
+
+      final formData = FormData.fromMap({
+        'file0': MultipartFile.fromBytes(bytes, filename: filename),
+      });
+
+      logger.info('FormData created, sending POST to /api/upload/cloud/chat');
+
+      final response = await dio.post(
+        '/api/upload/cloud/chat',
+        data: formData,
+        // Don't manually set Content-Type - Dio sets it with boundary automatically
+      );
+
+      logger.info('Upload response: ${response.statusCode} - ${response.data}');
+
+      final data = response.data;
+      if (data != null && data['data'] != null && data['data']['url'] != null) {
+        final url = data['data']['url'] as String;
+        logger.info('Upload successful, URL: $url');
+        return url;
+      }
+
+      throw Exception('Upload failed: No URL returned');
+    } catch (e, st) {
+      logger.error('Upload file error: $e\n$st');
+      rethrow;
+    }
   }
 }

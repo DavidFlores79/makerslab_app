@@ -53,6 +53,7 @@ import '../features/chat/domain/usecases/send_image_message_usecase.dart';
 import '../features/chat/domain/usecases/send_message_usecase.dart';
 import '../features/chat/domain/usecases/send_text_message_usecase.dart';
 import '../features/chat/domain/usecases/start_chat_session_usecase.dart';
+import '../features/chat/domain/usecases/upload_file_usecase.dart';
 import '../features/chat/presentation/bloc/chat_bloc.dart';
 import '../features/gamepad/data/repositories/gamepad_repository_impl.dart';
 import '../features/gamepad/domain/repositories/gamepad_repository.dart';
@@ -266,6 +267,7 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => ResendSignUpCode(repository: getIt()));
   getIt.registerLazySingleton(() => ConfirmSignUp(repository: getIt()));
   getIt.registerLazySingleton(() => SendMessageUsecase(repository: getIt()));
+  getIt.registerLazySingleton(() => UploadFile(repository: getIt()));
   getIt.registerLazySingleton(
     () => GetServoPositionUseCase(repository: getIt()),
   );
