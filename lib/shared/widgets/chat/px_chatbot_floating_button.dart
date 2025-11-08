@@ -8,6 +8,7 @@ import '../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../../features/auth/presentation/pages/login_page.dart';
 import '../../../features/chat/presentation/pages/chat_content.dart';
+import 'chat_modal_header.dart';
 
 class PxChatBotFloatingButton extends StatelessWidget {
   final String moduleKey;
@@ -96,75 +97,39 @@ class _PxChatBotBottomSheetState extends State<_PxChatBotBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.vertical(top: Radius.circular(16));
-    return SafeArea(
+    return Padding(
+      padding: const EdgeInsets.only(top: 24.0), // Larger gap from top
       child: ClipRRect(
         borderRadius: borderRadius,
-        child: Container(
-          height: MediaQuery.of(context).size.height * 0.92,
-          color: Theme.of(context).canvasColor,
-          child: DraggableScrollableSheet(
-            controller: _draggableController,
-            initialChildSize: _initial,
-            minChildSize: _min,
-            maxChildSize: _max,
-            expand: false,
-            builder: (context, scrollController) {
-              return Material(
-                color: Theme.of(context).canvasColor,
-                child: Column(
-                  children: [
-                    // handle + acciones
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        // minimizar (colapsar)
-                        IconButton(
-                          tooltip: 'Minimizar',
-                          onPressed: _minimize,
-                          icon: const Icon(Icons.expand_more),
-                        ),
+        child: DraggableScrollableSheet(
+          controller: _draggableController,
+          initialChildSize: _initial,
+          minChildSize: _min,
+          maxChildSize: _max,
+          expand: false,
+          builder: (context, scrollController) {
+            return Material(
+              color: Theme.of(context).canvasColor,
+              child: Column(
+                children: [
+                  // Use ChatModalHeader instead of custom row
+                  ChatModalHeader(
+                    moduleKey: widget.moduleKey,
+                    onMinimize: _minimize,
+                    onClose: () => context.pop(),
+                  ),
 
-                        // cerrar
-                        IconButton(
-                          tooltip: 'Cerrar',
-                          onPressed: () => context.pop(),
-                          icon: const Icon(Icons.close),
-                        ),
-                      ],
+                  // contenido del chat (reusa ChatContent)
+                  Expanded(
+                    child: ChatContent(
+                      moduleKey: widget.moduleKey,
+                      externalScrollController: scrollController,
                     ),
-
-                    // titulo pequeño
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.smart_toy),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Chat — ${widget.moduleKey}',
-                              style: Theme.of(context).textTheme.titleMedium,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    // contenido del chat (reusa ChatContent)
-                    Expanded(
-                      child: ChatContent(
-                        moduleKey: widget.moduleKey,
-                        externalScrollController: scrollController,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
