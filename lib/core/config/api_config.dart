@@ -1,7 +1,7 @@
 // lib/core/config/api_config.dart
 class ApiConfig {
   // Base URL de tu backend (puedes leer de .env o flavors)
-  static const String baseUrl = 'http://192.168.100.45:3001';
+  static const String baseUrl = 'https://makerslab-backend.onrender.com';
 
   // Endpoints de auth
   static const String signInEndpoint = '/auth/login';

@@ -15,7 +15,7 @@ class ServoPage extends StatelessWidget {
     description: 'description',
     image: 'assets/images/static/servo/servo2.png',
     videoId: 'kJpdoBLSmHs',
-    inoFile: 'assets/files/esp32_bt_servo.ino',
+    inoFile: 'assets/files/esp32_bt_servo/esp32_bt_servo.ino',
     moduleRoute: ServoPage.routeName,
     interfaceRoute: ServoInterfacePage.routeName,
     instructions: [
