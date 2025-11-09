@@ -16,7 +16,7 @@ class GamepadPage extends StatelessWidget {
     description: 'description',
     image: 'assets/images/static/gamepad/gamepad.png',
     videoId: 'kJpdoBLSmHs',
-    inoFile: 'assets/files/esp32_bt_servo.ino',
+    inoFile: 'assets/files/esp32_bt_servo/esp32_bt_servo.ino',
     moduleRoute: GamepadPage.routeName,
     interfaceRoute: GamepadInterfacePage.routeName,
     instructions: [

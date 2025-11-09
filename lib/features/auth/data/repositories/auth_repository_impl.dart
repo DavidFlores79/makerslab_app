@@ -6,9 +6,9 @@ import '../../../../core/error/failure.dart';
 import '../../../../core/domain/entities/user.dart';
 import '../../../../core/domain/repositories/base_repository.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../datasource/auth_remote_datasource.dart';
-import '../datasource/auth_token_local_datasource.dart';
-import '../datasource/auth_user_local_datasource.dart';
+import '../datasources/auth_remote_datasource.dart';
+import '../datasources/auth_token_local_datasource.dart';
+import '../datasources/auth_user_local_datasource.dart';
 import '../models/forgot_password_response_model.dart';
 import '../models/login_response_model.dart';
 
