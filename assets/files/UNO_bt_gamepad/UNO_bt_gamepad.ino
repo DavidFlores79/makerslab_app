@@ -90,6 +90,7 @@ void executeCommand(String command) {
   } else if (command == "L01") {
     turnLeft();
   } else if (command == "Y00") {
+    releaseObject();
     moveServosDown();
     pickUpObject();
     stopMotors();
@@ -100,16 +101,14 @@ void executeCommand(String command) {
     releaseObject();
     stopMotors();
   } else if (command == "A00") {
-    returnContainerBack();
     moveServosUp();
-    releaseObject();
     stopMotors();
   } else if (command == "L02") {
-    moveServosMiddle();
-    returnContainerBack();
+    // moveServosMiddle();
+    // returnContainerBack();
   } else if (command == "R02") {
-    moveServosMiddle();
-    emptyTrashContainer();
+    // moveServosMiddle();
+    // emptyTrashContainer();
   } else {
     Serial.print("Comando no reconocido: ");
     Serial.println(command);
@@ -138,11 +137,24 @@ void releaseObject() {
   }
 }
 
-void moveServosDown() {
+void moveServosUp() {
   int currentPosition = servoLeft.read();
-  for (int angle = currentPosition; angle >= 20; angle--) {
+  for (int angle = currentPosition; angle >= 10; angle--) {
     servoLeft.write(angle);
     servoRight.write(abs(angle - 180));
+    // Serial.print("Down Servo Left Angle");
+    // Serial.println(angle);
+    delay(5);
+  }
+}
+
+void moveServosDown() {
+  int currentPosition = servoLeft.read();
+  for (int angle = currentPosition; angle <= 60; angle++) {
+    servoLeft.write(angle);
+    servoRight.write(abs(angle - 180));
+    // Serial.print("Up Servo Left Angle");
+    // Serial.println(angle);
     delay(5);
   }
 }
@@ -150,15 +162,6 @@ void moveServosDown() {
 void moveServosMiddle() {
   int currentPosition = servoLeft.read();
   for (int angle = currentPosition; angle >= 70; angle--) {
-    servoLeft.write(angle);
-    servoRight.write(abs(angle - 180));
-    delay(5);
-  }
-}
-
-void moveServosUp() {
-  int currentPosition = servoLeft.read();
-  for (int angle = currentPosition; angle <= 160; angle++) {
     servoLeft.write(angle);
     servoRight.write(abs(angle - 180));
     delay(5);
