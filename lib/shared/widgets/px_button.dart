@@ -70,10 +70,16 @@ class MainAppButton extends StatelessWidget {
     // Contenido interno (loading o label + ícono)
     final Widget content =
         isLoading
-            ? const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2),
+            ? Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ],
             )
             : Row(
               mainAxisSize: MainAxisSize.max,

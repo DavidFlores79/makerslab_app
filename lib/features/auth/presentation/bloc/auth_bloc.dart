@@ -71,7 +71,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     debugPrint(">>> SigninWithPhoneRequested event recibido");
-    emit(SignInWithPhoneInProgress());
+    emit(AuthLoading());
 
     final result = await signinWithPhone(event.phone, event.password);
     debugPrint(">>> signinWithPhone result: $result");
@@ -153,7 +153,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ForgotPasswordRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(ForgotPasswordInProgress());
+    emit(AuthLoading());
     final result = await forgotPassword(event.phone);
 
     result.fold(

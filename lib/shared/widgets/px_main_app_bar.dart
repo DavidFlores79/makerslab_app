@@ -40,9 +40,14 @@ class PxMainAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   CircleAvatar(
                     radius: 26,
-                    backgroundImage: AssetImage(
-                      userImage ?? 'assets/images/default_avatar.png',
-                    ),
+                    backgroundImage:
+                        userImage != null && userImage!.isNotEmpty
+                            ? (userImage!.startsWith('http')
+                                ? NetworkImage(userImage!) as ImageProvider
+                                : AssetImage(userImage!))
+                            : const AssetImage(
+                              'assets/images/default_avatar.png',
+                            ),
                   ),
                   const SizedBox(width: 12),
                   Column(
@@ -61,7 +66,7 @@ class PxMainAppBar extends StatelessWidget implements PreferredSizeWidget {
                             waveMeByHour(),
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.onSurface,
+                              color: AppColors.gray600,
                             ),
                           ),
                         ],
@@ -94,7 +99,7 @@ class PxMainAppBar extends StatelessWidget implements PreferredSizeWidget {
                     waveMeByHour(),
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
+                      color: AppColors.gray600,
                     ),
                   ),
                 ],
