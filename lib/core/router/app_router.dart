@@ -6,11 +6,14 @@ import '../../features/auth/presentation/routes/auth_routes.dart';
 import '../../features/home/presentation/bloc/home_bloc.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/routes/main_static_routes.dart';
+import '../../features/profile/presentation/pages/personal_data_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../main_shell.dart';
+import '../presentation/pages/not_found_page.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: SplashCoordinator.routeName,
+  errorBuilder: (context, state) => const NotFoundPage(),
   routes: [
     ...authRoutes,
     ShellRoute(
@@ -33,6 +36,12 @@ final GoRouter appRouter = GoRouter(
           path: ProfilePage.routeName,
           name: ProfilePage.routeName,
           pageBuilder: (c, s) => const NoTransitionPage(child: ProfilePage()),
+        ),
+        GoRoute(
+          path: PersonalDataPage.routeName,
+          name: PersonalDataPage.routeName,
+          pageBuilder:
+              (c, s) => const NoTransitionPage(child: PersonalDataPage()),
         ),
       ],
     ),
