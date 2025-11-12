@@ -5,10 +5,10 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../../shared/widgets/index.dart';
-import '../../../../theme/app_color.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import 'personal_data_page.dart';
+import 'settings_page.dart';
 
 class ProfilePage extends StatefulWidget {
   static const String routeName = "/profile";
@@ -82,9 +82,7 @@ class _BuildAccountSection extends StatelessWidget {
               title: 'Configuración',
               subtitle: 'Ajustes y preferencias',
               icon: Symbols.settings,
-              onTap: () {
-                // TODO: Navigate to settings
-              },
+              onTap: () => context.push(SettingsPage.routeName),
             ),
           ],
         );
@@ -246,9 +244,14 @@ class ProfileItemCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
       decoration: BoxDecoration(
-        color: isDisabled ? AppColors.gray100 : AppColors.white,
+        color:
+            isDisabled
+                ? theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                )
+                : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.gray300, width: 1),
+        border: Border.all(color: theme.colorScheme.outlineVariant, width: 1),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
@@ -262,20 +265,26 @@ class ProfileItemCard extends StatelessWidget {
             shape: BoxShape.circle,
             color:
                 isDisabled
-                    ? AppColors.gray300.withOpacity(0.3)
-                    : AppColors.primary.withOpacity(0.1),
+                    ? theme.colorScheme.onSurface.withValues(alpha: 0.08)
+                    : theme.colorScheme.primary.withValues(alpha: 0.1),
           ),
           child: Icon(
             icon,
             size: 24,
-            color: isDisabled ? AppColors.gray400 : AppColors.primary,
+            color:
+                isDisabled
+                    ? theme.colorScheme.onSurface.withValues(alpha: 0.38)
+                    : theme.colorScheme.primary,
           ),
         ),
         title: Text(
           title,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: isDisabled ? AppColors.gray500 : null,
+            color:
+                isDisabled
+                    ? theme.colorScheme.onSurface.withValues(alpha: 0.5)
+                    : null,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -283,14 +292,20 @@ class ProfileItemCard extends StatelessWidget {
         subtitle: Text(
           subtitle,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: isDisabled ? AppColors.gray400 : AppColors.gray600,
+            color:
+                isDisabled
+                    ? theme.colorScheme.onSurface.withValues(alpha: 0.38)
+                    : theme.colorScheme.onSurfaceVariant,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         trailing: Icon(
           Icons.chevron_right,
-          color: isDisabled ? AppColors.gray300 : AppColors.gray400,
+          color:
+              isDisabled
+                  ? theme.colorScheme.onSurface.withValues(alpha: 0.2)
+                  : theme.colorScheme.onSurfaceVariant,
         ),
       ),
     );

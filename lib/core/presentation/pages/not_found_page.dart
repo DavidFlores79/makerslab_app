@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../shared/widgets/px_back_app_bar.dart';
-import '../../../theme/app_color.dart';
 
 class NotFoundPage extends StatelessWidget {
   static const routeName = '/not-found';
@@ -17,7 +16,7 @@ class NotFoundPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: theme.colorScheme.surface,
       appBar: const PxBackAppBar(backLabel: 'Volver'),
       body: SafeArea(
         child: Center(
@@ -30,7 +29,7 @@ class NotFoundPage extends StatelessWidget {
                 Icon(
                   Symbols.construction,
                   size: 120,
-                  color: AppColors.primary.withOpacity(0.7),
+                  color: theme.colorScheme.primary.withOpacity(0.7),
                 ),
                 const SizedBox(height: 32),
 
@@ -39,7 +38,7 @@ class NotFoundPage extends StatelessWidget {
                   '¡En Construcción!',
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: theme.colorScheme.primary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -49,7 +48,7 @@ class NotFoundPage extends StatelessWidget {
                 Text(
                   'Esta función está en desarrollo.\nPronto estará disponible.',
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: AppColors.gray700,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
                 ),

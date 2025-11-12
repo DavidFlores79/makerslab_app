@@ -5,14 +5,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:logger/logger.dart';
+import 'core/domain/entities/theme_preference.dart';
 import 'core/presentation/bloc/bluetooth/bluetooth_bloc.dart';
+import 'core/presentation/bloc/theme/theme_bloc.dart';
+import 'core/presentation/bloc/theme/theme_event.dart';
+import 'core/presentation/bloc/theme/theme_state.dart';
 import 'core/router/app_router.dart';
 import 'core/ui/snackbar_service.dart';
 import 'di/service_locator.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/chat/presentation/bloc/chat_bloc.dart';
-import 'theme/app_color.dart';
+import 'theme/app_theme.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -25,6 +29,21 @@ void main() async {
   EquatableConfig.stringify = true;
   Bloc.observer = SimpleBlocObserver();
 
+  // Pre-load theme preference to prevent flicker
+  final themeBloc = getIt<ThemeBloc>();
+  themeBloc.add(LoadThemePreference());
+
+  // Wait for theme to load (with timeout to prevent hang)
+  await themeBloc.stream
+      .firstWhere(
+        (state) => state is ThemeLoaded || state is ThemeInitial,
+        orElse: () => ThemeInitial(),
+      )
+      .timeout(
+        const Duration(milliseconds: 500),
+        onTimeout: () => ThemeInitial(),
+      );
+
   runApp(
     MultiBlocProvider(
       providers: [
@@ -34,6 +53,7 @@ void main() async {
         ),
         BlocProvider(create: (_) => getIt<BluetoothBloc>()),
         BlocProvider(create: (_) => getIt<ChatBloc>()),
+        BlocProvider.value(value: themeBloc), // Use pre-loaded instance
       ],
       child: const MyApp(),
     ),
@@ -52,46 +72,81 @@ void _configEnvironment() {
   Logger.level = kDebugMode ? Level.all : Level.info;
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    super.didChangePlatformBrightness();
+    // Only reload theme if user preference is "System"
+    final themeBloc = context.read<ThemeBloc>();
+    final currentState = themeBloc.state;
+    if (currentState is ThemeLoaded &&
+        currentState.mode == ThemePreference.system) {
+      themeBloc.add(LoadThemePreference());
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Makers Lab',
-      routerConfig: appRouter, // ← aquí enchufas go_router
-      debugShowCheckedModeBanner: false,
-      // Configuración de localización
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('es', 'MX'), // Español México como principal
-        Locale('en', 'US'), // Inglés como respaldo
-      ],
-      locale: const Locale('es', 'MX'),
-      theme: ThemeData(
-        fontFamily: 'Roboto',
-        colorScheme: ColorScheme(
-          brightness: Brightness.light,
-          primary: AppColors.primary,
-          onPrimary: Colors.white,
-          primaryContainer: AppColors.greenLight,
-          onPrimaryContainer: AppColors.greenDark,
-          secondary: AppColors.gray700,
-          onSecondary: Colors.white,
-          onSecondaryContainer: AppColors.gray600,
-          surface: AppColors.white,
-          onSurface: AppColors.black,
-          error: Colors.red,
-          onError: Colors.white,
-        ),
-        useMaterial3: true,
-      ),
-      scaffoldMessengerKey: SnackbarService().messengerKey,
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, state) {
+        // Determine effective theme mode based on state
+        ThemeMode effectiveThemeMode = ThemeMode.system;
+
+        if (state is ThemeLoaded) {
+          switch (state.mode) {
+            case ThemePreference.light:
+              effectiveThemeMode = ThemeMode.light;
+              break;
+            case ThemePreference.dark:
+              effectiveThemeMode = ThemeMode.dark;
+              break;
+            case ThemePreference.system:
+              effectiveThemeMode = ThemeMode.system;
+              break;
+          }
+        }
+
+        return MaterialApp.router(
+          title: 'Makers Lab',
+          routerConfig: appRouter,
+          debugShowCheckedModeBanner: false,
+          // Configuración de localización
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('es', 'MX'), // Español México como principal
+            Locale('en', 'US'), // Inglés como respaldo
+          ],
+          locale: const Locale('es', 'MX'),
+          theme: AppTheme.lightTheme(),
+          darkTheme: AppTheme.darkTheme(),
+          themeMode: effectiveThemeMode,
+          scaffoldMessengerKey: SnackbarService().messengerKey,
+        );
+      },
     );
   }
 }

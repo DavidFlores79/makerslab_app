@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:makerslab_app/core/app_keys.dart';
 
-import '../../theme/app_color.dart';
 import '../../utils/date_utils.dart';
 
 class PxMainAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -18,16 +17,23 @@ class PxMainAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isLoggedIn = userName != null && userName!.isNotEmpty;
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return AppBar(
       toolbarHeight: 90,
-      backgroundColor: AppColors.transparent,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: false,
+      iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
       flexibleSpace: ClipRRect(
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Container(color: AppColors.white.withOpacity(0.3)),
+          child: Container(
+            color:
+                isDarkMode
+                    ? theme.colorScheme.surface.withValues(alpha: 0.7)
+                    : theme.colorScheme.surface.withValues(alpha: 0.3),
+          ),
         ),
       ),
       title:
@@ -56,9 +62,12 @@ class PxMainAppBar extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.waving_hand_rounded,
-                            color: AppColors.orange,
+                            color:
+                                isDarkMode
+                                    ? const Color(0xFFFFB74D)
+                                    : const Color(0xFFFF9800),
                             size: 20,
                           ),
                           const SizedBox(width: 4),
@@ -66,7 +75,7 @@ class PxMainAppBar extends StatelessWidget implements PreferredSizeWidget {
                             waveMeByHour(),
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: AppColors.gray600,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -89,9 +98,12 @@ class PxMainAppBar extends StatelessWidget implements PreferredSizeWidget {
                     icon: const Icon(Icons.menu),
                     onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
                   ),
-                  const Icon(
+                  Icon(
                     Icons.waving_hand_rounded,
-                    color: AppColors.orange,
+                    color:
+                        isDarkMode
+                            ? const Color(0xFFFFB74D)
+                            : const Color(0xFFFF9800),
                     size: 30,
                   ),
                   const SizedBox(width: 4),
@@ -99,7 +111,7 @@ class PxMainAppBar extends StatelessWidget implements PreferredSizeWidget {
                     waveMeByHour(),
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.gray600,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],

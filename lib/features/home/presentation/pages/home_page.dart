@@ -146,11 +146,27 @@ class _HomePageState extends State<HomePage> {
                                 itemBuilder: (BuildContext context, int index) {
                                   final m = menu[index];
 
+                                  final theme = Theme.of(context);
+                                  final isDarkMode =
+                                      theme.brightness == Brightness.dark;
+
                                   return Card(
-                                    color: AppColors.gray300,
+                                    color:
+                                        isDarkMode
+                                            ? theme
+                                                .colorScheme
+                                                .surfaceContainerHighest
+                                            : AppColors.gray300,
                                     elevation: 3,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8.0),
+                                      side: BorderSide(
+                                        color:
+                                            isDarkMode
+                                                ? theme.colorScheme.outline
+                                                : AppColors.gray500,
+                                        width: 1.0,
+                                      ),
                                     ),
                                     child: InkWell(
                                       onTap:
@@ -179,7 +195,8 @@ class _HomePageState extends State<HomePage> {
                                               style: TextStyle(
                                                 fontSize: 20,
                                                 fontWeight: FontWeight.bold,
-                                                color: AppColors.black3,
+                                                color:
+                                                    theme.colorScheme.onSurface,
                                               ),
                                             ),
                                           ],

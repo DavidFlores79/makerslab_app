@@ -1,7 +1,5 @@
 class LightControlEntity {
   final String id;
 
-  LightControlEntity({
-    required this.id,
-  });
+  LightControlEntity({required this.id});
 }

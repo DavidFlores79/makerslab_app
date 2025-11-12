@@ -1,6 +1,35 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  // Dark Theme Colors
+  // Surfaces
+  static const darkSurface = Color(0xFF1C1B1F);
+  static const darkSurfaceVariant = Color(0xFF2B2930);
+  static const darkBackground = Color(0xFF1C1B1F);
+
+  // Primary (APPROVED: #5EB1E8 - 40% lighter than light mode #247BA0)
+  static const darkPrimary = Color(0xFF5EB1E8);
+  static const darkOnPrimary = Color(0xFF003548);
+  static const darkPrimaryContainer = Color(0xFF004F7A);
+  static const darkOnPrimaryContainer = Color(0xFFB8E7FF);
+
+  // Text colors
+  static const darkOnSurface = Color(0xFFE6E1E5); // 87% white
+  static const darkOnSurfaceVariant = Color(0xFFCAC4D0); // 60% white
+  static const darkOutline = Color(0xFF938F99); // 38% white
+
+  // Module colors adapted for dark mode (brighter versions)
+  static const darkLightGreen = Color(0xFFA5D57B); // Gamepad (brighter)
+  static const darkBlue = Color(0xFF64B5F6); // Sensor DHT (lighter)
+  static const darkRed = Color(0xFFEF5350); // Servos (lighter)
+  static const darkOrange = Color(0xFFFFB74D); // Light Control (lighter)
+  static const darkPurple = Color(0xFFBA68C8); // Chat (lighter)
+
+  // Error colors for dark theme
+  static const darkError = Color(0xFFCF6679);
+  static const darkOnError = Color(0xFF000000);
+
+  // Light Theme Colors
   static const black = Color(0xFF000000);
   static const black2 = Color(0xFF111111);
   static const black3 = Color(0xFF222222);

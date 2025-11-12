@@ -88,6 +88,12 @@ import '../features/temperature/data/datasources/temperature_local_datasource.da
 import '../features/temperature/data/repositories/temperature_repository_impl.dart';
 import '../features/temperature/domain/repositories/temperature_repository.dart';
 import '../features/temperature/presentation/bloc/temperature_bloc.dart';
+import '../core/data/datasources/theme_local_datasource.dart';
+import '../core/data/repositories/theme_repository_impl.dart';
+import '../core/domain/repositories/theme_repository.dart';
+import '../core/domain/usecases/load_theme_preference_usecase.dart';
+import '../core/domain/usecases/save_theme_preference_usecase.dart';
+import '../core/presentation/bloc/theme/theme_bloc.dart';
 
 // Importa tus repositorios, usecases, Blocs
 
@@ -153,6 +159,11 @@ Future<void> setupLocator() async {
   // temperature local datasource
   getIt.registerLazySingleton<TemperatureLocalDataSource>(
     () => TemperatureLocalDataSourceImpl(prefs: getIt()),
+  );
+
+  // theme local datasource
+  getIt.registerLazySingleton<ThemeLocalDataSource>(
+    () => ThemeLocalDataSourceImpl(sharedPreferences: getIt()),
   );
 
   //remote data sources
@@ -232,6 +243,11 @@ Future<void> setupLocator() async {
     () => CatalogsRepositoryImpl(remoteDataSource: getIt()),
   );
 
+  // Theme repository
+  getIt.registerLazySingleton<ThemeRepository>(
+    () => ThemeRepositoryImpl(localDataSource: getIt()),
+  );
+
   // Use cases
   getIt.registerLazySingleton(() => ShareFileUseCase(getIt()));
   getIt.registerLazySingleton(() => MarkOnboardingCompletedUseCase(getIt()));
@@ -296,6 +312,14 @@ Future<void> setupLocator() async {
     () => SendServoPositionUseCase(repository: getIt()),
   );
 
+  // Theme use cases
+  getIt.registerLazySingleton(
+    () => LoadThemePreferenceUseCase(repository: getIt()),
+  );
+  getIt.registerLazySingleton(
+    () => SaveThemePreferenceUseCase(repository: getIt()),
+  );
+
   // Blocs
   getIt.registerFactory(() => OnboardingBloc(getIt(), getIt()));
 
@@ -329,6 +353,11 @@ Future<void> setupLocator() async {
       disconnectDeviceUseCase: getIt(),
       permissionService: getIt(),
     ),
+  );
+
+  // Theme BLoC (singleton for global theme state)
+  getIt.registerLazySingleton(
+    () => ThemeBloc(loadThemeUseCase: getIt(), saveThemeUseCase: getIt()),
   );
 
   getIt.registerFactory(() => HomeBloc(getCombinedMenu: getIt()));
