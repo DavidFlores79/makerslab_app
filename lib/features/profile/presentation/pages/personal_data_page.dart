@@ -57,7 +57,7 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
-    
+
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: const PxBackAppBar(backLabel: 'Back'),
@@ -214,9 +214,12 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
           style: TextStyle(color: theme.colorScheme.onSurface),
           decoration: InputDecoration(
             filled: true,
-            fillColor: enabled 
-              ? (isDarkMode ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.surface)
-              : theme.colorScheme.surfaceContainerHigh,
+            fillColor:
+                enabled
+                    ? (isDarkMode
+                        ? theme.colorScheme.surfaceContainerHighest
+                        : theme.colorScheme.surface)
+                    : theme.colorScheme.surfaceContainerHigh,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: theme.colorScheme.outline),
@@ -227,7 +230,10 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+              borderSide: BorderSide(
+                color: theme.colorScheme.primary,
+                width: 2,
+              ),
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),

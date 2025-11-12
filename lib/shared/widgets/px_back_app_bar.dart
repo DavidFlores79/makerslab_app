@@ -25,9 +25,7 @@ class PxBackAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       backgroundColor: backgroundColor ?? theme.colorScheme.surface,
-      iconTheme: IconThemeData(
-        color: theme.colorScheme.onSurface,
-      ),
+      iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
       //chevron back button
       leading: Container(
         margin: EdgeInsets.only(left: 6.0),
