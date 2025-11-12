@@ -1,0 +1,9 @@
+{
+  "dart.flutterSdkPath": "/Users/LAPTOP-david-001/Development/flutter",
+  "dart.env": {
+    "PATH": "/opt/homebrew/opt/ruby/bin:/opt/homebrew/lib/ruby/gems/3.4.0/bin:/opt/homebrew/bin:${env:PATH}"
+  },
+  "terminal.integrated.env.osx": {
+    "PATH": "/opt/homebrew/opt/ruby/bin:/opt/homebrew/lib/ruby/gems/3.4.0/bin:/opt/homebrew/bin:${env:PATH}"
+  }
+}
