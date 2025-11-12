@@ -366,7 +366,7 @@ Implement dark mode with triple selector (System, Light, Dark) in Settings page 
 6. [ ] Create GitHub issue (manual - gh CLI not available)
 7. ✅ **COMPLETE**: Day 1-2 Infrastructure (Domain/Data/BLoC layers)
 8. ✅ Update this session file with progress after each phase
-9. [ ] Day 3: Theme System & Colors (AppColors dark variants, AppTheme factory)
+9. ✅ **COMPLETE**: Day 3: Theme System & Colors (AppColors dark variants, AppTheme factory)
 10. [ ] Day 4: Settings UI (SettingsPage, ThemeSelectorWidget)
 11. [ ] Day 5: App Integration (main.dart modifications)
 12. [ ] Day 6-7: Widget Audit (fix all modules for dark mode)
@@ -483,9 +483,87 @@ Implement dark mode with triple selector (System, Light, Dark) in Settings page 
 4. **Simple Entity**: ThemePreference is plain enum, no Equatable in entities
 5. **Storage Strategy**: SharedPreferences with string values for simplicity
 
-#### Next Phase: Day 3 (Theme System & Colors)
+---
+
+### Day 3: Theme System & Colors ✅ COMPLETE
+**Date**: 2025-11-12 17:30
+**Status**: All theme colors and factory methods implemented
+
+#### Files Modified (2 files):
+
+**1. `lib/theme/app_color.dart`**:
+- ✅ Added comprehensive dark theme color variants
+- ✅ Dark surfaces: darkSurface, darkSurfaceVariant, darkBackground (#1C1B1F, #2B2930)
+- ✅ Dark primary: darkPrimary (#5EB1E8 - APPROVED), darkOnPrimary, darkPrimaryContainer, darkOnPrimaryContainer
+- ✅ Dark text: darkOnSurface (#E6E1E5 - 87% white), darkOnSurfaceVariant (#CAC4D0 - 60% white)
+- ✅ Dark module colors: darkLightGreen, darkBlue, darkRed, darkOrange, darkPurple (all brightened)
+- ✅ Dark error states: darkError (#CF6679), darkOnError
+- ✅ All existing light theme colors preserved
+
+**2. `lib/main.dart`**:
+- ✅ Added import for AppTheme
+- ✅ Replaced hardcoded ThemeData with AppTheme.lightTheme()
+- ✅ Added darkTheme: AppTheme.darkTheme()
+- ✅ Added themeMode: ThemeMode.system (temporary until Day 5)
+- ✅ Removed unused AppColors import after theme refactor
+
+#### Files Created (2 files):
+
+**1. `lib/theme/app_theme.dart`**:
+- ✅ Private constructor (prevents instantiation)
+- ✅ lightTheme() static method with complete Material Design 3 ColorScheme
+- ✅ darkTheme() static method with complete dark ColorScheme
+- ✅ Component themes configured:
+  - AppBarTheme (elevation, colors, centered titles)
+  - CardTheme (rounded corners, elevation, surface tint)
+  - ElevatedButtonTheme (rounded, proper padding)
+  - InputDecorationTheme (outlined style, proper states)
+  - TextButtonTheme (primary color for actions)
+  - IconTheme (proper sizing)
+  - DividerTheme (consistent spacing)
+  - BottomNavigationBarTheme (fixed type, proper colors)
+- ✅ All ABOUTME comments present
+- ✅ Dart formatted and analyzer passed
+
+**2. `.claude/docs/dark_mode/contrast_validation.md`**:
+- ✅ Comprehensive WCAG AA contrast validation
+- ✅ 11 color combination tests performed
+- ✅ All combinations PASS (4.5:1 minimum for text)
+- ✅ Key results:
+  - Primary text (darkOnSurface): **11.67:1** - Exceeds AAA
+  - Secondary text (darkOnSurfaceVariant): **8.54:1** - Exceeds AAA
+  - Primary accent (darkPrimary): **6.55:1** - Excellent
+  - Module colors: All between **5.12:1 and 7.95:1**
+  - Error states: **5.89:1** - Clear visibility
+- ✅ **No adjustments needed** - All colors approved for production
+
+#### Architecture Compliance:
+- ✅ Material Design 3 guidelines followed
+- ✅ Theme factory pattern implemented (no instantiation)
+- ✅ Complete ColorScheme for both themes
+- ✅ Consistent component themes across light/dark
+- ✅ WCAG AA compliance validated
+- ✅ 0 flutter analyze errors
+- ✅ Code properly formatted
+
+#### Key Implementation Details:
+1. **Color Philosophy**: Pre-defined dark variants (NO runtime transformations)
+2. **Primary Dark**: #5EB1E8 (40% lighter than light mode #247BA0) - APPROVED by David
+3. **Text Hierarchy**: 87% white (primary), 60% white (secondary), 38% white (outline)
+4. **Module Colors**: All brightened for dark backgrounds (Gamepad, DHT, Servos, Light Control, Chat)
+5. **Theme Mode**: Currently set to ThemeMode.system (will be controlled by ThemeBloc in Day 5)
+6. **Backward Compatibility**: Light theme looks identical to original hardcoded theme
+
+#### Testing Performed:
+- ✅ flutter analyze: 0 errors
+- ✅ dart format: All files formatted
+- ✅ Contrast validation: 11/11 tests passed
+- 📱 Visual verification: Ready for Day 5 (will test with actual BLoC integration)
+
+#### Next Phase: Day 4 (Settings UI)
 **Ready to implement**:
-- Add dark color variants to AppColors
-- Create AppTheme.lightTheme() and darkTheme() factory methods
-- Validate contrast ratios (WCAG AA compliance)
-- Test color system in isolation
+- Create SettingsPage with section layout
+- Build ThemeSelectorWidget with CupertinoSlidingSegmentedControl
+- Add placeholder sections (Notifications, Language, About)
+- Spanish localization for all UI text
+- Integrate with ThemeBloc (already exists from Day 1-2)

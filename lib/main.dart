@@ -12,7 +12,7 @@ import 'di/service_locator.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/chat/presentation/bloc/chat_bloc.dart';
-import 'theme/app_color.dart';
+import 'theme/app_theme.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -73,24 +73,11 @@ class MyApp extends StatelessWidget {
         Locale('en', 'US'), // Inglés como respaldo
       ],
       locale: const Locale('es', 'MX'),
-      theme: ThemeData(
-        fontFamily: 'Roboto',
-        colorScheme: ColorScheme(
-          brightness: Brightness.light,
-          primary: AppColors.primary,
-          onPrimary: Colors.white,
-          primaryContainer: AppColors.greenLight,
-          onPrimaryContainer: AppColors.greenDark,
-          secondary: AppColors.gray700,
-          onSecondary: Colors.white,
-          onSecondaryContainer: AppColors.gray600,
-          surface: AppColors.white,
-          onSurface: AppColors.black,
-          error: Colors.red,
-          onError: Colors.white,
-        ),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme(),
+      darkTheme: AppTheme.darkTheme(),
+      themeMode:
+          ThemeMode
+              .system, // Temporary: will be controlled by ThemeBloc in Day 5
       scaffoldMessengerKey: SnackbarService().messengerKey,
     );
   }
