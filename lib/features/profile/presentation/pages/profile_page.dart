@@ -59,21 +59,36 @@ class _BuildAccountSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ProfileItemCard(
-          title: 'Datos personales',
-          subtitle: 'Información de perfil',
-          icon: Symbols.person,
-          onTap: () => context.push(PersonalDataPage.routeName),
-        ),
-        ProfileItemCard(
-          title: 'Configuración',
-          subtitle: 'Ajustes y preferencias',
-          icon: Symbols.settings,
-        ),
-      ],
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        final isAuthenticated = authState is Authenticated;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ProfileItemCard(
+              title: 'Datos personales',
+              subtitle:
+                  isAuthenticated
+                      ? 'Información de perfil'
+                      : 'Inicia sesión para ver tu perfil',
+              icon: Symbols.person,
+              onTap:
+                  isAuthenticated
+                      ? () => context.push(PersonalDataPage.routeName)
+                      : null,
+            ),
+            ProfileItemCard(
+              title: 'Configuración',
+              subtitle: 'Ajustes y preferencias',
+              icon: Symbols.settings,
+              onTap: () {
+                // TODO: Navigate to settings
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -83,20 +98,38 @@ class _BuildSupportSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ProfileItemCard(
-          title: 'Centro de Ayuda',
-          subtitle: 'Preguntas frecuentes y guía',
-          icon: Symbols.help,
-        ),
-        ProfileItemCard(
-          title: 'Contactar Soporte',
-          subtitle: 'Chat y asistencia',
-          icon: Symbols.support_agent,
-        ),
-      ],
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        final isAuthenticated = authState is Authenticated;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ProfileItemCard(
+              title: 'Centro de Ayuda',
+              subtitle: 'Preguntas frecuentes y guía',
+              icon: Symbols.help,
+              onTap: () {
+                // TODO: Navigate to help center
+              },
+            ),
+            ProfileItemCard(
+              title: 'Contactar Soporte',
+              subtitle:
+                  isAuthenticated
+                      ? 'Chat y asistencia'
+                      : 'Inicia sesión para contactar soporte',
+              icon: Symbols.support_agent,
+              onTap:
+                  isAuthenticated
+                      ? () {
+                        // TODO: Navigate to contact support
+                      }
+                      : null,
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -113,11 +146,17 @@ class _BuildLegalSection extends StatelessWidget {
           title: 'Términos y condiciones',
           subtitle: 'Condiciones de uso',
           icon: Symbols.description,
+          onTap: () {
+            // TODO: Navigate to terms and conditions
+          },
         ),
         ProfileItemCard(
           title: 'Política de Privacidad',
           subtitle: 'Manejo de datos',
           icon: Symbols.privacy_tip,
+          onTap: () {
+            // TODO: Navigate to privacy policy
+          },
         ),
       ],
     );
@@ -149,16 +188,25 @@ class _BuildAppSectionState extends State<_BuildAppSection> {
           title: 'Calificar App',
           subtitle: 'Ayúdanos a mejorar',
           icon: Symbols.star,
+          onTap: () {
+            // TODO: Open app store for rating
+          },
         ),
         ProfileItemCard(
           title: 'Compartir App',
           subtitle: 'Invita a tus amigos',
           icon: Symbols.share,
+          onTap: () {
+            // TODO: Share app
+          },
         ),
         ProfileItemCard(
           title: 'Versión',
           subtitle: version,
           icon: Symbols.info,
+          onTap: () {
+            // TODO: Show version details or changelog
+          },
         ),
       ],
     );
@@ -193,11 +241,12 @@ class ProfileItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDisabled = onTap == null;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: isDisabled ? AppColors.gray100 : AppColors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.gray300, width: 1),
       ),
@@ -211,25 +260,38 @@ class ProfileItemCard extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: AppColors.primary.withOpacity(0.1),
+            color:
+                isDisabled
+                    ? AppColors.gray300.withOpacity(0.3)
+                    : AppColors.primary.withOpacity(0.1),
           ),
-          child: Icon(icon, size: 24, color: AppColors.primary),
+          child: Icon(
+            icon,
+            size: 24,
+            color: isDisabled ? AppColors.gray400 : AppColors.primary,
+          ),
         ),
         title: Text(
           title,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
+            color: isDisabled ? AppColors.gray500 : null,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
           subtitle,
-          style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.gray600),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: isDisabled ? AppColors.gray400 : AppColors.gray600,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        trailing: Icon(Icons.chevron_right, color: AppColors.gray400),
+        trailing: Icon(
+          Icons.chevron_right,
+          color: isDisabled ? AppColors.gray300 : AppColors.gray400,
+        ),
       ),
     );
   }
