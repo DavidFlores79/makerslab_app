@@ -195,7 +195,8 @@ class _HomePageState extends State<HomePage> {
                                               style: TextStyle(
                                                 fontSize: 20,
                                                 fontWeight: FontWeight.bold,
-                                                color: AppColors.black3,
+                                                color:
+                                                    theme.colorScheme.onSurface,
                                               ),
                                             ),
                                           ],

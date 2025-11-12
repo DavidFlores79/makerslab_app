@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
+import '../../../../shared/widgets/px_back_app_bar.dart';
 import '../widgets/theme_selector_widget.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -14,7 +15,7 @@ class SettingsPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Configuración'), centerTitle: true),
+      appBar: const PxBackAppBar(backLabel: 'Configuración'),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(

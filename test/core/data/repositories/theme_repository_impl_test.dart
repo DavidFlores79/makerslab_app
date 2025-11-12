@@ -25,97 +25,112 @@ void main() {
   });
 
   group('getThemePreference', () {
-    test('should return ThemePreference.dark when datasource returns dark', () async {
-      // Arrange
-      when(mockLocalDataSource.getThemePreference())
-          .thenAnswer((_) async => ThemePreference.dark);
+    test(
+      'should return ThemePreference.dark when datasource returns dark',
+      () async {
+        // Arrange
+        when(
+          mockLocalDataSource.getThemePreference(),
+        ).thenAnswer((_) async => ThemePreference.dark);
 
-      // Act
-      final result = await repository.getThemePreference();
+        // Act
+        final result = await repository.getThemePreference();
 
-      // Assert
-      expect(result, equals(const Right(ThemePreference.dark)));
-      verify(mockLocalDataSource.getThemePreference());
-      verifyNoMoreInteractions(mockLocalDataSource);
-    });
+        // Assert
+        expect(result, equals(const Right(ThemePreference.dark)));
+        verify(mockLocalDataSource.getThemePreference());
+        verifyNoMoreInteractions(mockLocalDataSource);
+      },
+    );
 
-    test('should return ThemePreference.light when datasource returns light', () async {
-      // Arrange
-      when(mockLocalDataSource.getThemePreference())
-          .thenAnswer((_) async => ThemePreference.light);
+    test(
+      'should return ThemePreference.light when datasource returns light',
+      () async {
+        // Arrange
+        when(
+          mockLocalDataSource.getThemePreference(),
+        ).thenAnswer((_) async => ThemePreference.light);
 
-      // Act
-      final result = await repository.getThemePreference();
+        // Act
+        final result = await repository.getThemePreference();
 
-      // Assert
-      expect(result, equals(const Right(ThemePreference.light)));
-      verify(mockLocalDataSource.getThemePreference());
-      verifyNoMoreInteractions(mockLocalDataSource);
-    });
+        // Assert
+        expect(result, equals(const Right(ThemePreference.light)));
+        verify(mockLocalDataSource.getThemePreference());
+        verifyNoMoreInteractions(mockLocalDataSource);
+      },
+    );
 
-    test('should return ThemePreference.system when datasource returns system', () async {
-      // Arrange
-      when(mockLocalDataSource.getThemePreference())
-          .thenAnswer((_) async => ThemePreference.system);
+    test(
+      'should return ThemePreference.system when datasource returns system',
+      () async {
+        // Arrange
+        when(
+          mockLocalDataSource.getThemePreference(),
+        ).thenAnswer((_) async => ThemePreference.system);
 
-      // Act
-      final result = await repository.getThemePreference();
+        // Act
+        final result = await repository.getThemePreference();
 
-      // Assert
-      expect(result, equals(const Right(ThemePreference.system)));
-      verify(mockLocalDataSource.getThemePreference());
-      verifyNoMoreInteractions(mockLocalDataSource);
-    });
+        // Assert
+        expect(result, equals(const Right(ThemePreference.system)));
+        verify(mockLocalDataSource.getThemePreference());
+        verifyNoMoreInteractions(mockLocalDataSource);
+      },
+    );
 
-    test('should return CacheFailure when datasource throws CacheException', () async {
-      // Arrange
-      const errorMessage = 'No theme preference found';
-      when(mockLocalDataSource.getThemePreference())
-          .thenThrow(CacheException(errorMessage));
+    test(
+      'should return CacheFailure when datasource throws CacheException',
+      () async {
+        // Arrange
+        const errorMessage = 'No theme preference found';
+        when(
+          mockLocalDataSource.getThemePreference(),
+        ).thenThrow(CacheException(errorMessage));
 
-      // Act
-      final result = await repository.getThemePreference();
+        // Act
+        final result = await repository.getThemePreference();
 
-      // Assert
-      expect(result, isA<Left>());
-      result.fold(
-        (failure) {
+        // Assert
+        expect(result, isA<Left>());
+        result.fold((failure) {
           expect(failure, isA<CacheFailure>());
           expect(failure.message, equals(errorMessage));
-        },
-        (_) => fail('Should return Left'),
-      );
-      verify(mockLocalDataSource.getThemePreference());
-      verifyNoMoreInteractions(mockLocalDataSource);
-    });
+        }, (_) => fail('Should return Left'));
+        verify(mockLocalDataSource.getThemePreference());
+        verifyNoMoreInteractions(mockLocalDataSource);
+      },
+    );
 
-    test('should return CacheFailure when datasource throws generic exception', () async {
-      // Arrange
-      when(mockLocalDataSource.getThemePreference())
-          .thenThrow(Exception('Unexpected error'));
+    test(
+      'should return CacheFailure when datasource throws generic exception',
+      () async {
+        // Arrange
+        when(
+          mockLocalDataSource.getThemePreference(),
+        ).thenThrow(Exception('Unexpected error'));
 
-      // Act
-      final result = await repository.getThemePreference();
+        // Act
+        final result = await repository.getThemePreference();
 
-      // Assert
-      expect(result, isA<Left>());
-      result.fold(
-        (failure) {
+        // Assert
+        expect(result, isA<Left>());
+        result.fold((failure) {
           expect(failure, isA<CacheFailure>());
           expect(failure.message, contains('Error'));
-        },
-        (_) => fail('Should return Left'),
-      );
-      verify(mockLocalDataSource.getThemePreference());
-      verifyNoMoreInteractions(mockLocalDataSource);
-    });
+        }, (_) => fail('Should return Left'));
+        verify(mockLocalDataSource.getThemePreference());
+        verifyNoMoreInteractions(mockLocalDataSource);
+      },
+    );
   });
 
   group('saveThemePreference', () {
     test('should call datasource to save ThemePreference.dark', () async {
       // Arrange
-      when(mockLocalDataSource.saveThemePreference(ThemePreference.dark))
-          .thenAnswer((_) async => Future.value());
+      when(
+        mockLocalDataSource.saveThemePreference(ThemePreference.dark),
+      ).thenAnswer((_) async => Future.value());
 
       // Act
       final result = await repository.saveThemePreference(ThemePreference.dark);
@@ -128,11 +143,14 @@ void main() {
 
     test('should call datasource to save ThemePreference.light', () async {
       // Arrange
-      when(mockLocalDataSource.saveThemePreference(ThemePreference.light))
-          .thenAnswer((_) async => Future.value());
+      when(
+        mockLocalDataSource.saveThemePreference(ThemePreference.light),
+      ).thenAnswer((_) async => Future.value());
 
       // Act
-      final result = await repository.saveThemePreference(ThemePreference.light);
+      final result = await repository.saveThemePreference(
+        ThemePreference.light,
+      );
 
       // Assert
       expect(result, equals(const Right(null)));
@@ -142,11 +160,14 @@ void main() {
 
     test('should call datasource to save ThemePreference.system', () async {
       // Arrange
-      when(mockLocalDataSource.saveThemePreference(ThemePreference.system))
-          .thenAnswer((_) async => Future.value());
+      when(
+        mockLocalDataSource.saveThemePreference(ThemePreference.system),
+      ).thenAnswer((_) async => Future.value());
 
       // Act
-      final result = await repository.saveThemePreference(ThemePreference.system);
+      final result = await repository.saveThemePreference(
+        ThemePreference.system,
+      );
 
       // Assert
       expect(result, equals(const Right(null)));
@@ -154,47 +175,53 @@ void main() {
       verifyNoMoreInteractions(mockLocalDataSource);
     });
 
-    test('should return CacheFailure when datasource throws CacheException', () async {
-      // Arrange
-      const errorMessage = 'Failed to save theme preference';
-      when(mockLocalDataSource.saveThemePreference(any))
-          .thenThrow(CacheException(errorMessage));
+    test(
+      'should return CacheFailure when datasource throws CacheException',
+      () async {
+        // Arrange
+        const errorMessage = 'Failed to save theme preference';
+        when(
+          mockLocalDataSource.saveThemePreference(any),
+        ).thenThrow(CacheException(errorMessage));
 
-      // Act
-      final result = await repository.saveThemePreference(ThemePreference.dark);
+        // Act
+        final result = await repository.saveThemePreference(
+          ThemePreference.dark,
+        );
 
-      // Assert
-      expect(result, isA<Left>());
-      result.fold(
-        (failure) {
+        // Assert
+        expect(result, isA<Left>());
+        result.fold((failure) {
           expect(failure, isA<CacheFailure>());
           expect(failure.message, equals(errorMessage));
-        },
-        (_) => fail('Should return Left'),
-      );
-      verify(mockLocalDataSource.saveThemePreference(ThemePreference.dark));
-      verifyNoMoreInteractions(mockLocalDataSource);
-    });
+        }, (_) => fail('Should return Left'));
+        verify(mockLocalDataSource.saveThemePreference(ThemePreference.dark));
+        verifyNoMoreInteractions(mockLocalDataSource);
+      },
+    );
 
-    test('should return CacheFailure when datasource throws generic exception', () async {
-      // Arrange
-      when(mockLocalDataSource.saveThemePreference(any))
-          .thenThrow(Exception('Unexpected save error'));
+    test(
+      'should return CacheFailure when datasource throws generic exception',
+      () async {
+        // Arrange
+        when(
+          mockLocalDataSource.saveThemePreference(any),
+        ).thenThrow(Exception('Unexpected save error'));
 
-      // Act
-      final result = await repository.saveThemePreference(ThemePreference.light);
+        // Act
+        final result = await repository.saveThemePreference(
+          ThemePreference.light,
+        );
 
-      // Assert
-      expect(result, isA<Left>());
-      result.fold(
-        (failure) {
+        // Assert
+        expect(result, isA<Left>());
+        result.fold((failure) {
           expect(failure, isA<CacheFailure>());
           expect(failure.message, contains('Error'));
-        },
-        (_) => fail('Should return Left'),
-      );
-      verify(mockLocalDataSource.saveThemePreference(ThemePreference.light));
-      verifyNoMoreInteractions(mockLocalDataSource);
-    });
+        }, (_) => fail('Should return Left'));
+        verify(mockLocalDataSource.saveThemePreference(ThemePreference.light));
+        verifyNoMoreInteractions(mockLocalDataSource);
+      },
+    );
   });
 }

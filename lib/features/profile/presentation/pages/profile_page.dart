@@ -246,7 +246,9 @@ class ProfileItemCard extends StatelessWidget {
       decoration: BoxDecoration(
         color:
             isDisabled
-                ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
+                ? theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                )
                 : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: theme.colorScheme.outlineVariant, width: 1),

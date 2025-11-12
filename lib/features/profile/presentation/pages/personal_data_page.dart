@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../shared/widgets/index.dart';
-import '../../../../theme/app_color.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -56,8 +55,11 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: theme.colorScheme.surface,
       appBar: const PxBackAppBar(backLabel: 'Back'),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
@@ -86,13 +88,15 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
               child: Column(
                 children: [
                   // Avatar with camera icon
-                  _buildAvatarSection(),
+                  _buildAvatarSection(theme),
                   const SizedBox(height: 30),
 
                   // Name
                   _buildTextField(
                     label: 'Full Name',
                     controller: _nameController,
+                    theme: theme,
+                    isDarkMode: isDarkMode,
                   ),
                   const SizedBox(height: 16),
 
@@ -102,6 +106,8 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
                     enabled: false, // Usually phone is not editable
+                    theme: theme,
+                    isDarkMode: isDarkMode,
                   ),
                   const SizedBox(height: 16),
 
@@ -110,6 +116,8 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
                     label: 'Email',
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
+                    theme: theme,
+                    isDarkMode: isDarkMode,
                   ),
                   const SizedBox(height: 32),
 
@@ -143,7 +151,7 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
     );
   }
 
-  Widget _buildAvatarSection() {
+  Widget _buildAvatarSection(ThemeData theme) {
     return Stack(
       children: [
         CircleAvatar(
@@ -161,12 +169,12 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
           child: Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: AppColors.black.withOpacity(0.7),
+              color: theme.colorScheme.primary.withOpacity(0.9),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.camera_alt,
-              color: AppColors.white,
+              color: theme.colorScheme.onPrimary,
               size: 20,
             ),
           ),
@@ -178,6 +186,8 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
+    required ThemeData theme,
+    required bool isDarkMode,
     TextInputType? keyboardType,
     bool enabled = true,
     bool readOnly = false,
@@ -190,7 +200,7 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
           label,
           style: TextStyle(
             fontSize: 12,
-            color: AppColors.gray600,
+            color: theme.colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -201,24 +211,27 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
           enabled: enabled,
           readOnly: readOnly,
           onTap: onTap,
+          style: TextStyle(color: theme.colorScheme.onSurface),
           decoration: InputDecoration(
             filled: true,
-            fillColor: enabled ? AppColors.white : AppColors.gray100,
+            fillColor: enabled 
+              ? (isDarkMode ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.surface)
+              : theme.colorScheme.surfaceContainerHigh,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.gray300),
+              borderSide: BorderSide(color: theme.colorScheme.outline),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.gray300),
+              borderSide: BorderSide(color: theme.colorScheme.outline),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
+              borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.gray300),
+              borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,

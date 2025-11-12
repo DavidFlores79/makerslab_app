@@ -24,9 +24,7 @@ class PxMainAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: false,
-      iconTheme: IconThemeData(
-        color: theme.colorScheme.onSurface,
-      ),
+      iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
       flexibleSpace: ClipRRect(
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
