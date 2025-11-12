@@ -1,3 +1,5 @@
+// ABOUTME: This file contains the main application router configuration
+// ABOUTME: It defines all routes for the application using GoRouter
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:makerslab_app/features/auth/presentation/pages/splash_coordinator.dart';

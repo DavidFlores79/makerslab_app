@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "mx.enlacetecnologias.makerslab_app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = "27.0.12077973"
 
     compileOptions {
