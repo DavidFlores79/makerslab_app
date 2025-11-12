@@ -10,20 +10,10 @@ class RegisterUser {
   RegisterUser({required this.repository});
 
   Future<Either<Failure, User>> call({
+    required String name,
     required String phone,
     required String password,
-    String? firstName,
-    String? firstSurname,
-    String? secondSurname,
-    required String confirmPassword,
   }) {
-    return repository.signUp(
-      phone: phone,
-      password: password,
-      firstName: firstName,
-      firstSurname: firstSurname,
-      secondSurname: secondSurname,
-      confirmPassword: confirmPassword,
-    );
+    return repository.signUp(name: name, phone: phone, password: password);
   }
 }

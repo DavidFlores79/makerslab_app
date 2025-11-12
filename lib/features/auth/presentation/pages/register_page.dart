@@ -6,7 +6,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../../core/ui/snackbar_service.dart';
 import '../../../../di/service_locator.dart';
-import '../../../../shared/images/tri_circle_header.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_color.dart';
 import '../../../../utils/util_image.dart';
@@ -112,13 +111,9 @@ class RegisterPage extends StatelessWidget {
                                 // último step: registrar
                                 context.read<AuthBloc>().add(
                                   RegisterRequested(
-                                    firstName: state.firstName ?? '',
-                                    firstSurname: state.firstSurname ?? '',
-                                    secondSurname: state.secondSurname ?? '',
+                                    name: state.name ?? '',
                                     phone: state.phone ?? '',
                                     password: state.password ?? '',
-                                    confirmPassword:
-                                        state.confirmPassword ?? '',
                                   ),
                                 );
                               } else {

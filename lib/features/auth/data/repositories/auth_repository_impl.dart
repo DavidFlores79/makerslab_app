@@ -57,24 +57,19 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
 
   @override
   Future<Either<Failure, User>> signUp({
+    required String name,
     required String phone,
     required String password,
-    String? firstName,
-    String? firstSurname,
-    String? secondSurname,
-    required String confirmPassword,
   }) {
     return safeCall<User>(() async {
-      // final response = await localDataSource.signUp(
-      //   phone: phone,
-      //   password: password,
-      //   confirmPassword: confirmPassword,
-      //   firstName: firstName,
-      //   firstSurname: firstSurname,
-      //   secondSurname: secondSurname,
-      // );
-      // return response.data!;
-      throw UnimplementedError('signUp is not implemented');
+      final response = await remoteDataSource.signUp(
+        name: name,
+        phone: phone,
+        password: password,
+      );
+
+      // Don't cache tokens yet - user needs to verify OTP first
+      return response.data!;
     });
   }
 
@@ -159,6 +154,42 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   Future<Either<Failure, void>> resendSignUpCode({required String userId}) {
     return safeCall<void>(() async {
       await remoteDataSource.resendSignUpCode(userId: userId);
+    });
+  }
+
+  @override
+  Future<Either<Failure, User>> updateProfile({
+    required String userId,
+    String? name,
+    String? email,
+    String? phone,
+    String? image,
+  }) {
+    return safeCall<User>(() async {
+      final userModel = await remoteDataSource.updateProfile(
+        userId: userId,
+        name: name,
+        email: email,
+        phone: phone,
+        image: image,
+      );
+
+      // Update local cache with new user data
+      await userLocalDataSource.saveUser(userModel);
+
+      return User(
+        id: userModel.id,
+        name: userModel.name,
+        phone: userModel.phone,
+        email: userModel.email,
+        status: userModel.status,
+        image: userModel.image,
+        profile: userModel.profile,
+        deleted: userModel.deleted,
+        google: userModel.google,
+        createdAt: userModel.createdAt,
+        updatedAt: userModel.updatedAt,
+      );
     });
   }
 

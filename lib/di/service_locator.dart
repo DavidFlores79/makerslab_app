@@ -40,6 +40,7 @@ import '../features/auth/domain/usecases/logout_user.dart';
 import '../features/auth/domain/usecases/register_user.dart';
 import '../features/auth/domain/usecases/resend_sign_up_code.dart';
 import '../features/auth/domain/usecases/signin_with_phone.dart';
+import '../features/auth/domain/usecases/update_profile.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/auth/presentation/bloc/otp/otp_bloc.dart';
 import '../features/auth/presentation/bloc/register/register_cubit.dart';
@@ -150,7 +151,7 @@ Future<void> setupLocator() async {
 
   //remote data sources
   getIt.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(dio: getIt()),
+    () => AuthRemoteDataSourceImpl(dio: getIt(), logger: logger),
   );
   getIt.registerLazySingleton<HomeRemoteDataSource>(
     () => HomeRemoteDataSourceImpl(dio: getIt()),
@@ -266,6 +267,7 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => LogoutUser(repository: getIt()));
   getIt.registerLazySingleton(() => ResendSignUpCode(repository: getIt()));
   getIt.registerLazySingleton(() => ConfirmSignUp(repository: getIt()));
+  getIt.registerLazySingleton(() => UpdateProfile(repository: getIt()));
   getIt.registerLazySingleton(() => SendMessageUsecase(repository: getIt()));
   getIt.registerLazySingleton(() => UploadFile(repository: getIt()));
   getIt.registerLazySingleton(
@@ -288,6 +290,7 @@ Future<void> setupLocator() async {
       getUserFromCache: getIt(),
       logoutUser: getIt(),
       signinWithPhone: getIt(),
+      updateProfile: getIt(),
     ),
   );
 

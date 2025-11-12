@@ -2,20 +2,19 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/api_config.dart';
+import '../../../../core/data/services/logger_service.dart';
 import '../../../../core/network/api_exceptions.dart';
 import '../models/forgot_password_response_model.dart';
 import '../models/login_response_model.dart';
+import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<LoginResponseModel> signIn(String email, String password);
   Future<LoginResponseModel> phoneSignIn(String phone, String password);
   Future<LoginResponseModel> signUp({
+    required String name,
     required String phone,
     required String password,
-    required String confirmPassword,
-    String? firstName,
-    String? firstSurname,
-    String? secondSurname,
   });
   Future<void> changePassword(String oldPassword, String newPassword);
   Future<ForgotPasswordResponseModel> forgotPassword(String phone);
@@ -24,12 +23,20 @@ abstract class AuthRemoteDataSource {
     required String userId,
     required String code,
   });
+  Future<UserModel> updateProfile({
+    required String userId,
+    String? name,
+    String? email,
+    String? phone,
+    String? image,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final Dio dio;
+  final ILogger logger;
 
-  AuthRemoteDataSourceImpl({required this.dio});
+  AuthRemoteDataSourceImpl({required this.dio, required this.logger});
 
   @override
   Future<LoginResponseModel> signIn(String email, String password) async {
@@ -55,26 +62,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<LoginResponseModel> signUp({
+    required String name,
     required String phone,
     required String password,
-    required String confirmPassword,
-    String? firstName,
-    String? firstSurname,
-    String? secondSurname,
   }) async {
-    final response = await _safePost(
-      ApiConfig.signUpEndpoint,
-      data: {
-        'phone': phone,
-        'password': password,
-        'confirmPassword': confirmPassword,
-        'firstName': firstName,
-        'firstSurname': firstSurname,
-        'secondSurname': secondSurname,
-      },
+    logger.info(
+      'POST ${ApiConfig.signUpEndpoint} -> name: $name, phone: $phone',
     );
 
-    return LoginResponseModel.fromJson(_ensureMap(response.data));
+    try {
+      final response = await _safePost(
+        ApiConfig.signUpEndpoint,
+        data: {'name': name, 'phone': phone, 'password': password},
+      );
+
+      logger.info('Sign up successful for user: $name');
+      return LoginResponseModel.fromJson(_ensureMap(response.data));
+    } catch (e, stackTrace) {
+      logger.error('Sign up failed', e, stackTrace);
+      rethrow;
+    }
   }
 
   @override
@@ -123,6 +130,35 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return LoginResponseModel.fromJson(_ensureMap(response.data));
   }
 
+  @override
+  Future<UserModel> updateProfile({
+    required String userId,
+    String? name,
+    String? email,
+    String? phone,
+    String? image,
+  }) async {
+    debugPrint('PUT ${ApiConfig.usersEndpoint}/$userId');
+
+    final Map<String, dynamic> data = {};
+    if (name != null) data['name'] = name;
+    if (email != null) data['email'] = email;
+    if (phone != null) data['phone'] = phone;
+    if (image != null) data['image'] = image;
+
+    final response = await _safePut(
+      '${ApiConfig.usersEndpoint}/$userId',
+      data: data,
+    );
+
+    final responseData = _ensureMap(response.data);
+    if (responseData.containsKey('data')) {
+      return UserModel.fromJson(responseData['data']);
+    }
+
+    return UserModel.fromJson(responseData);
+  }
+
   /// --- Helpers ---
 
   Future<Response> _safePost(
@@ -149,6 +185,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } on DioException catch (e) {
       _handleDioError(e);
       rethrow; // nunca llega aquí, pero por typing
+    }
+  }
+
+  Future<Response> _safePut(
+    String path, {
+    Map<String, dynamic>? data,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      final response = await dio.put(
+        path,
+        data: data,
+        cancelToken: cancelToken,
+        options: Options(validateStatus: (s) => s != null && s < 500),
+      );
+
+      if (response.statusCode != null &&
+          response.statusCode! >= 200 &&
+          response.statusCode! < 300) {
+        return response;
+      }
+
+      final message = _extractMessageFromResponse(response);
+      throw ApiException(message, statusCode: response.statusCode);
+    } on DioException catch (e) {
+      _handleDioError(e);
+      rethrow;
     }
   }
 

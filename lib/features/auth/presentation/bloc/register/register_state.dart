@@ -1,12 +1,13 @@
+// ABOUTME: This file contains the RegisterState
+// ABOUTME: It manages the registration form state including name, phone, and password
+
 class RegisterState {
   final int step;
   final String? phone;
   final String? confirmPhone;
   final String? password;
   final String? confirmPassword;
-  final String? firstName;
-  final String? firstSurname;
-  final String? secondSurname;
+  final String? name;
   final bool isValid;
 
   const RegisterState({
@@ -15,9 +16,7 @@ class RegisterState {
     this.confirmPhone,
     this.password,
     this.confirmPassword,
-    this.firstName,
-    this.firstSurname,
-    this.secondSurname,
+    this.name,
     this.isValid = false,
   });
 
@@ -27,9 +26,7 @@ class RegisterState {
     String? confirmPhone,
     String? password,
     String? confirmPassword,
-    String? firstName,
-    String? firstSurname,
-    String? secondSurname,
+    String? name,
     bool? isValid,
   }) {
     return RegisterState(
@@ -38,9 +35,7 @@ class RegisterState {
       confirmPhone: confirmPhone ?? this.confirmPhone,
       password: password ?? this.password,
       confirmPassword: confirmPassword ?? this.confirmPassword,
-      firstName: firstName ?? this.firstName,
-      firstSurname: firstSurname ?? this.firstSurname,
-      secondSurname: secondSurname ?? this.secondSurname,
+      name: name ?? this.name,
       isValid: isValid ?? this.isValid,
     );
   }

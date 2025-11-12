@@ -8,6 +8,8 @@
   "sign_up_label": "Sign Up",
   "sign_up_2_label": "Register",
   "dont_have_account_label": "Don't have an account? Sign Up",
+  "name_label": "Full name",
+  "name_hint": "Enter your full name",
   "first_name_label": "First Name",
   "first_name_hint": "Enter your first name",
   "first_surname_label": "First Lastname",
