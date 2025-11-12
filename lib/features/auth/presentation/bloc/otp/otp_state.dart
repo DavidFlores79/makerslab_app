@@ -1,3 +1,4 @@
+import '../../../../../core/domain/entities/user.dart';
 import '../../../data/models/user_model.dart';
 
 abstract class OtpState {}
@@ -21,6 +22,11 @@ class OtpConfirmSuccess extends OtpState {
   final String token;
   final UserModel user;
   OtpConfirmSuccess({required this.token, required this.user});
+}
+
+class OtpRegistrationSuccess extends OtpState {
+  final User user;
+  OtpRegistrationSuccess({required this.user});
 }
 
 class OtpFailure extends OtpState {

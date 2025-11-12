@@ -1,3 +1,6 @@
+// ABOUTME: This file contains the OTP BLoC for handling OTP verification
+// ABOUTME: Supports both legacy and new registration flows with timer management
+
 import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
@@ -7,24 +10,32 @@ import '../../../../../core/error/failure.dart';
 import '../../../data/models/login_response_model.dart';
 import '../../../domain/usecases/resend_sign_up_code.dart';
 import '../../../domain/usecases/confirm_sign_up.dart';
+import '../../../domain/usecases/verify_registration.dart';
+import '../../../domain/usecases/resend_registration_code.dart';
 import 'otp_event.dart';
 import 'otp_state.dart';
 
 class OtpBloc extends Bloc<OtpEvent, OtpState> {
   final ResendSignUpCode resendSignUpCode;
   final ConfirmSignUp confirmSignUp;
+  final VerifyRegistration verifyRegistration;
+  final ResendRegistrationCode resendRegistrationCode;
 
   StreamSubscription<int>? _tickerSub;
 
-  OtpBloc({required this.resendSignUpCode, required this.confirmSignUp})
-    : super(OtpInitial(secondsLeft: 60)) {
-    // debugPrint('>>> OtpBloc creado para userId: $userId');
-
+  OtpBloc({
+    required this.resendSignUpCode,
+    required this.confirmSignUp,
+    required this.verifyRegistration,
+    required this.resendRegistrationCode,
+  }) : super(OtpInitial(secondsLeft: 300)) {
     on<OtpStartTimer>(_onStarted);
     on<OtpTick>(_onTicked);
     on<OtpCodeChanged>(_onCodeChanged);
     on<OtpResendPressed>(_onResendPressed);
     on<OtpConfirmPressed>(_onConfirmPressed);
+    on<OtpVerifyRegistration>(_onVerifyRegistration);
+    on<OtpResendRegistrationCode>(_onResendRegistrationCode);
   }
 
   void _onStarted(OtpStartTimer event, Emitter<OtpState> emit) {
@@ -143,9 +154,72 @@ class OtpBloc extends Bloc<OtpEvent, OtpState> {
     }
   }
 
+  Future<void> _onVerifyRegistration(
+    OtpVerifyRegistration event,
+    Emitter<OtpState> emit,
+  ) async {
+    debugPrint(
+      '>>> OtpVerifyRegistration for registrationId: ${event.registrationId} with OTP: ${event.otp}',
+    );
+    emit(OtpLoading());
+
+    try {
+      final Either<Failure, dynamic> result = await verifyRegistration.call(
+        registrationId: event.registrationId,
+        otp: event.otp,
+      );
+
+      result.fold(
+        (failure) {
+          debugPrint('>>> verifyRegistration failed: ${failure.message}');
+          emit(OtpFailure(failure.message));
+        },
+        (user) {
+          debugPrint('>>> verifyRegistration success');
+          emit(OtpRegistrationSuccess(user: user));
+        },
+      );
+    } catch (e) {
+      debugPrint('>>> verifyRegistration exception: $e');
+      emit(OtpFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onResendRegistrationCode(
+    OtpResendRegistrationCode event,
+    Emitter<OtpState> emit,
+  ) async {
+    debugPrint(
+      '>>> OtpResendRegistrationCode for registrationId: ${event.registrationId}',
+    );
+    emit(OtpLoading());
+
+    try {
+      final Either<Failure, void> result = await resendRegistrationCode.call(
+        registrationId: event.registrationId,
+      );
+
+      result.fold(
+        (failure) {
+          debugPrint('>>> resendRegistrationCode failed: ${failure.message}');
+          emit(OtpFailure(failure.message));
+        },
+        (_) {
+          debugPrint('>>> resendRegistrationCode success');
+          emit(OtpResendSent());
+          // Restart timer (5 minutes)
+          add(OtpStartTimer(seconds: 300));
+        },
+      );
+    } catch (e) {
+      debugPrint('>>> resendRegistrationCode exception: $e');
+      emit(OtpFailure(e.toString()));
+    }
+  }
+
   @override
   Future<void> close() {
-    debugPrint('>>> OtpBloc cerrado para $id');
+    debugPrint('>>> OtpBloc closed');
     _tickerSub?.cancel();
     return super.close();
   }

@@ -1,3 +1,6 @@
+// ABOUTME: This file contains the RegisterStep1 widget
+// ABOUTME: It displays the first step of registration form with name input field
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -15,38 +18,12 @@ class RegisterStep1 extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         PXCustomTextField(
-          labelText: AppLocalizations.of(context)!.first_name_label,
-          hintText: AppLocalizations.of(context)!.first_name_hint,
+          labelText: AppLocalizations.of(context)!.name_label,
+          hintText: AppLocalizations.of(context)!.name_hint,
           keyboardType: TextInputType.name,
           validator: (value) => PXAppValidators.name(value),
           onChanged: (value) {
             context.read<RegisterCubit>().updateName(value);
-          },
-        ),
-        const SizedBox(height: 20),
-        PXCustomTextField(
-          labelText: AppLocalizations.of(context)!.first_surname_label,
-          hintText: AppLocalizations.of(context)!.first_surname_hint,
-          keyboardType: TextInputType.name,
-          validator: (value) => PXAppValidators.name(value),
-          onChanged: (value) {
-            context.read<RegisterCubit>().updateFirstSurname(value);
-          },
-        ),
-        const SizedBox(height: 20),
-        PXCustomTextField(
-          labelText: AppLocalizations.of(context)!.second_surname_label,
-          hintText: AppLocalizations.of(context)!.second_surname_hint,
-          keyboardType: TextInputType.name,
-          //campo opcional pero si existe debe ser válido y mayor a 2
-          validator: (value) {
-            if (value != null && value.isNotEmpty) {
-              return PXAppValidators.name(value);
-            }
-            return null;
-          },
-          onChanged: (value) {
-            context.read<RegisterCubit>().updateSecondSurname(value);
           },
         ),
       ],

@@ -12,10 +12,14 @@ import 'package:uuid/uuid.dart';
 // import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart' as fcui;
 
+import '../../../../di/service_locator.dart';
 import '../../../../theme/app_color.dart';
+import '../../domain/usecases/upload_file_usecase.dart';
 import '../bloc/chat_bloc.dart';
 import '../bloc/chat_event.dart';
 import '../bloc/chat_state.dart';
+import '../theme/chat_theme_provider.dart';
+import '../widgets/custom_message_bubble.dart';
 
 class ChatContent extends StatefulWidget {
   final String moduleKey;
@@ -33,6 +37,7 @@ class ChatContent extends StatefulWidget {
 
 class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
   final _chatController = InMemoryChatController();
+  final _textController = TextEditingController();
   final String _currentUserId = 'unknownUser';
   final List<Message> _localMessages = [];
   final _uuid = const Uuid();
@@ -64,6 +69,7 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _chatController.dispose();
+    _textController.dispose();
     super.dispose();
   }
 
@@ -189,10 +195,18 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
     return User(id: id, name: id == _currentUserId ? 'Tú' : 'IA Bot');
   }
 
-  // Stub: implementa la subida a tu servidor / storage y retorna la URL (o null si no subes)
-  Future<String?> uploadPendingFileToServer(File file) async {
-    // TODO: subir a tu backend y retornar la URL pública
-    return null;
+  // Upload file using the UploadFile use case
+  Future<String?> uploadPendingFileToServer(
+    Uint8List bytes,
+    String filename,
+  ) async {
+    final uploadFile = getIt<UploadFile>();
+    final result = await uploadFile(bytes, filename);
+
+    return result.fold((failure) {
+      debugPrint('Error uploading file: ${failure.message}');
+      return null;
+    }, (url) => url);
   }
 
   void _onMessageSend(String text) async {
@@ -208,9 +222,26 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
         return;
       }
 
-      // intenta subir primero (opcional)
+      // Upload file to get Cloudinary URL using the bytes we already have
       String? source = _pendingFile!.path;
-      final uploadedUrl = await uploadPendingFileToServer(_pendingFile!);
+      final uploadedUrl = await uploadPendingFileToServer(
+        _pendingBytes!,
+        _pendingName!,
+      );
+
+      if (uploadedUrl == null && _pendingIsImage) {
+        // Show error if upload failed for images (required for API)
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Error al subir la imagen. Intenta de nuevo.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
       if (uploadedUrl != null) source = uploadedUrl;
 
       if (_pendingIsImage) {
@@ -221,7 +252,7 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
           size: _pendingSize ?? 0,
           width: _pendingWidth ?? 0,
           height: _pendingHeight ?? 0,
-          source: source ?? '',
+          source: source,
         );
 
         _chatController.insertMessage(imgMsg);
@@ -241,13 +272,37 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
 
         _chatController.insertMessage(textMsg);
         _localMessages.insert(0, textMsg);
+
+        // Send message to API with image URL
+        context.read<ChatBloc>().add(
+          SendMessageEvent(
+            conversationId: conversationId,
+            content: trimmed,
+            imageUrl: uploadedUrl!,
+          ),
+        );
+
+        // Insert typing indicator for AI response
+        final typingId = 'typing-${_uuid.v4()}';
+        final typingMsg = TextMessage(
+          id: typingId,
+          authorId: 'assistant',
+          createdAt: DateTime.now().toUtc(),
+          sentAt: DateTime.now().toUtc(),
+          text: '',
+          metadata: {'isTyping': true, 'moduleKey': widget.moduleKey},
+        );
+
+        _typingMessageId = typingId;
+        _chatController.insertMessage(typingMsg);
+        _localMessages.insert(0, typingMsg);
       } else {
         final fileMsg = FileMessage(
           id: _uuid.v4(),
           authorId: _currentUserId,
           createdAt: DateTime.now().toUtc(),
           size: _pendingSize ?? 0,
-          source: source ?? '',
+          source: source,
           name: _pendingName ?? 'archivo',
         );
 
@@ -268,6 +323,15 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
 
         _chatController.insertMessage(textMsg);
         _localMessages.insert(0, textMsg);
+
+        // Send message to API (files don't need imageUrl)
+        context.read<ChatBloc>().add(
+          SendMessageEvent(
+            conversationId: conversationId,
+            content: trimmed,
+            imageUrl: '',
+          ),
+        );
       }
 
       _removePendingAttachment();
@@ -361,8 +425,6 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
       top: false,
       child: BlocConsumer<ChatBloc, ChatState>(
         builder: (context, state) {
-          final size = MediaQuery.of(context).size;
-
           if (state.status == ChatStatus.failure) {
             return const Center(child: Text('Error al cargar el chat'));
           }
@@ -370,189 +432,202 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
           if (state.status == ChatStatus.messagesLoaded ||
               state.status == ChatStatus.messageResponseReceived ||
               state.status == ChatStatus.sending) {
-            return Stack(
-              children: [
-                fcui.Chat(
-                  chatController: _chatController,
-                  currentUserId: _currentUserId,
-                  resolveUser: _resolveUser,
-                  onMessageSend: _onMessageSend,
-                  onAttachmentTap: _onAttachmentTap,
-                  builders: Builders(
-                    textMessageBuilder: (
-                      context,
-                      message,
-                      index, {
-                      required bool isSentByMe,
-                      MessageGroupStatus? groupStatus,
-                    }) {
-                      try {
-                        final meta =
-                            (message as dynamic).metadata
-                                as Map<String, dynamic>?;
-                        if (meta != null && meta['isTyping'] == true) {
-                          // Mostrar exactamente tu _threeDots() dentro de la burbuja
-                          return Align(
-                            alignment:
-                                isSentByMe
-                                    ? Alignment.centerRight
-                                    : Alignment.centerLeft,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 12,
-                              ),
-                              margin: const EdgeInsets.symmetric(vertical: 4),
-                              decoration: BoxDecoration(
-                                color:
-                                    isSentByMe
-                                        ? Colors.blue.shade50
-                                        : Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: _threeDots(),
-                            ),
-                          );
-                        }
-                      } catch (_) {
-                        // ignore
-                      }
+            return Container(
+              color: const Color(0xFFF5F5F5), // Light gray to match composer
+              child: Stack(
+                children: [
+                  fcui.Chat(
+                    chatController: _chatController,
+                    currentUserId: _currentUserId,
+                    resolveUser: _resolveUser,
+                    onMessageSend: _onMessageSend,
+                    onAttachmentTap: _onAttachmentTap,
+                    builders: Builders(
+                      textMessageBuilder: (
+                        context,
+                        message,
+                        index, {
+                        required bool isSentByMe,
+                        MessageGroupStatus? groupStatus,
+                      }) {
+                        try {
+                          final meta =
+                              (message as dynamic).metadata
+                                  as Map<String, dynamic>?;
+                          if (meta != null && meta['isTyping'] == true) {
+                            final theme = Theme.of(context);
+                            final isDark = theme.brightness == Brightness.dark;
+                            final moduleColor =
+                                ChatThemeProvider.getModuleColor(
+                                  widget.moduleKey,
+                                  isDarkMode: isDark,
+                                );
 
-                      // default renderer (tu implementación previa)
-                      return Container(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width * 0.75,
-                        ),
-                        child: fcui.SimpleTextMessage(
+                            // Mostrar typing indicator con module color
+                            return Align(
+                              alignment:
+                                  isSentByMe
+                                      ? Alignment.centerRight
+                                      : Alignment.centerLeft,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                  horizontal: 12,
+                                ),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      isDark
+                                          ? AppColors.gray800
+                                          : AppColors.gray200,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: _threeDots(color: moduleColor),
+                              ),
+                            );
+                          }
+                        } catch (_) {
+                          // ignore
+                        }
+
+                        // Use custom message bubble
+                        return CustomTextMessageBubble(
                           message: message,
                           index: index,
-                        ),
-                      );
-                    },
+                          isSentByMe: isSentByMe,
+                          moduleKey: widget.moduleKey,
+                          groupStatus: groupStatus,
+                        );
+                      },
 
-                    // Composer envuelto con key para medir su posición
-                    composerBuilder: (context) {
-                      return Container(
-                        key: _composerKey,
-                        child: fcui.Composer(
-                          hintText: 'Escribe un mensaje...',
-                          hintColor: AppColors.gray700,
-                          maxLines: 4,
-                          sendButtonVisibilityMode:
-                              fcui.SendButtonVisibilityMode.always,
-                        ),
-                      );
-                    },
-
-                    imageMessageBuilder: (
-                      context,
-                      message,
-                      index, {
-                      required bool isSentByMe,
-                      MessageGroupStatus? groupStatus,
-                    }) {
-                      final source = _extractSource(message);
-                      if (source == null || source.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-
-                      if (_isRemote(source)) {
-                        try {
-                          return FlyerChatImageMessage(
-                            message: message,
-                            index: index,
-                          );
-                        } catch (_) {
-                          return ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth:
-                                  MediaQuery.of(context).size.width * 0.65,
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                source,
-                                fit: BoxFit.cover,
-                                errorBuilder:
-                                    (_, __, ___) =>
-                                        const Icon(Icons.broken_image),
-                              ),
-                            ),
-                          );
-                        }
-                      }
-
-                      // local path -> Image.file
-                      return ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.65,
-                          maxHeight: 360,
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.file(
-                            File(source),
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (_, __, ___) => Container(
-                                  color: Colors.grey.shade200,
-                                  alignment: Alignment.center,
-                                  child: const Icon(
-                                    Icons.broken_image,
-                                    size: 48,
-                                  ),
-                                ),
+                      // Composer envuelto con key para medir su posición
+                      composerBuilder: (context) {
+                        return Container(
+                          key: _composerKey,
+                          child: fcui.Composer(
+                            hintText: 'Escribe un mensaje...',
+                            hintColor: AppColors.gray700,
+                            maxLines: 4,
+                            sendButtonVisibilityMode:
+                                fcui.SendButtonVisibilityMode.always,
+                            textEditingController: _textController,
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
 
-                    fileMessageBuilder: (
-                      context,
-                      message,
-                      index, {
-                      required bool isSentByMe,
-                      MessageGroupStatus? groupStatus,
-                    }) {
-                      final source = _extractSource(message);
-                      final name = (message as dynamic).name ?? 'archivo';
-
-                      if (source == null || source.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-
-                      if (_isRemote(source)) {
-                        try {
-                          return FlyerChatFileMessage(
-                            message: message,
-                            index: index,
-                          );
-                        } catch (_) {
-                          return _localFileCard(name, source, isSentByMe);
+                      imageMessageBuilder: (
+                        context,
+                        message,
+                        index, {
+                        required bool isSentByMe,
+                        MessageGroupStatus? groupStatus,
+                      }) {
+                        final source = _extractSource(message);
+                        if (source == null || source.isEmpty) {
+                          return const SizedBox.shrink();
                         }
-                      }
 
-                      // local -> render card
-                      return _localFileCard(name, source, isSentByMe);
-                    },
-                  ),
-                ),
+                        if (_isRemote(source)) {
+                          try {
+                            return FlyerChatImageMessage(
+                              message: message,
+                              index: index,
+                            );
+                          } catch (_) {
+                            return ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width * 0.65,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  source,
+                                  fit: BoxFit.cover,
+                                  errorBuilder:
+                                      (_, __, ___) =>
+                                          const Icon(Icons.broken_image),
+                                ),
+                              ),
+                            );
+                          }
+                        }
 
-                // Preview flotante justo encima del composer (bottom medido dinámicamente)
-                if (_pendingFile != null)
-                  Positioned(
-                    left: 8,
-                    right: 8,
-                    bottom: (_composerBottom + 8).clamp(
-                      8.0,
-                      MediaQuery.of(context).size.height,
-                    ),
-                    child: SafeArea(
-                      top: false,
-                      child: _pendingAttachmentPreview(),
+                        // local path -> Image.file
+                        return ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.65,
+                            maxHeight: 360,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.file(
+                              File(source),
+                              fit: BoxFit.cover,
+                              errorBuilder:
+                                  (_, __, ___) => Container(
+                                    color: Colors.grey.shade200,
+                                    alignment: Alignment.center,
+                                    child: const Icon(
+                                      Icons.broken_image,
+                                      size: 48,
+                                    ),
+                                  ),
+                            ),
+                          ),
+                        );
+                      },
+
+                      fileMessageBuilder: (
+                        context,
+                        message,
+                        index, {
+                        required bool isSentByMe,
+                        MessageGroupStatus? groupStatus,
+                      }) {
+                        final source = _extractSource(message);
+                        final name = (message as dynamic).name ?? 'archivo';
+
+                        if (source == null || source.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+
+                        if (_isRemote(source)) {
+                          try {
+                            return FlyerChatFileMessage(
+                              message: message,
+                              index: index,
+                            );
+                          } catch (_) {
+                            return _localFileCard(name, source, isSentByMe);
+                          }
+                        }
+
+                        // local -> render card
+                        return _localFileCard(name, source, isSentByMe);
+                      },
                     ),
                   ),
-              ],
+
+                  // Preview flotante justo encima del composer (bottom medido dinámicamente)
+                  if (_pendingFile != null)
+                    Positioned(
+                      left: 8,
+                      right: 8,
+                      bottom: (_composerBottom + 8).clamp(
+                        8.0,
+                        MediaQuery.of(context).size.height,
+                      ),
+                      child: SafeArea(
+                        top: false,
+                        child: _pendingAttachmentPreview(),
+                      ),
+                    ),
+                ],
+              ),
             );
           }
 
@@ -704,18 +779,20 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
   }
 }
 
-Widget _threeDots() {
+Widget _threeDots({Color? color}) {
   return Row(
     mainAxisSize: MainAxisSize.min,
     children: List.generate(3, (i) {
-      return AnimatedDot(delay: i * 150);
+      return AnimatedDot(delay: i * 150, color: color ?? AppColors.primary);
     }),
   );
 }
 
 class AnimatedDot extends StatefulWidget {
   final int delay;
-  const AnimatedDot({Key? key, required this.delay}) : super(key: key);
+  final Color color;
+  const AnimatedDot({Key? key, required this.delay, required this.color})
+    : super(key: key);
   @override
   State<AnimatedDot> createState() => _AnimatedDotState();
 }
@@ -753,7 +830,7 @@ class _AnimatedDotState extends State<AnimatedDot>
           width: 6,
           height: 6,
           decoration: BoxDecoration(
-            color: AppColors.primary,
+            color: widget.color,
             shape: BoxShape.circle,
           ),
         ),

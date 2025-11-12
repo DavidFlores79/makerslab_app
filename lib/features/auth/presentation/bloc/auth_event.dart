@@ -17,19 +17,14 @@ class SigninWithPhoneRequested extends AuthEvent {
 class LogoutRequested extends AuthEvent {}
 
 class RegisterRequested extends AuthEvent {
+  final String name;
   final String phone;
   final String password;
-  final String confirmPassword;
-  final String firstName;
-  final String firstSurname;
-  final String? secondSurname;
+
   RegisterRequested({
+    required this.name,
     required this.phone,
     required this.password,
-    required this.firstName,
-    required this.firstSurname,
-    this.secondSurname,
-    required this.confirmPassword,
   });
 }
 
@@ -55,4 +50,20 @@ class RegistrationConfirmed extends AuthEvent {
 class AuthUserChanged extends AuthEvent {
   final UserModel? user;
   AuthUserChanged(this.user);
+}
+
+class UpdateProfileRequested extends AuthEvent {
+  final String userId;
+  final String? name;
+  final String? email;
+  final String? phone;
+  final String? image;
+
+  UpdateProfileRequested({
+    required this.userId,
+    this.name,
+    this.email,
+    this.phone,
+    this.image,
+  });
 }

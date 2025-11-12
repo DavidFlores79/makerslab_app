@@ -5,10 +5,11 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/domain/entities/user.dart';
 import '../../../../core/domain/repositories/base_repository.dart';
+import '../../domain/entities/signup_response.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../datasource/auth_remote_datasource.dart';
-import '../datasource/auth_token_local_datasource.dart';
-import '../datasource/auth_user_local_datasource.dart';
+import '../datasources/auth_remote_datasource.dart';
+import '../datasources/auth_token_local_datasource.dart';
+import '../datasources/auth_user_local_datasource.dart';
 import '../models/forgot_password_response_model.dart';
 import '../models/login_response_model.dart';
 
@@ -56,25 +57,59 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, User>> signUp({
+  Future<Either<Failure, SignupResponse>> signUp({
+    required String name,
     required String phone,
     required String password,
-    String? firstName,
-    String? firstSurname,
-    String? secondSurname,
-    required String confirmPassword,
+  }) {
+    return safeCall<SignupResponse>(() async {
+      final response = await remoteDataSource.signUp(
+        name: name,
+        phone: phone,
+        password: password,
+      );
+
+      // Don't cache tokens yet - user needs to verify OTP first
+      // Return SignupResponse with registrationId for OTP verification
+      return SignupResponse(
+        message: response.message,
+        registrationId: response.registrationId,
+      );
+    });
+  }
+
+  @override
+  Future<Either<Failure, User>> verifyRegistration({
+    required String registrationId,
+    required String otp,
   }) {
     return safeCall<User>(() async {
-      // final response = await localDataSource.signUp(
-      //   phone: phone,
-      //   password: password,
-      //   confirmPassword: confirmPassword,
-      //   firstName: firstName,
-      //   firstSurname: firstSurname,
-      //   secondSurname: secondSurname,
-      // );
-      // return response.data!;
-      throw UnimplementedError('signUp is not implemented');
+      final response = await remoteDataSource.verifyRegistration(
+        registrationId: registrationId,
+        otp: otp,
+      );
+
+      // Cache tokens after successful OTP verification
+      await tokenLocalDataSource.cacheTokens(
+        accessToken: response.jwt ?? '',
+        refreshToken: response.jwt ?? '',
+      );
+
+      // Cache user data
+      await userLocalDataSource.saveUser(response.data!);
+
+      return response.data!;
+    });
+  }
+
+  @override
+  Future<Either<Failure, void>> resendRegistrationCode({
+    required String registrationId,
+  }) {
+    return safeCall<void>(() async {
+      await remoteDataSource.resendRegistrationCode(
+        registrationId: registrationId,
+      );
     });
   }
 
@@ -159,6 +194,42 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   Future<Either<Failure, void>> resendSignUpCode({required String userId}) {
     return safeCall<void>(() async {
       await remoteDataSource.resendSignUpCode(userId: userId);
+    });
+  }
+
+  @override
+  Future<Either<Failure, User>> updateProfile({
+    required String userId,
+    String? name,
+    String? email,
+    String? phone,
+    String? image,
+  }) {
+    return safeCall<User>(() async {
+      final userModel = await remoteDataSource.updateProfile(
+        userId: userId,
+        name: name,
+        email: email,
+        phone: phone,
+        image: image,
+      );
+
+      // Update local cache with new user data
+      await userLocalDataSource.saveUser(userModel);
+
+      return User(
+        id: userModel.id,
+        name: userModel.name,
+        phone: userModel.phone,
+        email: userModel.email,
+        status: userModel.status,
+        image: userModel.image,
+        profile: userModel.profile,
+        deleted: userModel.deleted,
+        google: userModel.google,
+        createdAt: userModel.createdAt,
+        updatedAt: userModel.updatedAt,
+      );
     });
   }
 

@@ -18,7 +18,7 @@ class TemperaturePage extends StatelessWidget {
     interfaceRoute: TemperatureInterfacePage.routeName,
     image: 'assets/images/static/temperature/esp32DHT11.png',
     videoId: 'kJpdoBLSmHs',
-    inoFile: 'assets/files/esp32_bt_temp.ino',
+    inoFile: 'assets/files/esp32_bt_temp/esp32_bt_temp.ino',
     instructions: [
       InstructionItem(
         title:

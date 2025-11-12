@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
 
@@ -12,11 +14,15 @@ abstract class ChatRepository {
 
   /// Obtiene el listado de mensajes (una vez) - envuelto en Either por si falla.
   Future<Either<Failure, List<Message>>> fetchMessages(String conversationId);
+
   Future<Either<Failure, String>> sendMessage(
     String conversationId,
     String content,
     String imageUrl,
   );
+
+  /// Sube un archivo al servidor y retorna la URL pública.
+  Future<Either<Failure, String>> uploadFile(Uint8List bytes, String filename);
 
   /// Envía un texto. Devuelve Either para propagar errores.
   Future<Either<Failure, void>> sendText(String authorId, String text);

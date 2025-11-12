@@ -7,6 +7,8 @@
   "sign_up_label": "Regístrate",
   "sign_up_2_label": "Registrarse",
   "dont_have_account_label": "¿No tienes una cuenta? Regístrate",
+  "name_label": "Nombre completo",
+  "name_hint": "Ingresa tu nombre completo",
   "first_name_label": "Primer Nombre",
   "first_name_hint": "Ingresa tu primer nombre",
   "first_surname_label": "Primer Apellido",

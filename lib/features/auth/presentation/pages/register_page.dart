@@ -6,7 +6,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../../core/ui/snackbar_service.dart';
 import '../../../../di/service_locator.dart';
-import '../../../../shared/images/tri_circle_header.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_color.dart';
 import '../../../../utils/util_image.dart';
@@ -48,13 +47,17 @@ class RegisterPage extends StatelessWidget {
         body: BlocListener<AuthBloc, AuthState>(
           listener: (context, authState) {
             if (authState is RegistrationPending) {
-              // navegar a OTP con go_router (param userId), pasamos phone por extra
+              // Navigate to OTP with registrationId
               debugPrint(
-                '>>> Navegando a OTP para userId: ${authState.userId}',
+                '>>> Navigating to OTP with registrationId: ${authState.registrationId}',
               );
               context.go(
                 OtpPage.routeName,
-                extra: {'phone': authState.phone, 'userId': authState.userId},
+                extra: {
+                  'phone': authState.phone,
+                  'registrationId': authState.registrationId,
+                  'message': authState.message,
+                },
               );
             } else if (authState is AuthError) {
               SnackbarService().show(message: authState.message);
@@ -112,13 +115,9 @@ class RegisterPage extends StatelessWidget {
                                 // último step: registrar
                                 context.read<AuthBloc>().add(
                                   RegisterRequested(
-                                    firstName: state.firstName ?? '',
-                                    firstSurname: state.firstSurname ?? '',
-                                    secondSurname: state.secondSurname ?? '',
-                                    phone: state.phone ?? '',
+                                    name: state.name ?? '',
+                                    phone: state.fullPhoneNumber ?? '',
                                     password: state.password ?? '',
-                                    confirmPassword:
-                                        state.confirmPassword ?? '',
                                   ),
                                 );
                               } else {

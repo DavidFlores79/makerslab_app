@@ -7,9 +7,17 @@ class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
 
 class RegistrationPending extends AuthState {
-  final String userId;
+  final String registrationId;
   final String phone;
-  RegistrationPending({required this.userId, required this.phone});
+  final String message;
+  RegistrationPending({
+    required this.registrationId,
+    required this.phone,
+    this.message = '',
+  });
+
+  // Legacy support - userId can be used as registrationId
+  String get userId => registrationId;
 }
 
 class Authenticated extends AuthState {

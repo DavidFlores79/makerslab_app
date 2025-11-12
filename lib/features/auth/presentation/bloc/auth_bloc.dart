@@ -9,6 +9,7 @@ import '../../domain/usecases/register_user.dart';
 import '../../domain/usecases/change_password.dart';
 import '../../domain/usecases/forgot_password.dart';
 import '../../domain/usecases/signin_with_phone.dart';
+import '../../domain/usecases/update_profile.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -21,6 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final CheckSession checkSession;
   final GetUserFromCache getUserFromCache;
   final LogoutUser logoutUser;
+  final UpdateProfile updateProfile;
 
   AuthBloc({
     required this.loginUser,
@@ -31,6 +33,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.checkSession,
     required this.getUserFromCache,
     required this.logoutUser,
+    required this.updateProfile,
   }) : super(AuthInitial()) {
     debugPrint('>>> AuthBloc creado');
     on<LoginRequested>(_onLoginRequested);
@@ -42,6 +45,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LogoutRequested>(_onLogoutRequested);
     on<RegistrationConfirmed>(_onRegistrationConfirmed);
     on<AuthUserChanged>(_onAuthUserChanged);
+    on<UpdateProfileRequested>(_onUpdateProfileRequested);
   }
 
   Future<void> _onLoginRequested(
@@ -71,7 +75,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     debugPrint(">>> SigninWithPhoneRequested event recibido");
-    emit(SignInWithPhoneInProgress());
+    emit(AuthLoading());
 
     final result = await signinWithPhone(event.phone, event.password);
     debugPrint(">>> signinWithPhone result: $result");
@@ -94,23 +98,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     final result = await registerUser(
-      firstName: event.firstName,
-      firstSurname: event.firstSurname,
-      secondSurname: event.secondSurname,
+      name: event.name,
       phone: event.phone,
       password: event.password,
-      confirmPassword: event.confirmPassword,
     );
 
     result.fold(
       (failure) {
-        debugPrint('>>> Registro falló: ${failure.message}');
+        debugPrint('>>> Registration failed: ${failure.message}');
         emit(AuthError(failure.message));
       },
-      (user) {
-        debugPrint('>>> Registro ok; pasar a OTP para userId: ${user.id}');
+      (signupResponse) {
+        debugPrint(
+          '>>> Registration successful; navigate to OTP with registrationId: ${signupResponse.registrationId}',
+        );
         emit(
-          RegistrationPending(userId: user.id ?? '', phone: user.phone ?? ''),
+          RegistrationPending(
+            registrationId: signupResponse.registrationId ?? '',
+            phone: event.phone,
+            message: signupResponse.message ?? '',
+          ),
         );
       },
     );
@@ -153,7 +160,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ForgotPasswordRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(ForgotPasswordInProgress());
+    emit(AuthLoading());
     final result = await forgotPassword(event.phone);
 
     result.fold(
@@ -217,5 +224,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } else {
       emit(Unauthenticated());
     }
+  }
+
+  Future<void> _onUpdateProfileRequested(
+    UpdateProfileRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    debugPrint(">>> UpdateProfileRequested event recibido");
+    emit(AuthLoading());
+
+    final result = await updateProfile(
+      userId: event.userId,
+      name: event.name,
+      email: event.email,
+      phone: event.phone,
+      image: event.image,
+    );
+
+    result.fold(
+      (failure) {
+        debugPrint(">>> updateProfile falló: ${failure.message}");
+        emit(AuthError(failure.message));
+      },
+      (user) {
+        debugPrint(">>> updateProfile exitoso: ${user.name}");
+        emit(Authenticated(user: user));
+      },
+    );
   }
 }

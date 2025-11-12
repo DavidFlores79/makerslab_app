@@ -25,10 +25,10 @@ import '../core/presentation/bloc/bluetooth/bluetooth_bloc.dart';
 import '../core/storage/secure_storage_service.dart';
 import '../core/ui/snackbar_service.dart';
 import '../core/domain/usecases/share_file_usecase.dart';
-import '../features/auth/data/datasource/auth_remote_datasource.dart';
-import '../features/auth/data/datasource/auth_token_local_datasource.dart';
-import '../features/auth/data/datasource/auth_user_local_datasource.dart';
-import '../features/auth/data/repository/auth_repository_impl.dart';
+import '../features/auth/data/datasources/auth_remote_datasource.dart';
+import '../features/auth/data/datasources/auth_token_local_datasource.dart';
+import '../features/auth/data/datasources/auth_user_local_datasource.dart';
+import '../features/auth/data/repositories/auth_repository_impl.dart';
 import '../features/auth/domain/repositories/auth_repository.dart';
 import '../features/auth/domain/usecases/change_password.dart';
 import '../features/auth/domain/usecases/check_session.dart';
@@ -38,11 +38,18 @@ import '../features/auth/domain/usecases/get_user_from_cache.dart';
 import '../features/auth/domain/usecases/login_user.dart';
 import '../features/auth/domain/usecases/logout_user.dart';
 import '../features/auth/domain/usecases/register_user.dart';
+import '../features/auth/domain/usecases/resend_registration_code.dart';
 import '../features/auth/domain/usecases/resend_sign_up_code.dart';
 import '../features/auth/domain/usecases/signin_with_phone.dart';
+import '../features/auth/domain/usecases/update_profile.dart';
+import '../features/auth/domain/usecases/verify_registration.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/auth/presentation/bloc/otp/otp_bloc.dart';
 import '../features/auth/presentation/bloc/register/register_cubit.dart';
+import '../features/catalogs/data/datasources/catalogs_remote_datasource.dart';
+import '../features/catalogs/data/repositories/catalogs_repository_impl.dart';
+import '../features/catalogs/domain/repositories/catalogs_repository.dart';
+import '../features/catalogs/domain/usecases/get_countries.dart';
 import '../features/chat/data/datasources/chat_local_datasource_impl.dart';
 import '../features/chat/data/datasources/chat_remote_datasource.dart';
 import '../features/chat/data/repositories/chat_repository_impl.dart';
@@ -53,13 +60,14 @@ import '../features/chat/domain/usecases/send_image_message_usecase.dart';
 import '../features/chat/domain/usecases/send_message_usecase.dart';
 import '../features/chat/domain/usecases/send_text_message_usecase.dart';
 import '../features/chat/domain/usecases/start_chat_session_usecase.dart';
+import '../features/chat/domain/usecases/upload_file_usecase.dart';
 import '../features/chat/presentation/bloc/chat_bloc.dart';
 import '../features/gamepad/data/repositories/gamepad_repository_impl.dart';
 import '../features/gamepad/domain/repositories/gamepad_repository.dart';
 import '../features/gamepad/presentation/bloc/gamepad_bloc.dart';
 import '../features/home/data/datasources/home_local_datasource_impl.dart';
 import '../features/home/data/datasources/home_remote_datesource.dart';
-import '../features/home/data/repository/home_repository_impl.dart';
+import '../features/home/data/repositories/home_repository_impl.dart';
 import '../features/home/domain/repositories/home_repository.dart';
 import '../features/home/domain/usecases/get_remote_home_menu.dart';
 import '../features/home/presentation/bloc/home_bloc.dart';
@@ -149,7 +157,7 @@ Future<void> setupLocator() async {
 
   //remote data sources
   getIt.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(dio: getIt()),
+    () => AuthRemoteDataSourceImpl(dio: getIt(), logger: logger),
   );
   getIt.registerLazySingleton<HomeRemoteDataSource>(
     () => HomeRemoteDataSourceImpl(dio: getIt()),
@@ -157,6 +165,10 @@ Future<void> setupLocator() async {
 
   getIt.registerLazySingleton<RemoteChatDataSource>(
     () => ChatRemoteDataSourceImpl(dio: getIt(), logger: logger),
+  );
+
+  getIt.registerLazySingleton<CatalogsRemoteDataSource>(
+    () => CatalogsRemoteDataSourceImpl(dio: getIt()),
   );
 
   // cubits
@@ -216,6 +228,10 @@ Future<void> setupLocator() async {
     ),
   );
 
+  getIt.registerLazySingleton<CatalogsRepository>(
+    () => CatalogsRepositoryImpl(remoteDataSource: getIt()),
+  );
+
   // Use cases
   getIt.registerLazySingleton(() => ShareFileUseCase(getIt()));
   getIt.registerLazySingleton(() => MarkOnboardingCompletedUseCase(getIt()));
@@ -225,6 +241,7 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(
     () => GetCombinedMenu(homeRepository: getIt(), checkSession: getIt()),
   );
+  getIt.registerLazySingleton(() => GetCountries(repository: getIt()));
   // Bluetooth usecases
   getIt.registerLazySingleton(
     () => DiscoverDevicesUseCase(repository: getIt()),
@@ -265,7 +282,13 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => LogoutUser(repository: getIt()));
   getIt.registerLazySingleton(() => ResendSignUpCode(repository: getIt()));
   getIt.registerLazySingleton(() => ConfirmSignUp(repository: getIt()));
+  getIt.registerLazySingleton(() => UpdateProfile(repository: getIt()));
+  getIt.registerLazySingleton(() => VerifyRegistration(repository: getIt()));
+  getIt.registerLazySingleton(
+    () => ResendRegistrationCode(repository: getIt()),
+  );
   getIt.registerLazySingleton(() => SendMessageUsecase(repository: getIt()));
+  getIt.registerLazySingleton(() => UploadFile(repository: getIt()));
   getIt.registerLazySingleton(
     () => GetServoPositionUseCase(repository: getIt()),
   );
@@ -286,11 +309,17 @@ Future<void> setupLocator() async {
       getUserFromCache: getIt(),
       logoutUser: getIt(),
       signinWithPhone: getIt(),
+      updateProfile: getIt(),
     ),
   );
 
   getIt.registerFactory(
-    () => OtpBloc(resendSignUpCode: getIt(), confirmSignUp: getIt()),
+    () => OtpBloc(
+      resendSignUpCode: getIt(),
+      confirmSignUp: getIt(),
+      verifyRegistration: getIt(),
+      resendRegistrationCode: getIt(),
+    ),
   );
 
   getIt.registerLazySingleton(

@@ -1,5 +1,9 @@
+// ABOUTME: This file contains the RegisterCubit
+// ABOUTME: It manages registration form state and validation including country code
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../catalogs/data/models/country_model.dart';
 import 'register_state.dart';
 
 class RegisterCubit extends Cubit<RegisterState> {
@@ -15,6 +19,11 @@ class RegisterCubit extends Cubit<RegisterState> {
     emit(newState.copyWith(isValid: _validate(newState)));
   }
 
+  void updateCountryCode(CountryModel country) {
+    final newState = state.copyWith(countryCode: country.phoneCode);
+    emit(newState.copyWith(isValid: _validate(newState)));
+  }
+
   void updatePassword(String password) {
     final newState = state.copyWith(password: password);
     emit(newState.copyWith(isValid: _validate(newState)));
@@ -26,17 +35,7 @@ class RegisterCubit extends Cubit<RegisterState> {
   }
 
   void updateName(String name) {
-    final newState = state.copyWith(firstName: name);
-    emit(newState.copyWith(isValid: _validate(newState)));
-  }
-
-  void updateFirstSurname(String surname) {
-    final newState = state.copyWith(firstSurname: surname);
-    emit(newState.copyWith(isValid: _validate(newState)));
-  }
-
-  void updateSecondSurname(String surname) {
-    final newState = state.copyWith(secondSurname: surname);
+    final newState = state.copyWith(name: name);
     emit(newState.copyWith(isValid: _validate(newState)));
   }
 
@@ -47,8 +46,9 @@ class RegisterCubit extends Cubit<RegisterState> {
 
   bool _validate(RegisterState s) {
     return (s.phone?.isNotEmpty ?? false) &&
+        (s.countryCode?.isNotEmpty ?? false) &&
         (s.password?.isNotEmpty ?? false) &&
         (s.confirmPassword == s.password) &&
-        (s.firstName?.isNotEmpty ?? false);
+        (s.name?.isNotEmpty ?? false);
   }
 }

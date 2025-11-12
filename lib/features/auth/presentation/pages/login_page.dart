@@ -8,22 +8,35 @@ import '../../../../core/validators/px_validators.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_color.dart';
 import '../../../../utils/util_image.dart';
-import '../../../home/presentation/pages/home_page.dart';
+import '../../../catalogs/data/models/country_model.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../widgets/app_country_dropdown.dart';
 import 'forgot_password_page.dart';
-import 'otp_page.dart';
 import 'register_page.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   static const routeName = '/login';
 
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  String _countryCode = '52'; // Default Mexico
 
-  LoginPage({super.key});
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +69,10 @@ class LoginPage extends StatelessWidget {
                       const SizedBox(height: 20),
                       _buildWelcomeText(context),
                       const SizedBox(height: 20),
+                      _buildCountryDropdown(context),
+                      const SizedBox(height: 20),
                       _buildPhoneField(context),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       _buildPasswordField(context),
                       const SizedBox(height: 20),
                       _buildForgotPasswordButton(context),
@@ -86,9 +101,16 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  onLoginRequest(BuildContext context) {
+  void onLoginRequest(BuildContext context) {
+    // Format phone with country code
+    final phone = _phoneController.text;
+    final formattedPhone =
+        _countryCode.startsWith('+')
+            ? '$_countryCode$phone'
+            : '+$_countryCode$phone';
+
     context.read<AuthBloc>().add(
-      SigninWithPhoneRequested(_phoneController.text, _passwordController.text),
+      SigninWithPhoneRequested(formattedPhone, _passwordController.text),
     );
   }
 
@@ -96,6 +118,25 @@ class LoginPage extends StatelessWidget {
     return PXSectionTitle(
       title: AppLocalizations.of(context)!.welcome_app_label,
       subtitle: AppLocalizations.of(context)!.login_help_message,
+    );
+  }
+
+  Widget _buildCountryDropdown(BuildContext context) {
+    return AppCountryDropdown(
+      labelText: AppLocalizations.of(context)!.country_label,
+      onChanged: (CountryModel? country) {
+        if (country != null && country.phoneCode != null) {
+          setState(() {
+            _countryCode = country.phoneCode!;
+          });
+        }
+      },
+      validator: (CountryModel? value) {
+        if (value == null) {
+          return AppLocalizations.of(context)!.select_option_error;
+        }
+        return null;
+      },
     );
   }
 
