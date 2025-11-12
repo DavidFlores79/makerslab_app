@@ -4,95 +4,175 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Flutter mobile application (Android/iOS) implementing Clean Architecture with separation of concerns across Domain, Data, and Presentation layers. The application demonstrates best practices in Flutter development with SOLID principles, modern state management patterns (BLoC), and comprehensive Material Design UI/UX standards optimized for mobile devices.
+**Makers Lab** is a Flutter mobile application (Android/iOS) for IoT device control and educational purposes. The app enables users to interact with Arduino-based modules through Bluetooth, including temperature sensors, servo motors, LED control, and gamepad interfaces. It implements Clean Architecture with clear separation across Domain, Data, and Presentation layers, following SOLID principles and modern Flutter development patterns.
 
 ## Architecture
 
 ### Tech Stack
-- **Framework**: Flutter 3.24+ with Dart 3.5+
-- **Target Platforms**: Android & iOS (primary), Windows/Linux/Web (rarely)
+- **Framework**: Flutter 3.7.2+ with Dart 3.7.2+
+- **Target Platforms**: Android & iOS (primary focus)
 - **Architecture**: Clean Architecture (Domain, Data, Presentation)
-- **State Management**: BLoC Pattern (classic Bloc<Event, State>) with flutter_bloc
-- **Dependency Injection**: get_it with injectable for service locator pattern
-- **Navigation**: GoRouter or Auto Route for type-safe declarative routing
-- **Testing**: flutter_test, mockito, bloc_test, integration_test
-- **UI Components**: Material Design 3 with custom theming and responsive layouts
-- **Networking**: dio with retrofit for type-safe REST API calls
-- **Local Storage**: sqflite (SQLite), hive (NoSQL), shared_preferences (key-value)
-- **Form Validation**: reactive_forms or form_builder_validators
-- **Image Handling**: cached_network_image with image optimization
-- **Animations**: Built-in Flutter animations and lottie for complex animations
+- **State Management**: BLoC Pattern (classic Bloc<Event, State>) with flutter_bloc 9.1.1
+- **Dependency Injection**: get_it 8.0.3 for service locator pattern (manual registration)
+- **Navigation**: go_router 16.0.0 with ShellRoute for nested navigation
+- **Testing**: flutter_test (minimal test coverage currently)
+- **UI Components**: Material Design 3 with custom AppColors theme
+- **Networking**: dio 5.9.0 with custom interceptors (auth, refresh token, error handling)
+- **Local Storage**: flutter_secure_storage 9.2.4, shared_preferences 2.5.3
+- **Bluetooth**: flutter_bluetooth_serial 0.4.0, flutter_reactive_ble 5.4.0
+- **Form Validation**: pin_code_fields 8.0.1 for OTP verification
+- **Media**: video_player 2.10.0, youtube_player_flutter 9.1.2, lottie 3.3.1
+- **Localization**: intl 0.19.0, flutter_localizations (Spanish/English)
+- **Chat**: flutter_chat_core 2.8.0, flutter_chat_ui 2.9.0
+- **Other**: uuid 3.0.4, equatable 2.0.7, dartz 0.10.1, logger 2.6.0
 
 ### Clean Architecture Layers
 
-The codebase follows strict Clean Architecture with clear separation of concerns:
+The codebase follows Clean Architecture with feature-based organization:
 
-#### Project Structure
+#### Actual Project Structure
 ```
 lib/
-  core/                    # Shared utilities and base classes
-    constants/             # App-wide constants (colors, strings, endpoints)
-    error/                 # Error handling (failures, exceptions)
-    usecases/              # Base UseCase interface
-    utils/                 # Helper functions and extensions
-    network/               # Network info and connectivity
-    theme/                 # Material Design 3 theme configuration
-    
-  features/                # Feature-based organization
-    {feature_name}/
-      domain/              # Core business logic (framework-agnostic)
-        entities/          # Business objects with identity
-        repositories/      # Repository interfaces (contracts)
-        usecases/          # Business use cases
-        
-      data/                # Data layer (external concerns)
-        models/            # Data models extending entities
-        datasources/       # Remote (API) and Local (DB) data sources
-        repositories/      # Repository implementations
-        
-      presentation/        # UI layer
-        bloc/              # BLoC state management
-          {feature}_bloc.dart
-          {feature}_event.dart
-          {feature}_state.dart
-        pages/             # Screen-level widgets
-        widgets/           # Reusable feature-specific widgets
-        
-  injection_container.dart # Dependency injection setup (get_it)
-  main.dart                # App entry point
-  app.dart                 # MaterialApp configuration
+  core/                           # Shared cross-cutting concerns
+    config/                       # API config, module seeds
+    data/
+      repositories/               # Bluetooth repository impl
+      services/                   # File sharing, permissions, logger, Bluetooth service
+    domain/
+      entities/                   # Core entities (if any)
+      repositories/               # Bluetooth, file sharing repository interfaces
+      usecases/                   # Bluetooth usecases (connect, discover, send data)
+        bluetooth/                # Connect, disconnect, discover, send, get stream
+        share_file_usecase.dart
+    error/                        # Failure classes (Equatable), exceptions
+    mocks/                        # Mock data for development
+    network/                      # DioClient, interceptors (auth, error), refresh token service, api_exceptions
+    presentation/
+      bloc/
+        bluetooth/                # Bluetooth BLoC (global)
+      pages/                      # Not found page
+    router/                       # GoRouter configuration (app_router.dart)
+    storage/                      # Secure storage service, keys
+    ui/                           # Snackbar service, bluetooth dialogs
+    validators/                   # Form validators
+    app_keys.dart                 # Global app keys
+
+  di/
+    service_locator.dart          # Manual get_it registration (no @injectable)
+
+  features/                       # Feature modules
+    auth/                         # Authentication & user management
+      data/
+        datasources/              # Remote (API), local (token, user)
+        repositories/             # Auth repository impl
+      domain/
+        entities/                 # User entity
+        repositories/             # Auth repository interface
+        usecases/                 # Login, register, logout, check session, OTP, etc.
+      presentation/
+        bloc/                     # AuthBloc, OtpBloc, RegisterCubit
+        pages/                    # Login, signup, OTP, splash coordinator
+        routes/                   # Auth routes configuration
+        widgets/                  # Auth-specific widgets
+
+    catalogs/                     # Country/catalog data
+      data/, domain/, presentation/ (minimal)
+
+    chat/                         # In-app chat functionality
+      data/, domain/, presentation/
+      usecases/                   # Send message, upload file, start session
+
+    home/                         # Main home screen with module menu
+      data/
+        datasources/              # Local (menu cache), remote (API)
+        repositories/             # Home repository impl
+      domain/
+        repositories/             # Home repository interface
+        usecases/                 # Get menu, get remote menu, get combined menu
+      presentation/
+        bloc/                     # HomeBloc
+        pages/                    # HomePage
+        routes/                   # Static module routes
+
+    gamepad/                      # Gamepad control module
+      data/, domain/, presentation/
+
+    light_control/                # LED light control module
+      data/, domain/, presentation/
+
+    onboarding/                   # First-time user onboarding
+      data/, domain/, presentation/
+
+    profile/                      # User profile management
+      data/, domain/, presentation/
+      pages/                      # ProfilePage, PersonalDataPage
+
+    servo/                        # Servo motor control module
+      data/, domain/, presentation/
+      usecases/                   # Get/send servo position
+
+    temperature/                  # Temperature sensor module
+      data/
+        datasources/              # Local temperature datasource
+        repositories/             # Temperature repository impl
+      domain/
+        entities/                 # Temperature entity
+        repositories/             # Temperature repository interface
+      presentation/
+        bloc/                     # TemperatureBloc
+        pages/                    # Temperature control page
+
+  l10n/                           # Localization files (Spanish, English)
+
+  shared/                         # Shared widgets and utilities
+
+  theme/                          # AppColors, theme configuration
+
+  utils/                          # Helper utilities
+
+  main.dart                       # App entry point with DI setup
+  main_shell.dart                 # Shell route wrapper
 
 assets/
-  images/                  # Image assets (PNG, JPG, SVG)
-  fonts/                   # Custom fonts
-  animations/              # Lottie animations
+  images/                         # Brand, modules, static instruction images
+    brand/
+    modules/
+    static/
+      temperature/, servo/, light_control/, gamepad/
+        instructions/             # Step-by-step images
+  fonts/                          # Roboto font family
+  lotties/                        # Lottie animations
+  files/                          # Static files
 
 test/
-  features/                # Feature tests (unit, widget, bloc)
-  integration_test/        # End-to-end integration tests
+  widget_test.dart                # Basic widget test (only test currently)
 ```
 
 ### Key Architectural Principles
 
-1. **Dependency Rule**: All dependencies point inward. Domain has zero dependencies on infrastructure or Flutter.
+1. **Dependency Rule**: All dependencies point inward. Domain layer has zero dependencies on Flutter/infrastructure.
 2. **Single Responsibility**: Each class has one reason to change
-3. **Dependency Injection**: All dependencies injected via constructors using get_it
+3. **Dependency Injection**: Manual get_it registration in `lib/di/service_locator.dart` (no @injectable)
 4. **Repository Pattern**: Domain defines interfaces, Data implements them
 5. **Either Pattern**: Use dartz package for functional error handling (Either<Failure, Success>)
-6. **BLoC Pattern**: Strict separation of business logic from UI using classic Bloc<Event, State>
+6. **BLoC Pattern**: Classic Bloc<Event, State> pattern for state management
+7. **Equatable**: Used ONLY for Failure classes, not for entities or models
+8. **Simple Entities**: Domain entities are simple classes with required/nullable fields
 
-### Path Structure (pubspec.yaml)
+### Import Structure
 
-No path aliases in Flutter - use relative imports or package imports:
+Use package imports for all internal code:
 ```dart
 // Core imports
-import 'package:app_name/core/error/failures.dart';
-import 'package:app_name/core/usecases/usecase.dart';
+import 'package:makerslab_app/core/error/failure.dart';
+import 'package:makerslab_app/core/network/dio_client.dart';
 
 // Feature imports
-import 'package:app_name/features/user/domain/entities/user.dart';
-import 'package:app_name/features/user/data/models/user_model.dart';
-import 'package:app_name/features/user/presentation/bloc/user_bloc.dart';
+import 'package:makerslab_app/features/auth/domain/entities/user_entity.dart';
+import 'package:makerslab_app/features/temperature/presentation/bloc/temperature_bloc.dart';
+
+// DI import
+import 'package:makerslab_app/di/service_locator.dart';
 ```
 
 ## Development Commands
@@ -103,47 +183,52 @@ import 'package:app_name/features/user/presentation/bloc/user_bloc.dart';
 # Get dependencies
 flutter pub get
 
-# Run on connected device/emulator
+# Run on connected device/emulator (default: main.dart)
 flutter run
 
-# Run with flavor (dev/staging/prod)
-flutter run --flavor dev -t lib/main_dev.dart
-flutter run --flavor prod -t lib/main_prod.dart
+# Run with device selection
+flutter devices
+flutter run -d <device-id>
 
-# Build APK (Android)
+# Build APK (Android) - current compileSdk: 35
 flutter build apk --release
 
-# Build App Bundle (Android - recommended for Play Store)
+# Build App Bundle (Android - for Play Store)
 flutter build appbundle --release
 
 # Build IPA (iOS - requires Mac)
 flutter build ios --release
 
-# Clean build artifacts
-flutter clean
+# Clean build artifacts (fixes many build issues)
+flutter clean && flutter pub get
+
+# Check Flutter environment
+flutter doctor
+flutter doctor -v
 ```
+
+**Note**: This project does NOT use flavors. There's only one entry point: `lib/main.dart`.
 
 ### Testing
 
 ```bash
-# Run all tests
+# Run all tests (currently only widget_test.dart exists)
 flutter test
 
 # Run tests with coverage
 flutter test --coverage
 
 # Run specific test file
-flutter test test/features/user/domain/usecases/get_users_test.dart
-
-# Run integration tests
-flutter test integration_test/app_test.dart
-
-# Run widget tests
-flutter test --name widget
+flutter test test/widget_test.dart
 
 # Generate test coverage report (HTML)
 genhtml coverage/lcov.info -o coverage/html
+
+# Open coverage report
+open coverage/html/index.html
 ```
+
+**Current State**: Minimal test coverage. Only `test/widget_test.dart` exists. Tests MUST be added for all new features.
 
 ### Code Quality & Analysis
 
@@ -157,22 +242,15 @@ dart format lib/ test/
 # Fix formatting issues automatically
 dart fix --apply
 
-# Run custom lint rules (if using flutter_lints)
+# Run analysis with strict mode
 flutter analyze --fatal-infos --fatal-warnings
 ```
 
+**Note**: This project uses `flutter_lints 5.0.0` for linting rules.
+
 ### Code Generation
 
-```bash
-# Generate code for json_serializable, freezed, etc.
-flutter pub run build_runner build
-
-# Watch mode for continuous generation
-flutter pub run build_runner watch
-
-# Delete conflicting outputs and rebuild
-flutter pub run build_runner build --delete-conflicting-outputs
-```
+This project does NOT currently use code generation tools like `build_runner`, `json_serializable`, or `freezed`. All models are handwritten.
 
 ### Device Management
 
@@ -195,522 +273,385 @@ flutter emulators
 
 **Always use `flutter pub` instead of `dart pub` for Flutter projects.**
 
-## Environment Variables
+## Key Technical Configurations
 
-Configuration in `lib/core/config/env_config.dart`:
+### API Configuration
+
+API configuration is in `lib/core/config/api_config.dart`. The DioClient in `lib/core/network/dio_client.dart` includes:
+- **Auth Interceptor**: Adds Bearer token from secure storage
+- **Error Interceptor**: Handles API errors and logs them
+- **Refresh Token Service**: Automatically refreshes expired tokens
+
+### Dependency Injection Setup
+
+All DI is manually configured in `lib/di/service_locator.dart` using get_it. Registration includes:
+- Services (logger, permissions, Bluetooth, secure storage)
+- Data sources (local and remote)
+- Repositories
+- Use cases
+- BLoCs (factory for feature BLoCs, singleton for global BluetoothBloc)
+
+Example registration pattern:
 ```dart
-class EnvConfig {
-  static const String apiBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'https://api.example.com',
-  );
-  
-  static const String apiKey = String.fromEnvironment('API_KEY');
-}
+// Singleton service
+getIt.registerLazySingleton<BluetoothService>(() => BluetoothService());
+
+// Repository
+getIt.registerLazySingleton<AuthRepository>(
+  () => AuthRepositoryImpl(
+    tokenLocalDataSource: getIt(),
+    userLocalDataSource: getIt(),
+    remoteDataSource: getIt(),
+  ),
+);
+
+// Use case
+getIt.registerLazySingleton(() => LoginUser(repository: getIt()));
+
+// BLoC (factory for new instances)
+getIt.registerFactory(() => AuthBloc(
+  loginUser: getIt(),
+  registerUser: getIt(),
+  // ... other dependencies
+));
 ```
 
-Run with environment variables:
-```bash
-flutter run --dart-define=API_BASE_URL=https://api.dev.com --dart-define=API_KEY=your_key
-```
+### Navigation Configuration
+
+GoRouter is configured in `lib/core/router/app_router.dart`:
+- Initial route: `SplashCoordinator.routeName`
+- Auth routes defined in `features/auth/presentation/routes/auth_routes.dart`
+- Main app uses `ShellRoute` wrapper (`MainShell`) for persistent bottom navigation
+- Module routes in `features/home/presentation/routes/main_static_routes.dart`
 
 ## Mobile-Specific Architecture Patterns
 
 ### 1. BLoC State Management Pattern
 
-**Event Definition**:
+This project uses classic BLoC pattern. Here's a real example from the Temperature module:
+
+**BLoC Implementation** (`features/temperature/presentation/bloc/temperature_bloc.dart`):
 ```dart
-// presentation/bloc/user/user_event.dart
-abstract class UserEvent {}
+class TemperatureBloc extends Bloc<TemperatureEvent, TemperatureState> {
+  final GetBluetoothDataStreamUseCase getDataStreamUseCase;
+  final SendBluetoothStringUseCase sendStringUseCase;
+  final TemperatureLocalDataSource localDataSource;
+  final BluetoothBloc bluetoothBloc;
 
-class LoadUsersEvent extends UserEvent {
-  const LoadUsersEvent();
-}
-
-class CreateUserEvent extends UserEvent {
-  final CreateUserRequest request;
-  
-  const CreateUserEvent({required this.request});
-}
-```
-
-**State Definition**:
-```dart
-// presentation/bloc/user/user_state.dart
-abstract class UserState {}
-
-class UserInitial extends UserState {}
-
-class UserLoading extends UserState {}
-
-class UserLoaded extends UserState {
-  final List<User> users;
-  
-  UserLoaded({required this.users});
-}
-
-class UserError extends UserState {
-  final String message;
-  
-  UserError({required this.message});
-}
-```
-
-**BLoC Implementation**:
-```dart
-// presentation/bloc/user/user_bloc.dart
-class UserBloc extends Bloc<UserEvent, UserState> {
-  final GetUsersUseCase getUsersUseCase;
-  final CreateUserUseCase createUserUseCase;
-
-  UserBloc({
-    required this.getUsersUseCase,
-    required this.createUserUseCase,
-  }) : super(UserInitial()) {
-    on<LoadUsersEvent>(_onLoadUsers);
-    on<CreateUserEvent>(_onCreateUser);
+  TemperatureBloc({
+    required this.getDataStreamUseCase,
+    required this.sendStringUseCase,
+    required this.localDataSource,
+    required this.bluetoothBloc,
+  }) : super(TemperatureInitial()) {
+    on<StartTemperatureMonitoring>(_onStartMonitoring);
+    on<StopTemperatureMonitoring>(_onStopMonitoring);
+    on<UpdateTemperature>(_onUpdateTemperature);
   }
 
-  Future<void> _onLoadUsers(
-    LoadUsersEvent event,
-    Emitter<UserState> emit,
+  Future<void> _onStartMonitoring(
+    StartTemperatureMonitoring event,
+    Emitter<TemperatureState> emit,
   ) async {
-    emit(UserLoading());
-    
-    final result = await getUsersUseCase(NoParams());
-    
+    emit(TemperatureLoading());
+
+    // Subscribe to Bluetooth data stream
+    final result = await getDataStreamUseCase(NoParams());
+
     result.fold(
-      (failure) => emit(UserError(message: _mapFailureToMessage(failure))),
-      (users) => emit(UserLoaded(users: users)),
+      (failure) => emit(TemperatureError(message: _mapFailureToMessage(failure))),
+      (stream) {
+        // Process incoming data
+        emit(TemperatureMonitoring(stream: stream));
+      },
     );
   }
 
   String _mapFailureToMessage(Failure failure) {
-    switch (failure.runtimeType) {
-      case ServerFailure:
-        return 'Server Error. Please try again later.';
-      case NetworkFailure:
-        return 'No Internet Connection';
-      default:
-        return 'Unexpected Error';
+    if (failure is BluetoothFailure) {
+      return 'Bluetooth Error: ${failure.message}';
+    } else if (failure is NetworkFailure) {
+      return 'No Internet Connection';
     }
+    return 'Unexpected Error';
   }
 }
 ```
+
+**Key BLoC Patterns in this Project**:
+- All module BLoCs (Temperature, Servo, LightControl, Gamepad) depend on global `BluetoothBloc`
+- BLoCs subscribe to Bluetooth data streams for real-time sensor updates
+- Use `Either<Failure, Success>` from dartz for error handling
+- Events trigger use case execution
+- States represent UI states (Initial, Loading, Success, Error)
 
 ### 2. Domain Layer (Business Logic)
 
-**Entity**:
+Real examples from the Temperature feature:
+
+**Entity** (`features/temperature/domain/entities/temperature_entity.dart`):
 ```dart
-// domain/entities/user.dart
-class User {
-  String? id;
-  String? firstName;
-  String? lastName;
-  String? email;
-  bool? isActive;
+class Temperature {
+  final double celsius;
+  final double humidity;
+  final DateTime timestamp;
 
-  User({
-    this.id,
-    this.firstName,
-    this.lastName,
-    this.email,
-    this.isActive,
-  });
-
-  String get fullName => '${firstName ?? ''} ${lastName ?? ''}'.trim();
+  Temperature({
+    required this.celsius,
+    required this.humidity,
+    DateTime? timestamp,
+  }) : timestamp = timestamp ?? DateTime.now();
 }
 ```
 
-**Repository Interface**:
+**Repository Interface** (`features/temperature/domain/repositories/temperature_repository.dart`):
 ```dart
-// domain/repositories/user_repository.dart
-abstract class UserRepository {
-  Future<Either<Failure, List<User>>> getUsers();
-  Future<Either<Failure, User>> getUserById(String id);
-  Future<Either<Failure, User>> createUser(CreateUserRequest request);
-  Future<Either<Failure, void>> deleteUser(String id);
+abstract class TemperatureRepository {
+  Future<Either<Failure, Stream<String>>> getBluetoothDataStream();
+  Future<Either<Failure, void>> sendCommand(String command);
+  Future<Either<Failure, Temperature?>> getLastTemperature();
+  Future<Either<Failure, void>> saveTemperature(Temperature temperature);
 }
 ```
 
-**Use Case**:
+**Use Case Example** (`core/domain/usecases/bluetooth/connect_device.dart`):
 ```dart
-// domain/usecases/get_users_usecase.dart
-class GetUsersUseCase implements UseCase<List<User>, NoParams> {
-  final UserRepository repository;
+class ConnectDeviceUseCase {
+  final BluetoothRepository repository;
 
-  GetUsersUseCase({required this.repository});
+  ConnectDeviceUseCase({required this.repository});
 
-  @override
-  Future<Either<Failure, List<User>>> call(NoParams params) async {
-    return await repository.getUsers();
+  Future<Either<Failure, void>> call(String deviceId) async {
+    return await repository.connectToDevice(deviceId);
   }
 }
 ```
 
+**Important Domain Rules**:
+- Entities are simple classes (no Equatable, no immutability enforced)
+- Some fields are nullable, some required - depends on use case
+- Use cases follow single responsibility principle
+- Repository interfaces define contracts, implementations live in data layer
+
 ### 3. Data Layer (Infrastructure)
 
-**Data Model**:
+**Repository Implementation Example** (`core/data/repositories/bluetooth_repository_impl.dart`):
 ```dart
-// data/models/user_model.dart
-class UserModel extends User {
-  UserModel({
-    super.id,
-    super.firstName,
-    super.lastName,
-    super.email,
-    super.isActive,
-  });
+class BluetoothRepositoryImpl implements BluetoothRepository {
+  final BluetoothService btService;
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-    id: json['id'],
-    firstName: json['first_name'],
-    lastName: json['last_name'],
-    email: json['email'],
-    isActive: json['is_active'] ?? true,
-  );
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'first_name': firstName,
-    'last_name': lastName,
-    'email': email,
-    'is_active': isActive,
-  };
-}
-```
-
-**Repository Implementation**:
-```dart
-// data/repositories/user_repository_impl.dart
-class UserRepositoryImpl implements UserRepository {
-  final UserRemoteDataSource remoteDataSource;
-  final UserLocalDataSource localDataSource;
-  final NetworkInfo networkInfo;
-
-  UserRepositoryImpl({
-    required this.remoteDataSource,
-    required this.localDataSource,
-    required this.networkInfo,
-  });
+  BluetoothRepositoryImpl({required this.btService});
 
   @override
-  Future<Either<Failure, List<User>>> getUsers() async {
-    if (await networkInfo.isConnected) {
-      try {
-        final users = await remoteDataSource.getUsers();
-        await localDataSource.cacheUsers(users);
-        return Right(users);
-      } on ServerException catch (e) {
-        return Left(ServerFailure(message: e.message));
-      }
-    } else {
-      try {
-        final cachedUsers = await localDataSource.getCachedUsers();
-        return Right(cachedUsers);
-      } on CacheException {
-        return const Left(CacheFailure(message: 'No cached data'));
-      }
+  Future<Either<Failure, List<BluetoothDevice>>> discoverDevices() async {
+    try {
+      final devices = await btService.scanForDevices();
+      return Right(devices);
+    } on BluetoothException catch (e) {
+      return Left(BluetoothFailure(e.message));
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> connectToDevice(String deviceId) async {
+    try {
+      await btService.connect(deviceId);
+      return const Right(null);
+    } on BluetoothException catch (e) {
+      return Left(BluetoothFailure(e.message));
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Stream<String>>> getDataStream() async {
+    try {
+      final stream = btService.dataStream;
+      return Right(stream);
+    } catch (e) {
+      return Left(BluetoothFailure(e.toString()));
     }
   }
 }
 ```
 
+**Key Data Layer Patterns**:
+- Repository implementations handle exceptions and convert them to Failures
+- Use try-catch to handle exceptions from external sources (Bluetooth, API, storage)
+- Return `Either<Failure, Success>` - Left for errors, Right for success
+- Data sources are injected (remote API, local storage, Bluetooth service)
+- No business logic in repository implementations - pure data operations
+
 ### 4. Presentation Layer (UI)
 
-**Page Widget**:
+**Typical Page Structure**:
 ```dart
-// presentation/pages/users_page.dart
-class UsersPage extends StatelessWidget {
-  const UsersPage({super.key});
+class TemperaturePage extends StatelessWidget {
+  const TemperaturePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Users'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showCreateUserDialog(context),
+    return BlocProvider(
+      create: (_) => getIt<TemperatureBloc>()..add(StartTemperatureMonitoring()),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Temperature Monitor'),
+          backgroundColor: AppColors.primary,
+        ),
+        body: SafeArea(
+          child: BlocBuilder<TemperatureBloc, TemperatureState>(
+            builder: (context, state) {
+              if (state is TemperatureInitial) {
+                return const _InitialStateWidget();
+              }
+              if (state is TemperatureLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state is TemperatureMonitoring) {
+                return _TemperatureDisplayWidget(data: state.temperature);
+              }
+              if (state is TemperatureError) {
+                return _ErrorWidget(message: state.message);
+              }
+              return Container();
+            },
           ),
-        ],
-      ),
-      body: BlocBuilder<UserBloc, UserState>(
-        builder: (context, state) {
-          if (state is UserInitial) return const _EmptyStateWidget();
-          if (state is UserLoading) return const Center(child: CircularProgressIndicator());
-          if (state is UserLoaded) return _UserListWidget(users: state.users);
-          if (state is UserError) return _ErrorWidget(message: state.message);
-          return Container();
-        },
+        ),
       ),
     );
   }
 }
 ```
+
+**Key UI Patterns**:
+- BlocProvider creates BLoC instance with getIt<T>()
+- SafeArea handles notches/system UI
+- BlocBuilder rebuilds UI based on state changes
+- Material Design 3 with custom AppColors
+- Spanish localization by default (AppLocalizations)
 
 ## Mobile UI/UX Best Practices
 
-### Material Design 3 Guidelines
+### Current Project Theme
 
-1. **Theme Configuration**:
-```dart
-// core/theme/app_theme.dart
-class AppTheme {
-  static ThemeData lightTheme = ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: Colors.blue,
-      brightness: Brightness.light,
-    ),
-    appBarTheme: const AppBarTheme(
-      centerTitle: true,
-      elevation: 0,
-    ),
-    cardTheme: CardTheme(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-    ),
-  );
-}
-```
+Theme is configured in `main.dart` with Material Design 3:
+- **Primary Color**: `AppColors.primary` (from `theme/app_color.dart`)
+- **Font**: Roboto (regular, medium, bold, italic variants)
+- **Localization**: Spanish (es_MX) primary, English (en_US) fallback
+- **Material 3**: `useMaterial3: true`
 
-2. **Responsive Design**:
-```dart
-// Use MediaQuery for responsive layouts
-class ResponsiveWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.width > 600;
-    
-    return isTablet ? TabletLayout() : MobileLayout();
-  }
-}
-```
+### Key UI Patterns Used
 
-3. **Safe Area Handling**:
-```dart
-// Always wrap content in SafeArea for notch/status bar
-Scaffold(
-  body: SafeArea(
-    child: YourContent(),
-  ),
-);
-```
+1. **SafeArea**: Always used for handling notches/system UI
+2. **BlocBuilder**: For reactive UI updates based on state
+3. **Custom Dialogs**: Bluetooth dialogs in `core/ui/bluetooth_dialogs.dart`
+4. **Snackbar Service**: Global snackbar service in `core/ui/snackbar_service.dart`
+5. **ShellRoute**: Persistent navigation shell with `MainShell` widget
+6. **NoTransitionPage**: Used for instant page transitions
+7. **AppLocalizations**: Spanish/English translation support
 
-4. **Touch Target Sizes**:
-- Minimum 48x48 dp for interactive elements
-- Use `MaterialButton`, `IconButton`, `FloatingActionButton`
-- Provide adequate spacing between touch targets
+## Project-Specific Features
 
-5. **Loading States**:
-```dart
-// Show loading indicators for async operations
-if (state is Loading)
-  const Center(child: CircularProgressIndicator())
-else if (state is Loaded)
-  YourContent()
-```
+### Bluetooth Integration
 
-6. **Error Handling UI**:
-```dart
-// Display user-friendly error messages
-if (state is Error)
-  ErrorWidget(
-    message: state.message,
-    onRetry: () => context.read<Bloc>().add(RetryEvent()),
-  )
-```
+The app heavily relies on Bluetooth for IoT device communication:
+- **Services Used**: `flutter_bluetooth_serial`, `flutter_reactive_ble`
+- **Core Service**: `BluetoothService` in `core/data/services/bluetooth_service.dart`
+- **Global BLoC**: `BluetoothBloc` is a singleton (lazy) for managing connection state
+- **Module BLoCs**: Temperature, Servo, LightControl, Gamepad all depend on BluetoothBloc
+- **Permissions**: Handled by `PermissionService` in `core/data/services/permission_handler.dart`
 
-7. **Navigation Patterns**:
-```dart
-// Use proper navigation for mobile
-// Bottom navigation for 3-5 primary destinations
-// Drawer for 5+ destinations or settings
-// Tabs for related content groupings
-```
+### Authentication Flow
 
-8. **Form Validation**:
-```dart
-// Provide immediate, inline validation feedback
-TextFormField(
-  validator: (value) {
-    if (value?.isEmpty ?? true) return 'Required field';
-    if (!value!.contains('@')) return 'Invalid email';
-    return null;
-  },
-  decoration: InputDecoration(
-    labelText: 'Email',
-    helperText: 'Enter your email address',
-    errorMaxLines: 2,
-  ),
-);
-```
+- **OTP Verification**: Pin code fields for SMS/email verification
+- **Secure Storage**: Tokens stored in flutter_secure_storage
+- **Token Refresh**: Automatic token refresh via interceptor
+- **Session Check**: `CheckSession` use case validates token on app start
+- **User Cache**: Local user data caching for offline access
 
-### Platform-Specific Considerations
+### IoT Module Structure
 
-**Android**:
-- Material Design 3 components
-- Back button navigation support
-- Navigation drawer for menus
-- Bottom navigation bar
-- Floating action buttons (FAB)
-
-**iOS**:
-- Cupertino widgets when appropriate
-- Swipe-back gesture support
-- Bottom tab bar navigation
-- Use `CupertinoPageScaffold` for iOS-specific screens
-
-**Cross-platform**:
-```dart
-// Use Platform.isIOS / Platform.isAndroid for platform-specific behavior
-import 'dart:io';
-
-Widget buildButton() {
-  if (Platform.isIOS) {
-    return CupertinoButton(child: Text('Button'), onPressed: () {});
-  }
-  return ElevatedButton(child: Text('Button'), onPressed: () {});
-}
-```
-
-## Key Technical Details
-
-### Dependency Injection Setup
-
-```dart
-// injection_container.dart
-final sl = GetIt.instance;
-
-Future<void> init() async {
-  //! Features - User
-  // Bloc
-  sl.registerFactory(() => UserBloc(
-    getUsersUseCase: sl(),
-    createUserUseCase: sl(),
-  ));
-  
-  // Use cases
-  sl.registerLazySingleton(() => GetUsersUseCase(repository: sl()));
-  sl.registerLazySingleton(() => CreateUserUseCase(repository: sl()));
-  
-  // Repository
-  sl.registerLazySingleton<UserRepository>(
-    () => UserRepositoryImpl(
-      remoteDataSource: sl(),
-      localDataSource: sl(),
-      networkInfo: sl(),
-    ),
-  );
-  
-  // Data sources
-  sl.registerLazySingleton<UserRemoteDataSource>(
-    () => UserRemoteDataSourceImpl(client: sl()),
-  );
-  sl.registerLazySingleton<UserLocalDataSource>(
-    () => UserLocalDataSourceImpl(sharedPreferences: sl()),
-  );
-  
-  //! Core
-  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
-  
-  //! External
-  final sharedPreferences = await SharedPreferences.getInstance();
-  sl.registerLazySingleton(() => sharedPreferences);
-  sl.registerLazySingleton(() => Dio());
-}
-```
-
-### Main Entry Point
-
-```dart
-// main.dart
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await init(); // Initialize dependency injection
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Clean Architecture',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      home: BlocProvider(
-        create: (_) => sl<UserBloc>()..add(const LoadUsersEvent()),
-        child: const UsersPage(),
-      ),
-    );
-  }
-}
-```
+Each IoT module (Temperature, Servo, LightControl, Gamepad) follows the same pattern:
+1. **Domain**: Entity, Repository interface, Use cases (optional)
+2. **Data**: Repository implementation (uses BluetoothRepository)
+3. **Presentation**: BLoC, Page, Widgets
+4. **Instructions**: Static images in `assets/images/static/{module}/instructions/`
 
 ## Adding New Features
 
-### Adding a New Feature
+### Adding a New IoT Module
 
-1. Create feature folder structure in `lib/features/{feature_name}/`
-2. Define domain entities and repository interfaces
-3. Implement use cases in domain layer
-4. Create data models and repository implementations
-5. Implement BLoC for state management
-6. Build UI pages and widgets
-7. Register dependencies in `injection_container.dart`
-8. Write comprehensive tests
+1. Create feature folder: `lib/features/{module_name}/`
+2. Create domain layer:
+   - Entity (if needed): `domain/entities/{module}_entity.dart`
+   - Repository interface: `domain/repositories/{module}_repository.dart`
+   - Use cases (if complex logic): `domain/usecases/...`
+3. Create data layer:
+   - Repository implementation: `data/repositories/{module}_repository_impl.dart`
+   - Use `BluetoothRepository` for device communication
+4. Create presentation layer:
+   - BLoC: `presentation/bloc/{module}_bloc.dart`, `{module}_event.dart`, `{module}_state.dart`
+   - Page: `presentation/pages/{module}_page.dart`
+   - Widgets: `presentation/widgets/...`
+5. Register in DI (`lib/di/service_locator.dart`):
+   ```dart
+   // Repository
+   getIt.registerLazySingleton<YourRepository>(
+     () => YourRepositoryImpl(bluetoothRepository: getIt()),
+   );
+
+   // Use cases (if any)
+   getIt.registerLazySingleton(() => YourUseCase(repository: getIt()));
+
+   // BLoC (factory for new instances)
+   getIt.registerFactory(() => YourBloc(
+     getDataStreamUseCase: getIt(),
+     sendStringUseCase: getIt(),
+     bluetoothBloc: getIt(),
+   ));
+   ```
+6. Add route in `features/home/presentation/routes/main_static_routes.dart`
+7. Add module icon/card to Home menu
+8. Add instruction images to `assets/images/static/{module}/instructions/`
+9. Write tests (domain, data, presentation)
 
 ### Adding New Packages
 
 ```bash
-# Add package to pubspec.yaml
+# Add runtime dependency
 flutter pub add package_name
 
-# Add dev dependency (testing)
+# Add dev dependency
 flutter pub add --dev package_name
 
-# Update dependencies
+# Update all dependencies
 flutter pub upgrade
-```
 
-Common packages:
-- `flutter_bloc`: State management
-- `get_it`: Dependency injection
-- `dartz`: Functional programming (Either)
-- `equatable`: Value equality for Failures only
-- `dio`: HTTP client
-- `shared_preferences`: Simple storage
-- `sqflite`: SQLite database
-- `cached_network_image`: Image caching
-- `go_router`: Navigation
+# Check for outdated packages
+flutter pub outdated
+```
 
 ## Sub-Agent Workflow
 
 ### Rules
-- After a plan mode phase you should create a `.claude/sessions/context_session_{feature_name}.md` with the definition of the plan
-- Before you do any work, MUST view files in `.claude/sessions/context_session_{feature_name}.md` file and `.claude/doc/{feature_name}/*` files to get the full context
-- `.claude/sessions/context_session_{feature_name}.md` should contain most of context of what we did, overall plan, and sub agents will continuously add context to the file
-- After you finish the work, MUST update the `.claude/sessions/context_session_{feature_name}.md` file to make sure others can get full context of what you did
-- After you finish each phase, MUST update the `.claude/sessions/context_session_{feature_name}.md` file to make sure others can get full context of what you did
+- After a plan mode phase, create `.claude/sessions/context_session_{feature_name}.md` with plan definition
+- Before working, MUST read `.claude/sessions/context_session_{feature_name}.md` and `.claude/docs/{feature_name}/*` for full context
+- Session files contain overall plan and context - sub-agents continuously add to them
+- After finishing work or each phase, MUST update session file so others get full context
 
 ### Sub-Agent Workflow
-This project uses specialized sub-agents for different concerns. Always consult the appropriate agent:
+This project uses specialized sub-agents:
 
-- **flutter-frontend-developer**: Flutter feature development, Clean Architecture implementation, BLoC patterns
-- **ui-ux-analyzer**: Mobile UI review, Material Design compliance, responsive design validation
+- **flutter-frontend-developer**: Flutter development, Clean Architecture, BLoC patterns, IoT module implementation
+- **ui-ux-analyzer**: Mobile UI review, Material Design compliance, responsive design
 - **qa-criteria-validator**: Acceptance criteria definition, feature validation, testing strategy
-- **backend-architect**: API design, backend integration patterns (when applicable)
 
-Sub agents will do research about the implementation and report feedback, but you will do the actual implementation.
-When passing task to sub agent, make sure you pass the context file, e.g. `.claude/sessions/context_session_{feature_name}.md`.
-After each sub agent finishes the work, make sure you read the related documentation they created to get full context of the plan before you start executing.
+Sub-agents research and report feedback, but you do the actual implementation.
+When delegating to sub-agent, pass the context file (`.claude/sessions/context_session_{feature_name}.md`).
+After sub-agent finishes, read their documentation to get full context before executing.
 
 ## Code Writing Standards
 
@@ -776,199 +717,82 @@ extension StringExtensions on String {
 
 ## Testing Requirements
 
-**NO EXCEPTIONS POLICY**: All projects MUST have:
-- Unit tests for domain layer (use cases, entities)
-- Widget tests for UI components
-- BLoC tests for state management
-- Integration tests for critical user flows
+**IMPORTANT**: David requires comprehensive testing for ALL new features.
 
-The only way to skip tests: David EXPLICITLY states "I AUTHORIZE YOU TO SKIP WRITING TESTS THIS TIME."
+**NO EXCEPTIONS POLICY**: The only way to skip tests is if David EXPLICITLY states:
+> "I AUTHORIZE YOU TO SKIP WRITING TESTS THIS TIME."
 
-### Test Structure
+### Required Tests for New Features
 
-```dart
-// Unit Test Example
-void main() {
-  late GetUsersUseCase usecase;
-  late MockUserRepository mockRepository;
+1. **Unit Tests**: Domain layer (use cases, repositories with mocked dependencies)
+2. **Widget Tests**: UI components and pages
+3. **BLoC Tests**: State management logic (using `bloc_test` package)
+4. **Integration Tests**: Critical user flows (when applicable)
 
-  setUp(() {
-    mockRepository = MockUserRepository();
-    usecase = GetUsersUseCase(repository: mockRepository);
-  });
+### Test Structure Pattern
 
-  group('GetUsersUseCase', () {
-    test('should return list of users from repository', () async {
-      // arrange
-      final users = [
-        User(
-          id: '1',
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'john@example.com',
-          isActive: true,
-        )
-      ];
-      when(mockRepository.getUsers())
-          .thenAnswer((_) async => Right(users));
-      
-      // act
-      final result = await usecase(NoParams());
-      
-      // assert
-      expect(result, Right(users));
-      verify(mockRepository.getUsers());
-      verifyNoMoreInteractions(mockRepository);
-    });
-  });
-}
+Create test files mirroring source structure:
 ```
-
-```dart
-// Widget Test Example
-void main() {
-  testWidgets('UserCard displays user information', (tester) async {
-    // arrange
-    final user = User(
-      id: '1',
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      isActive: true,
-    );
-    
-    // act
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: UserCard(user: user),
-        ),
-      ),
-    );
-    
-    // assert
-    expect(find.text('John Doe'), findsOneWidget);
-    expect(find.text('john@example.com'), findsOneWidget);
-  });
-}
-```
-
-```dart
-// BLoC Test Example
-void main() {
-  late UserBloc bloc;
-  late MockGetUsersUseCase mockGetUsersUseCase;
-
-  setUp(() {
-    mockGetUsersUseCase = MockGetUsersUseCase();
-    bloc = UserBloc(getUsersUseCase: mockGetUsersUseCase);
-  });
-
-  blocTest<UserBloc, UserState>(
-    'emits [UserLoading, UserLoaded] when LoadUsersEvent is added',
-    build: () {
-      when(mockGetUsersUseCase(any))
-          .thenAnswer((_) async => Right([user]));
-      return bloc;
-    },
-    act: (bloc) => bloc.add(const LoadUsersEvent()),
-    expect: () => [
-      UserLoading(),
-      UserLoaded(users: [user]),
-    ],
-  );
-}
+test/
+  features/
+    {feature_name}/
+      domain/
+        usecases/
+          {usecase}_test.dart
+      data/
+        repositories/
+          {repository}_test.dart
+      presentation/
+        bloc/
+          {bloc}_test.dart
+        widgets/
+          {widget}_test.dart
 ```
 
 ### Test Coverage Requirements
 
-- Tests must comprehensively cover ALL functionality
-- Test output must be pristine to pass
-- Minimum 80% code coverage for all layers
-- 100% coverage for critical business logic
-- Mock all external dependencies
+- Minimum 80% code coverage for all new code
+- 100% coverage for critical business logic (auth, Bluetooth, payments)
+- Mock all external dependencies (Bluetooth, API, storage)
+- Test both success and failure scenarios
 - Never ignore test failures or warnings
 
-## Architecture Compliance
+## Architecture Compliance Checklist
 
-When writing Flutter code:
+### Domain Layer Rules
+- ✅ Zero Flutter/framework dependencies
+- ✅ Repository interfaces defined before implementations
+- ✅ All repository methods return `Either<Failure, Success>`
+- ✅ Entities are simple classes (no Equatable, nullable/required fields as needed)
+- ✅ Use cases have single responsibility
 
-1. **Keep Domain Pure**: Zero Flutter/framework dependencies in `domain/`
-2. **Define Interfaces First**: Repository interfaces in domain before implementations
-3. **Use Either Pattern**: All repository methods return `Either<Failure, Success>`
-4. **BLoC Pattern**: All business logic in BLoCs, not in widgets
-5. **Dependency Injection**: All dependencies injected via constructors using get_it
-6. **Immutability**: Use final fields where appropriate (especially in models/states)
-7. **Simple Classes**: Entities and Models are simple classes with nullable fields (no Equatable)
-8. **Equatable for Failures**: Only use Equatable for Failure classes in error handling
-9. **Single Responsibility**: Each widget, class, and function has one purpose
+### Data Layer Rules
+- ✅ Repository implementations handle exceptions → convert to Failures
+- ✅ Use try-catch for external sources (Bluetooth, API, storage)
+- ✅ No business logic in repositories
+- ✅ Data sources injected via constructor
 
-When writing mobile UI:
+### Presentation Layer Rules
+- ✅ All business logic in BLoCs, NOT in widgets
+- ✅ BLoCs registered in `di/service_locator.dart`
+- ✅ Use BlocProvider to create BLoC instances
+- ✅ BlocBuilder for reactive UI updates
+- ✅ SafeArea for handling notches/system UI
+- ✅ Material Design 3 components
+- ✅ Spanish localization (AppLocalizations)
 
-1. **Material Design 3**: Follow Material Design guidelines for Android
-2. **Responsive Design**: Support multiple screen sizes (phones, tablets)
-3. **Safe Areas**: Always handle notches and system UI
-4. **Touch Targets**: Minimum 48x48 dp for all interactive elements
-5. **Loading States**: Show appropriate feedback for async operations
-6. **Error Handling**: Display user-friendly error messages with retry options
-7. **Accessibility**: Support screen readers and dynamic font sizes
-8. **Platform Conventions**: Follow Android and iOS platform guidelines
+### Dependency Injection Rules
+- ✅ Manual registration in `lib/di/service_locator.dart` (NO @injectable)
+- ✅ Singleton services: `registerLazySingleton`
+- ✅ Feature BLoCs: `registerFactory` (new instance each time)
+- ✅ Global BLoCs: `registerLazySingleton` (BluetoothBloc, AuthBloc, ChatBloc)
+- ✅ All dependencies injected via constructor
 
-## Mobile-Specific Guidelines
-
-### Performance Optimization
-
-1. **Use const widgets** whenever possible
-2. **Implement keys** for ListView/GridView items
-3. **Cache images** with cached_network_image
-4. **Lazy load data** with pagination
-5. **Optimize build methods** - keep them pure and fast
-6. **Use RepaintBoundary** for complex animations
-7. **Profile with DevTools** to identify bottlenecks
-
-### Platform Integration
-
-```dart
-// Platform channels for native functionality
-import 'package:flutter/services.dart';
-
-const platform = MethodChannel('com.example.app/battery');
-
-Future<String> getBatteryLevel() async {
-  try {
-    final int result = await platform.invokeMethod('getBatteryLevel');
-    return 'Battery level: $result%';
-  } on PlatformException catch (e) {
-    return "Failed to get battery level: '${e.message}'.";
-  }
-}
-```
-
-### Offline-First Architecture
-
-```dart
-// Implement offline-first with local caching
-@override
-Future<Either<Failure, List<User>>> getUsers() async {
-  if (await networkInfo.isConnected) {
-    try {
-      final users = await remoteDataSource.getUsers();
-      await localDataSource.cacheUsers(users); // Cache for offline
-      return Right(users);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    }
-  } else {
-    // Return cached data when offline
-    try {
-      final cachedUsers = await localDataSource.getCachedUsers();
-      return Right(cachedUsers);
-    } on CacheException {
-      return const Left(CacheFailure(message: 'No cached data available'));
-    }
-  }
-}
-```
+### Error Handling Rules
+- ✅ Use Equatable ONLY for Failure classes
+- ✅ Define specific Failure types (BluetoothFailure, ServerFailure, etc.)
+- ✅ Map Failures to user-friendly messages in BLoCs
+- ✅ Display errors in UI with retry options
 
 ## Code Writing
 
@@ -992,37 +816,56 @@ Future<Either<Failure, List<User>>> getUsers() async {
 - Use `flutter doctor` to diagnose setup issues
 - Check `flutter doctor -v` for detailed environment information
 
-## Compliance Check
+## Pre-Submission Compliance Check
 
-Before submitting any work, verify that you have followed ALL guidelines above:
+Before submitting any work, verify ALL guidelines:
 
-- [ ] Clean Architecture layers properly separated
-- [ ] BLoC pattern correctly implemented
-- [ ] All dependencies injected via get_it
-- [ ] Either pattern used for error handling
+- [ ] Clean Architecture layers properly separated (domain, data, presentation)
+- [ ] BLoC pattern correctly implemented (classic Bloc<Event, State>)
+- [ ] Dependencies registered in `lib/di/service_locator.dart` with get_it
+- [ ] Either pattern used for error handling (dartz)
 - [ ] Unit tests for domain layer written
 - [ ] Widget tests for UI components written
 - [ ] BLoC tests for state management written
-- [ ] Test coverage >80%
-- [ ] ABOUTME comments added to all files
-- [ ] Dart format applied: `dart format .`
+- [ ] Test coverage >80% for new code
+- [ ] ABOUTME comments added to all new Dart files
+- [ ] Code formatted: `dart format lib/ test/`
 - [ ] No analysis errors: `flutter analyze`
 - [ ] Material Design 3 guidelines followed
-- [ ] Responsive design for mobile screens
-- [ ] Safe areas properly handled
-- [ ] Accessibility considerations included
+- [ ] SafeArea properly used
+- [ ] Spanish/English localization supported
+- [ ] Bluetooth integration follows existing patterns (if applicable)
 
-If you find yourself considering an exception to ANY rule, YOU MUST STOP and get explicit permission from David first.
+**If you consider ANY exception to these rules, STOP and get explicit permission from David first.**
 
-## Mobile Development Best Practices Summary
+## Quick Reference Summary
 
-1. **Architecture**: Clean Architecture with clear layer separation
-2. **State Management**: Classic BLoC pattern (Bloc<Event, State>)
-3. **Dependency Injection**: get_it with injectable
-4. **Error Handling**: Either<Failure, Success> pattern with dartz
-5. **Testing**: Comprehensive unit, widget, and BLoC tests (>80% coverage)
-6. **UI/UX**: Material Design 3 for Android, Cupertino for iOS when appropriate
-7. **Performance**: Const widgets, efficient builds, image caching
-8. **Offline-First**: Local caching with sqflite or hive
-9. **Platform Integration**: Platform channels for native functionality
-10. **Code Quality**: dart analyze, dart format, sound null safety
+### Project Characteristics
+- **Type**: Flutter IoT education app (Temperature, Servo, LED, Gamepad modules)
+- **Architecture**: Clean Architecture (Domain, Data, Presentation)
+- **State**: BLoC pattern with flutter_bloc
+- **DI**: Manual get_it registration in `di/service_locator.dart`
+- **Bluetooth**: Core feature using flutter_bluetooth_serial + flutter_reactive_ble
+- **Auth**: JWT tokens, OTP verification, secure storage
+- **Navigation**: GoRouter with ShellRoute
+- **Localization**: Spanish (primary), English (fallback)
+- **Theme**: Material Design 3, custom AppColors
+- **Target**: Android/iOS (compileSdk 35)
+
+### Key Files to Know
+- `lib/main.dart` - App entry point, DI initialization
+- `lib/di/service_locator.dart` - Dependency injection registry
+- `lib/core/router/app_router.dart` - Navigation configuration
+- `lib/core/network/dio_client.dart` - API client with interceptors
+- `lib/core/data/services/bluetooth_service.dart` - Bluetooth core service
+- `lib/core/error/failure.dart` - Failure types (Equatable)
+- `lib/theme/app_color.dart` - App color palette
+
+### Common Commands
+```bash
+flutter run                    # Run app
+flutter test --coverage        # Run tests with coverage
+flutter analyze               # Static analysis
+dart format lib/ test/        # Format code
+flutter clean && flutter pub get  # Clean rebuild
+```
