@@ -357,10 +357,7 @@ Future<void> setupLocator() async {
 
   // Theme BLoC (singleton for global theme state)
   getIt.registerLazySingleton(
-    () => ThemeBloc(
-      loadThemeUseCase: getIt(),
-      saveThemeUseCase: getIt(),
-    ),
+    () => ThemeBloc(loadThemeUseCase: getIt(), saveThemeUseCase: getIt()),
   );
 
   getIt.registerFactory(() => HomeBloc(getCombinedMenu: getIt()));

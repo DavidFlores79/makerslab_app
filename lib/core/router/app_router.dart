@@ -10,6 +10,7 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/routes/main_static_routes.dart';
 import '../../features/profile/presentation/pages/personal_data_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/profile/presentation/pages/settings_page.dart';
 import '../../main_shell.dart';
 import '../presentation/pages/not_found_page.dart';
 
@@ -44,6 +45,11 @@ final GoRouter appRouter = GoRouter(
           name: PersonalDataPage.routeName,
           pageBuilder:
               (c, s) => const NoTransitionPage(child: PersonalDataPage()),
+        ),
+        GoRoute(
+          path: SettingsPage.routeName,
+          name: SettingsPage.routeName,
+          pageBuilder: (c, s) => const NoTransitionPage(child: SettingsPage()),
         ),
       ],
     ),

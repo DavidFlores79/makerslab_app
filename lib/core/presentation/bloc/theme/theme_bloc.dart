@@ -15,10 +15,8 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   final LoadThemePreferenceUseCase loadThemeUseCase;
   final SaveThemePreferenceUseCase saveThemeUseCase;
 
-  ThemeBloc({
-    required this.loadThemeUseCase,
-    required this.saveThemeUseCase,
-  }) : super(const ThemeInitial()) {
+  ThemeBloc({required this.loadThemeUseCase, required this.saveThemeUseCase})
+    : super(const ThemeInitial()) {
     on<LoadThemePreference>(_onLoadThemePreference);
     on<ChangeThemeMode>(_onChangeThemeMode);
   }
@@ -35,17 +33,11 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
       (failure) {
         // If loading fails, default to system theme
         final isDark = _isSystemDarkMode();
-        emit(ThemeLoaded(
-          mode: ThemePreference.system,
-          isDarkMode: isDark,
-        ));
+        emit(ThemeLoaded(mode: ThemePreference.system, isDarkMode: isDark));
       },
       (preference) {
         final isDark = _computeIsDarkMode(preference);
-        emit(ThemeLoaded(
-          mode: preference,
-          isDarkMode: isDark,
-        ));
+        emit(ThemeLoaded(mode: preference, isDarkMode: isDark));
       },
     );
   }
@@ -61,18 +53,12 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
       (failure) {
         // If save fails, still update UI but keep trying
         final isDark = _computeIsDarkMode(event.mode);
-        emit(ThemeLoaded(
-          mode: event.mode,
-          isDarkMode: isDark,
-        ));
+        emit(ThemeLoaded(mode: event.mode, isDarkMode: isDark));
       },
       (_) {
         // Successfully saved, update UI
         final isDark = _computeIsDarkMode(event.mode);
-        emit(ThemeLoaded(
-          mode: event.mode,
-          isDarkMode: isDark,
-        ));
+        emit(ThemeLoaded(mode: event.mode, isDarkMode: isDark));
       },
     );
   }
@@ -88,7 +74,8 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
 
   /// Checks if system is in dark mode
   bool _isSystemDarkMode() {
-    final brightness = SchedulerBinding.instance.platformDispatcher.platformBrightness;
+    final brightness =
+        SchedulerBinding.instance.platformDispatcher.platformBrightness;
     return brightness == Brightness.dark;
   }
 }

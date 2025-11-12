@@ -35,7 +35,9 @@ class ThemeLocalDataSourceImpl implements ThemeLocalDataSource {
 
       return ThemePreference.fromStorageString(storedValue);
     } catch (e) {
-      throw CacheException('Error al obtener preferencia de tema: ${e.toString()}');
+      throw CacheException(
+        'Error al obtener preferencia de tema: ${e.toString()}',
+      );
     }
   }
 
@@ -51,7 +53,9 @@ class ThemeLocalDataSourceImpl implements ThemeLocalDataSource {
         throw CacheException('Error al guardar preferencia de tema');
       }
     } catch (e) {
-      throw CacheException('Error al guardar preferencia de tema: ${e.toString()}');
+      throw CacheException(
+        'Error al guardar preferencia de tema: ${e.toString()}',
+      );
     }
   }
 }

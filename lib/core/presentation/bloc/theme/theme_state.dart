@@ -27,10 +27,7 @@ class ThemeLoaded extends ThemeState {
   final ThemePreference mode;
   final bool isDarkMode;
 
-  const ThemeLoaded({
-    required this.mode,
-    required this.isDarkMode,
-  });
+  const ThemeLoaded({required this.mode, required this.isDarkMode});
 
   @override
   List<Object?> get props => [mode, isDarkMode];

@@ -71,7 +71,7 @@ void main() {
       // Arrange
       const errorMessage = 'No theme preference found';
       when(mockLocalDataSource.getThemePreference())
-          .thenThrow(const CacheException(errorMessage));
+          .thenThrow(CacheException(errorMessage));
 
       // Act
       final result = await repository.getThemePreference();
@@ -158,7 +158,7 @@ void main() {
       // Arrange
       const errorMessage = 'Failed to save theme preference';
       when(mockLocalDataSource.saveThemePreference(any))
-          .thenThrow(const CacheException(errorMessage));
+          .thenThrow(CacheException(errorMessage));
 
       // Act
       final result = await repository.saveThemePreference(ThemePreference.dark);
