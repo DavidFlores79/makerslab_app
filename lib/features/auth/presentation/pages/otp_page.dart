@@ -10,6 +10,7 @@ import '../../../../core/ui/snackbar_service.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../utils/util_image.dart';
 import '../../../home/presentation/pages/home_page.dart';
+import '../../data/models/user_model.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/otp/otp_bloc.dart';
@@ -19,16 +20,23 @@ import 'change_password_page.dart';
 
 class OtpPage extends StatefulWidget {
   static const routeName = '/auth/otp';
-  final String userId;
+  final String userId; // Legacy support or for forgot password
+  final String? registrationId; // New registration flow
   final String phone;
   final bool isForForgotPassword;
+  final bool isForRegistration;
 
   const OtpPage({
     super.key,
-    required this.userId,
+    this.userId = '',
+    this.registrationId,
     required this.phone,
     this.isForForgotPassword = false,
+    this.isForRegistration = false,
   });
+  
+  // Get the ID to use (prioritize registrationId for new flow)
+  String get id => registrationId ?? userId;
 
   @override
   State<OtpPage> createState() => _OtpPageState();
@@ -49,7 +57,9 @@ class _OtpPageState extends State<OtpPage> {
       _blocInitialized = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _otpBloc.add(OtpStartTimer(seconds: 60));
+          // New registration flow uses 5 minutes (300 seconds), legacy uses 1 minute
+          final seconds = widget.isForRegistration ? 300 : 60;
+          _otpBloc.add(OtpStartTimer(seconds: seconds));
         }
       });
     }
@@ -68,6 +78,12 @@ class _OtpPageState extends State<OtpPage> {
 
   void _showSnack(String message) {
     if (mounted) SnackbarService().show(message: message);
+  }
+
+  String _formatTime(int seconds) {
+    final minutes = seconds ~/ 60;
+    final secs = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -105,16 +121,26 @@ class _OtpPageState extends State<OtpPage> {
                             ? TextButton(
                               onPressed: null,
                               child: Text(
-                                '${AppLocalizations.of(context)!.wait_label} ${secondsLeft}s',
+                                '${AppLocalizations.of(context)!.wait_label} ${_formatTime(secondsLeft)}',
                                 style: theme.textTheme.bodyMedium,
                               ),
                             )
                             : TextButton(
                               onPressed:
                                   canResend && !isLoading
-                                      ? () => _otpBloc.add(
-                                        OtpResendPressed(id: widget.userId),
-                                      )
+                                      ? () {
+                                        if (widget.isForRegistration) {
+                                          _otpBloc.add(
+                                            OtpResendRegistrationCode(
+                                              registrationId: widget.id,
+                                            ),
+                                          );
+                                        } else {
+                                          _otpBloc.add(
+                                            OtpResendPressed(id: widget.id),
+                                          );
+                                        }
+                                      }
                                       : null,
                               child: Text(
                                 AppLocalizations.of(context)!.resend_code_label,
@@ -126,12 +152,24 @@ class _OtpPageState extends State<OtpPage> {
                     onPressed:
                         isLoading
                             ? null
-                            : () => _otpBloc.add(
-                              OtpConfirmPressed(
-                                id: widget.userId,
-                                code: _codeController.text.trim(),
-                              ),
-                            ),
+                            : () {
+                              final code = _codeController.text.trim();
+                              if (widget.isForRegistration) {
+                                _otpBloc.add(
+                                  OtpVerifyRegistration(
+                                    registrationId: widget.id,
+                                    otp: code,
+                                  ),
+                                );
+                              } else {
+                                _otpBloc.add(
+                                  OtpConfirmPressed(
+                                    id: widget.id,
+                                    code: code,
+                                  ),
+                                );
+                              }
+                            },
                     isLoading: isLoading,
                     label: AppLocalizations.of(context)!.confirm_label,
                   ),
@@ -169,6 +207,40 @@ class _OtpPageState extends State<OtpPage> {
       return;
     }
 
+    // Handle new registration flow success
+    if (state is OtpRegistrationSuccess) {
+      _showSnack(
+        AppLocalizations.of(context)!.account_verified_successfully_label,
+      );
+      _codeController.clear();
+
+      try {
+        final authBloc = context.read<AuthBloc>();
+        // Convert User to UserModel for the event
+        final userModel = UserModel(
+          id: state.user.id,
+          name: state.user.name,
+          phone: state.user.phone,
+          email: state.user.email,
+          image: state.user.image,
+          status: state.user.status,
+          deleted: state.user.deleted,
+          google: state.user.google,
+          createdAt: state.user.createdAt,
+          updatedAt: state.user.updatedAt,
+        );
+        authBloc.add(
+          RegistrationConfirmed(user: userModel, token: ''),
+        );
+      } catch (_) {}
+      
+      if (mounted) {
+        context.go(HomePage.routeName);
+      }
+      return;
+    }
+
+    // Handle legacy flow success
     if (state is OtpConfirmSuccess) {
       _showSnack(
         AppLocalizations.of(context)!.account_verified_successfully_label,
@@ -231,8 +303,14 @@ class _OtpPageState extends State<OtpPage> {
         _otpBloc.add(OtpCodeChanged(value));
       },
       onCompleted: (value) {
-        debugPrint('Código OTP completado: $value');
-        _otpBloc.add(OtpConfirmPressed(id: widget.userId, code: value));
+        debugPrint('OTP code completed: $value');
+        if (widget.isForRegistration) {
+          _otpBloc.add(
+            OtpVerifyRegistration(registrationId: widget.id, otp: value),
+          );
+        } else {
+          _otpBloc.add(OtpConfirmPressed(id: widget.id, code: value));
+        }
       },
       pinTheme: PinTheme(
         shape: PinCodeFieldShape.box,

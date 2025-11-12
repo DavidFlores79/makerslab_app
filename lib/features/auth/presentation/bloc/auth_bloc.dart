@@ -105,13 +105,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     result.fold(
       (failure) {
-        debugPrint('>>> Registro falló: ${failure.message}');
+        debugPrint('>>> Registration failed: ${failure.message}');
         emit(AuthError(failure.message));
       },
-      (user) {
-        debugPrint('>>> Registro ok; pasar a OTP para userId: ${user.id}');
+      (signupResponse) {
+        debugPrint(
+          '>>> Registration successful; navigate to OTP with registrationId: ${signupResponse.registrationId}',
+        );
         emit(
-          RegistrationPending(userId: user.id ?? '', phone: user.phone ?? ''),
+          RegistrationPending(
+            registrationId: signupResponse.registrationId ?? '',
+            phone: event.phone,
+            message: signupResponse.message ?? '',
+          ),
         );
       },
     );

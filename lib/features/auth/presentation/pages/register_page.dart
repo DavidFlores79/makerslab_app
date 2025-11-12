@@ -47,13 +47,17 @@ class RegisterPage extends StatelessWidget {
         body: BlocListener<AuthBloc, AuthState>(
           listener: (context, authState) {
             if (authState is RegistrationPending) {
-              // navegar a OTP con go_router (param userId), pasamos phone por extra
+              // Navigate to OTP with registrationId
               debugPrint(
-                '>>> Navegando a OTP para userId: ${authState.userId}',
+                '>>> Navigating to OTP with registrationId: ${authState.registrationId}',
               );
               context.go(
                 OtpPage.routeName,
-                extra: {'phone': authState.phone, 'userId': authState.userId},
+                extra: {
+                  'phone': authState.phone,
+                  'registrationId': authState.registrationId,
+                  'message': authState.message,
+                },
               );
             } else if (authState is AuthError) {
               SnackbarService().show(message: authState.message);
@@ -112,7 +116,7 @@ class RegisterPage extends StatelessWidget {
                                 context.read<AuthBloc>().add(
                                   RegisterRequested(
                                     name: state.name ?? '',
-                                    phone: state.phone ?? '',
+                                    phone: state.fullPhoneNumber ?? '',
                                     password: state.password ?? '',
                                   ),
                                 );

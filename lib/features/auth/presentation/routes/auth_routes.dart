@@ -62,18 +62,21 @@ final authRoutes = [
     path: OtpPage.routeName,
     name: OtpPage.routeName,
     builder: (context, state) {
-      final userId = (state.extra as Map<String, dynamic>?)?['userId'] ?? '';
-      final phone = (state.extra as Map<String, dynamic>?)?['phone'] ?? '';
-      final isForForgotPassword =
-          (state.extra as Map<String, dynamic>?)?['isForForgotPassword'] ??
-          false;
+      final extra = state.extra as Map<String, dynamic>? ?? {};
+      final userId = extra['userId'] ?? '';
+      final registrationId = extra['registrationId'];
+      final phone = extra['phone'] ?? '';
+      final isForForgotPassword = extra['isForForgotPassword'] ?? false;
+      final isForRegistration = registrationId != null;
 
       return BlocProvider(
         create: (_) => getIt<OtpBloc>(),
         child: OtpPage(
           userId: userId,
+          registrationId: registrationId,
           phone: phone,
           isForForgotPassword: isForForgotPassword,
+          isForRegistration: isForRegistration,
         ),
       );
     },

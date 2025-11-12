@@ -5,6 +5,7 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failure.dart';
 import '../../../../core/domain/entities/user.dart';
 import '../../../../core/domain/repositories/base_repository.dart';
+import '../../domain/entities/signup_response.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../datasources/auth_token_local_datasource.dart';
@@ -56,12 +57,12 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, User>> signUp({
+  Future<Either<Failure, SignupResponse>> signUp({
     required String name,
     required String phone,
     required String password,
   }) {
-    return safeCall<User>(() async {
+    return safeCall<SignupResponse>(() async {
       final response = await remoteDataSource.signUp(
         name: name,
         phone: phone,
@@ -69,7 +70,46 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
       );
 
       // Don't cache tokens yet - user needs to verify OTP first
+      // Return SignupResponse with registrationId for OTP verification
+      return SignupResponse(
+        message: response.message,
+        registrationId: response.registrationId,
+      );
+    });
+  }
+
+  @override
+  Future<Either<Failure, User>> verifyRegistration({
+    required String registrationId,
+    required String otp,
+  }) {
+    return safeCall<User>(() async {
+      final response = await remoteDataSource.verifyRegistration(
+        registrationId: registrationId,
+        otp: otp,
+      );
+
+      // Cache tokens after successful OTP verification
+      await tokenLocalDataSource.cacheTokens(
+        accessToken: response.jwt ?? '',
+        refreshToken: response.jwt ?? '',
+      );
+
+      // Cache user data
+      await userLocalDataSource.saveUser(response.data!);
+
       return response.data!;
+    });
+  }
+
+  @override
+  Future<Either<Failure, void>> resendRegistrationCode({
+    required String registrationId,
+  }) {
+    return safeCall<void>(() async {
+      await remoteDataSource.resendRegistrationCode(
+        registrationId: registrationId,
+      );
     });
   }
 

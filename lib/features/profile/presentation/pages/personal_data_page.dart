@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../theme/app_color.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 
 class PersonalDataPage extends StatefulWidget {
@@ -58,58 +59,83 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: const PxBackAppBar(backLabel: 'Back'),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                // Avatar with camera icon
-                _buildAvatarSection(),
-                const SizedBox(height: 30),
+      body: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is AuthError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else if (state is Authenticated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Perfil actualizado exitosamente'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.of(context).pop();
+          }
+        },
+        child: SafeArea(
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  // Avatar with camera icon
+                  _buildAvatarSection(),
+                  const SizedBox(height: 30),
 
-                // Name
-                _buildTextField(
-                  label: 'Full Name',
-                  controller: _nameController,
-                ),
-                const SizedBox(height: 16),
+                  // Name
+                  _buildTextField(
+                    label: 'Full Name',
+                    controller: _nameController,
+                  ),
+                  const SizedBox(height: 16),
 
-                // Phone
-                _buildTextField(
-                  label: 'Phone',
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  enabled: false, // Usually phone is not editable
-                ),
-                const SizedBox(height: 16),
+                  // Phone
+                  _buildTextField(
+                    label: 'Phone',
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    enabled: false, // Usually phone is not editable
+                  ),
+                  const SizedBox(height: 16),
 
-                // Email
-                _buildTextField(
-                  label: 'Email',
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 32),
+                  // Email
+                  _buildTextField(
+                    label: 'Email',
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 32),
 
-                // Save Button
-                MainAppButton(
-                  label: 'Save',
-                  expand: true,
-                  onPressed: _saveData,
-                ),
-                const SizedBox(height: 12),
+                  // Save Button
+                  BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      final isLoading = state is AuthLoading;
+                      return MainAppButton(
+                        label: isLoading ? 'Guardando...' : 'Save',
+                        expand: true,
+                        onPressed: isLoading ? null : _saveData,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
 
-                // Cancel Button
-                MainAppButton(
-                  label: 'Cancel',
-                  variant: ButtonVariant.outlined,
-                  expand: true,
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                const SizedBox(height: 20),
-              ],
+                  // Cancel Button
+                  MainAppButton(
+                    label: 'Cancel',
+                    variant: ButtonVariant.outlined,
+                    expand: true,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
@@ -206,9 +232,30 @@ class _PersonalDataPageState extends State<PersonalDataPage> {
 
   void _saveData() {
     if (_formKey.currentState!.validate()) {
-      // TODO: Implement save logic using UpdateUser UseCase
-      debugPrint('Saving user data...');
-      Navigator.of(context).pop();
+      final authState = context.read<AuthBloc>().state;
+      if (authState is Authenticated) {
+        final userId = authState.user.id;
+        if (userId == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Error: Usuario no identificado'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+
+        // Dispatch UpdateProfileRequested event
+        context.read<AuthBloc>().add(
+          UpdateProfileRequested(
+            userId: userId,
+            name: _nameController.text.trim(),
+            email: _emailController.text.trim(),
+            phone: _phoneController.text.trim(),
+            image: _userImage,
+          ),
+        );
+      }
     }
   }
 }
