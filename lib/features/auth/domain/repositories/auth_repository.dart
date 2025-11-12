@@ -21,14 +21,14 @@ abstract class AuthRepository {
   Future<Either<Failure, void>> resendRegistrationCode({
     required String registrationId,
   });
-  
+
   // Legacy methods (kept for backward compatibility)
   Future<Either<Failure, void>> resendSignUpCode({required String userId});
   Future<Either<Failure, LoginResponseModel>> confirmSignUp({
     required String userId,
     required String code,
   });
-  
+
   Future<Either<Failure, void>> changePassword(
     String oldPassword,
     String newPassword,

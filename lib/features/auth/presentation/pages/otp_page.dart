@@ -34,7 +34,7 @@ class OtpPage extends StatefulWidget {
     this.isForForgotPassword = false,
     this.isForRegistration = false,
   });
-  
+
   // Get the ID to use (prioritize registrationId for new flow)
   String get id => registrationId ?? userId;
 
@@ -163,10 +163,7 @@ class _OtpPageState extends State<OtpPage> {
                                 );
                               } else {
                                 _otpBloc.add(
-                                  OtpConfirmPressed(
-                                    id: widget.id,
-                                    code: code,
-                                  ),
+                                  OtpConfirmPressed(id: widget.id, code: code),
                                 );
                               }
                             },
@@ -229,11 +226,9 @@ class _OtpPageState extends State<OtpPage> {
           createdAt: state.user.createdAt,
           updatedAt: state.user.updatedAt,
         );
-        authBloc.add(
-          RegistrationConfirmed(user: userModel, token: ''),
-        );
+        authBloc.add(RegistrationConfirmed(user: userModel, token: ''));
       } catch (_) {}
-      
+
       if (mounted) {
         context.go(HomePage.routeName);
       }

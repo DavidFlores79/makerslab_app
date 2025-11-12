@@ -5,10 +5,7 @@ class SignupResponseModel {
   final String message;
   final String registrationId;
 
-  SignupResponseModel({
-    required this.message,
-    required this.registrationId,
-  });
+  SignupResponseModel({required this.message, required this.registrationId});
 
   factory SignupResponseModel.fromJson(Map<String, dynamic> json) {
     return SignupResponseModel(
@@ -18,7 +15,7 @@ class SignupResponseModel {
   }
 
   Map<String, dynamic> toJson() => {
-        'message': message,
-        'registrationId': registrationId,
-      };
+    'message': message,
+    'registrationId': registrationId,
+  };
 }

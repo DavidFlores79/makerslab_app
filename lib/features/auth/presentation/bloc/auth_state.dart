@@ -15,7 +15,7 @@ class RegistrationPending extends AuthState {
     required this.phone,
     this.message = '',
   });
-  
+
   // Legacy support - userId can be used as registrationId
   String get userId => registrationId;
 }

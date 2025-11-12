@@ -11,7 +11,7 @@ class ApiConfig {
   static const String signUpEndpoint = '/auth/signup';
   static const String verifyRegistrationEndpoint = '/auth/verify-registration';
   static const String resendCodeEndpoint = '/auth/resend-code';
-  
+
   // Legacy endpoints (kept for backward compatibility)
   static const String confirmSignUpEndpoint = '/auth/phone-verify';
 

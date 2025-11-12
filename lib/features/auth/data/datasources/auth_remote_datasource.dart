@@ -24,14 +24,14 @@ abstract class AuthRemoteDataSource {
   Future<void> resendRegistrationCode({required String registrationId});
   Future<void> changePassword(String oldPassword, String newPassword);
   Future<ForgotPasswordResponseModel> forgotPassword(String phone);
-  
+
   // Legacy methods (kept for backward compatibility)
   Future<void> resendSignUpCode({required String userId});
   Future<LoginResponseModel> confirmSignUp({
     required String userId,
     required String code,
   });
-  
+
   Future<UserModel> updateProfile({
     required String userId,
     String? name,

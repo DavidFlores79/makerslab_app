@@ -5,8 +5,5 @@ class SignupResponse {
   String? message;
   String? registrationId;
 
-  SignupResponse({
-    this.message,
-    this.registrationId,
-  });
+  SignupResponse({this.message, this.registrationId});
 }
