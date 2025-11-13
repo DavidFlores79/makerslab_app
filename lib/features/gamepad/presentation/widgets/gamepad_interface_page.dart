@@ -204,6 +204,8 @@ class _GamepadConnectedView extends StatefulWidget {
 class _GamepadConnectedViewState extends State<_GamepadConnectedView> {
   bool _isLandscapeReady = false;
   Timer? _orientationCheckTimer;
+  Timer? _joystickReleaseTimer;
+  String _lastCommand = 'S00';
   final Duration _pollInterval = const Duration(milliseconds: 50);
   final Duration _timeout = const Duration(milliseconds: 1000);
 
@@ -247,6 +249,10 @@ class _GamepadConnectedViewState extends State<_GamepadConnectedView> {
 
     _orientationCheckTimer?.cancel();
     _orientationCheckTimer = null;
+
+    _joystickReleaseTimer?.cancel();
+    _joystickReleaseTimer = null;
+
     super.dispose();
   }
 
@@ -354,7 +360,29 @@ class _GamepadConnectedViewState extends State<_GamepadConnectedView> {
                       final cmd = _directionFromAlignment(
                         Offset(details.alignment.x, details.alignment.y),
                       );
-                      bloc.add(GamepadDirectionChanged(command: cmd));
+
+                      // Only send command if it changed to avoid flooding
+                      if (cmd != _lastCommand) {
+                        bloc.add(GamepadDirectionChanged(command: cmd));
+                        _lastCommand = cmd;
+                      }
+
+                      // Cancel any existing timer
+                      _joystickReleaseTimer?.cancel();
+
+                      // Set timer to detect when joystick is released
+                      // If no updates for 100ms, joystick was released
+                      if (cmd != 'S00') {
+                        _joystickReleaseTimer = Timer(
+                          const Duration(milliseconds: 100),
+                          () {
+                            if (_lastCommand != 'S00') {
+                              bloc.add(GamepadDirectionChanged(command: 'S00'));
+                              _lastCommand = 'S00';
+                            }
+                          },
+                        );
+                      }
                     },
                     joyStickAreaColor: AppColors.primary.withAlpha(30),
                     joyStickStickColor: AppColors.primary,

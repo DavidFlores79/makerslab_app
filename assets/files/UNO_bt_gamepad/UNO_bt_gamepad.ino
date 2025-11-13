@@ -139,7 +139,7 @@ void releaseObject() {
 
 void moveServosUp() {
   int currentPosition = servoLeft.read();
-  for (int angle = currentPosition; angle >= 10; angle--) {
+  for (int angle = currentPosition; angle >= 1; angle--) {
     servoLeft.write(angle);
     servoRight.write(abs(angle - 180));
     // Serial.print("Down Servo Left Angle");
@@ -150,7 +150,7 @@ void moveServosUp() {
 
 void moveServosDown() {
   int currentPosition = servoLeft.read();
-  for (int angle = currentPosition; angle <= 60; angle++) {
+  for (int angle = currentPosition; angle <= 80; angle++) {
     servoLeft.write(angle);
     servoRight.write(abs(angle - 180));
     // Serial.print("Up Servo Left Angle");
