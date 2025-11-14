@@ -205,7 +205,9 @@ class _GamepadConnectedViewState extends State<_GamepadConnectedView> {
   bool _isLandscapeReady = false;
   Timer? _orientationCheckTimer;
   Timer? _joystickReleaseTimer;
+  Timer? _commandRepeatTimer;
   String _lastCommand = 'S00';
+  DateTime? _lastJoystickUpdate;
   final Duration _pollInterval = const Duration(milliseconds: 50);
   final Duration _timeout = const Duration(milliseconds: 1000);
 
@@ -253,6 +255,9 @@ class _GamepadConnectedViewState extends State<_GamepadConnectedView> {
     _joystickReleaseTimer?.cancel();
     _joystickReleaseTimer = null;
 
+    _commandRepeatTimer?.cancel();
+    _commandRepeatTimer = null;
+
     super.dispose();
   }
 
@@ -261,19 +266,35 @@ class _GamepadConnectedViewState extends State<_GamepadConnectedView> {
     final dy = -alignment.dy;
     final magnitude = sqrt(dx * dx + dy * dy);
 
-    const double threshold = 0.20;
-    if (magnitude < threshold) return 'S00';
+    // Lowered threshold from 0.20 to 0.10 for more responsive control
+    const double threshold = 0.10;
+    if (magnitude < threshold) {
+      debugPrint(
+        'Joystick - STOP (magnitude: ${magnitude.toStringAsFixed(2)})',
+      );
+      return 'S00';
+    }
 
     final angle = atan2(dy, dx) * 180 / pi;
 
+    // Debug: Print actual values to verify mapping
+    debugPrint(
+      'Joystick - dx: ${dx.toStringAsFixed(2)}, dy: ${dy.toStringAsFixed(2)}, magnitude: ${magnitude.toStringAsFixed(2)}, angle: ${angle.toStringAsFixed(1)}°',
+    );
+
+    // Corrected mapping (rotated 90° to match Arduino orientation):
+    // Right: angle ~0°   → B01 (Backward on Arduino)
+    // Up: angle ~90°     → R01 (Right on Arduino)
+    // Left: angle ~180°  → F01 (Forward on Arduino)
+    // Down: angle ~-90°  → L01 (Left on Arduino)
     if (angle >= -45 && angle < 45) {
-      return 'B01';
+      return 'L01'; // Right on screen = Backward on Arduino
     } else if (angle >= 45 && angle < 135) {
-      return 'R01';
+      return 'F01'; // Up on screen = Right on Arduino
     } else if (angle >= -135 && angle < -45) {
-      return 'L01';
+      return 'B01'; // Down on screen = Left on Arduino
     } else {
-      return 'F01';
+      return 'R01'; // Left on screen = Forward on Arduino
     }
   }
 
@@ -361,28 +382,70 @@ class _GamepadConnectedViewState extends State<_GamepadConnectedView> {
                         Offset(details.alignment.x, details.alignment.y),
                       );
 
+                      // Update timestamp - we got a joystick update
+                      _lastJoystickUpdate = DateTime.now();
+
+                      // Cancel any existing timers since we got an update
+                      _joystickReleaseTimer?.cancel();
+                      _joystickReleaseTimer = null;
+                      _commandRepeatTimer?.cancel();
+                      _commandRepeatTimer = null;
+
                       // Only send command if it changed to avoid flooding
                       if (cmd != _lastCommand) {
-                        bloc.add(GamepadDirectionChanged(command: cmd));
-                        _lastCommand = cmd;
-                      }
-
-                      // Cancel any existing timer
-                      _joystickReleaseTimer?.cancel();
-
-                      // Set timer to detect when joystick is released
-                      // If no updates for 100ms, joystick was released
-                      if (cmd != 'S00') {
-                        _joystickReleaseTimer = Timer(
-                          const Duration(milliseconds: 100),
-                          () {
-                            if (_lastCommand != 'S00') {
-                              bloc.add(GamepadDirectionChanged(command: 'S00'));
-                              _lastCommand = 'S00';
-                            }
-                          },
+                        debugPrint(
+                          '📤 Sending command: $cmd (previous: $_lastCommand)',
                         );
+                        bloc.add(GamepadDirectionChanged(command: cmd));
+                        setState(() {
+                          _lastCommand = cmd;
+                        });
                       }
+
+                      // If the joystick moved back to center (S00), we're done
+                      // No need to set a timer - the user released it
+                      if (cmd == 'S00') {
+                        return;
+                      }
+
+                      // For active movements (not S00), start a periodic timer
+                      // to keep sending the command even if joystick stops updating
+                      _commandRepeatTimer = Timer.periodic(
+                        const Duration(milliseconds: 150),
+                        (_) {
+                          if (_lastCommand != 'S00') {
+                            debugPrint('🔄 Repeating command: $_lastCommand');
+                            _lastJoystickUpdate =
+                                DateTime.now(); // Keep timestamp fresh to prevent timeout
+                            bloc.add(
+                              GamepadDirectionChanged(command: _lastCommand),
+                            );
+                          }
+                        },
+                      );
+
+                      // Set a release timer as safety net
+                      // If no joystick updates for 500ms, assume it was released
+                      _joystickReleaseTimer = Timer(
+                        const Duration(milliseconds: 500),
+                        () {
+                          if (_lastCommand != 'S00') {
+                            final timeSinceUpdate =
+                                DateTime.now()
+                                    .difference(_lastJoystickUpdate!)
+                                    .inMilliseconds;
+                            if (timeSinceUpdate >= 400) {
+                              debugPrint('📤 Joystick timeout - sending S00');
+                              _commandRepeatTimer?.cancel();
+                              _commandRepeatTimer = null;
+                              bloc.add(GamepadDirectionChanged(command: 'S00'));
+                              setState(() {
+                                _lastCommand = 'S00';
+                              });
+                            }
+                          }
+                        },
+                      );
                     },
                     joyStickAreaColor: AppColors.primary.withAlpha(30),
                     joyStickStickColor: AppColors.primary,
@@ -390,8 +453,48 @@ class _GamepadConnectedViewState extends State<_GamepadConnectedView> {
                   const SizedBox(height: 12),
                   BlocBuilder<GamepadBloc, GamepadState>(
                     builder: (context, state) {
-                      // Opcional: mostrar valores o estado del joystick
-                      return const Text('Joystick');
+                      return Column(
+                        children: [
+                          const Text(
+                            'Joystick',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: AppColors.primary,
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              'Comando: $_lastCommand',
+                              style: const TextStyle(
+                                fontFamily: 'monospace',
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Estado: ${state.runtimeType.toString().replaceAll('Gamepad', '')}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color:
+                                  state is GamepadConnected
+                                      ? AppColors.lightGreen
+                                      : AppColors.redAccent,
+                            ),
+                          ),
+                        ],
+                      );
                     },
                   ),
                 ],

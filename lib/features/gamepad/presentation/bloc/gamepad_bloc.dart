@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart';
 
@@ -44,6 +45,15 @@ class GamepadBloc extends Bloc<GamepadEvent, GamepadState> {
   }
 
   void _subscribeToBluetoothState() {
+    // CRITICAL FIX: Check current state first before listening to stream
+    // If Bluetooth is already connected when GamepadBloc is created,
+    // we need to start monitoring immediately
+    final currentState = bluetoothBloc.state;
+    if (currentState is BluetoothConnected) {
+      add(StartMonitoring());
+    }
+
+    // Then listen to future state changes
     _bluetoothStateSubscription = bluetoothBloc.stream.listen((state) {
       if (state is BluetoothConnected) {
         add(StartMonitoring());
@@ -95,11 +105,22 @@ class GamepadBloc extends Bloc<GamepadEvent, GamepadState> {
     if (bluetoothBloc.state is BluetoothConnected &&
         state is GamepadConnected) {
       final command = '${event.command}\n';
+      debugPrint('🎮 GamepadBloc: Sending direction command: $command');
       final result = await sendStringUseCase(command);
-      result.fold((failure) => emit(GamepadError(failure.message)), (_) {
-        // No emitimos un nuevo estado por cada dirección para evitar rebuilds; si quieres telemetry, úsalo.
-      });
+      result.fold(
+        (failure) {
+          debugPrint(
+            '❌ GamepadBloc: Failed to send command - ${failure.message}',
+          );
+          emit(GamepadError(failure.message));
+        },
+        (_) {
+          debugPrint('✅ GamepadBloc: Command sent successfully');
+          // No emitimos un nuevo estado por cada dirección para evitar rebuilds; si quieres telemetry, úsalo.
+        },
+      );
     } else {
+      debugPrint('❌ GamepadBloc: Not connected - cannot send direction');
       emit(GamepadError('No conectado: imposible enviar dirección.'));
     }
   }

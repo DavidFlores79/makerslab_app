@@ -8,7 +8,11 @@ const unsigned int IN2 = 5;
 const unsigned int IN3 = 6;
 const unsigned int IN4 = 7;
 
-const int MAX_SPEED = 180;  // Velocidad máxima
+const int MAX_SPEED = 255;  // Velocidad máxima (PWM max value)
+
+// Motor calibration (adjust these to balance wheel speeds)
+const float LEFT_MOTOR_MULTIPLIER = 1.00;  // Left wheel (IN1/IN2)
+const float RIGHT_MOTOR_MULTIPLIER = 0.70; // Right wheel (IN3/IN4) - reduce more if still spinning faster
 
 int servoPinR = 2;
 int servoPinL = 8;
@@ -90,9 +94,9 @@ void executeCommand(String command) {
   } else if (command == "L01") {
     turnLeft();
   } else if (command == "Y00") {
-    releaseObject();
-    moveServosDown();
-    pickUpObject();
+    
+    moveServosUp();
+    
     stopMotors();
   } else if (command == "B00") {
     pickUpObject();
@@ -101,7 +105,9 @@ void executeCommand(String command) {
     releaseObject();
     stopMotors();
   } else if (command == "A00") {
-    moveServosUp();
+    releaseObject();
+    moveServosDown();
+    pickUpObject();
     stopMotors();
   } else if (command == "L02") {
     // moveServosMiddle();
@@ -137,7 +143,7 @@ void releaseObject() {
   }
 }
 
-void moveServosUp() {
+void moveServosDown() {
   int currentPosition = servoLeft.read();
   for (int angle = currentPosition; angle >= 1; angle--) {
     servoLeft.write(angle);
@@ -148,7 +154,7 @@ void moveServosUp() {
   }
 }
 
-void moveServosDown() {
+void moveServosUp() {
   int currentPosition = servoLeft.read();
   for (int angle = currentPosition; angle <= 80; angle++) {
     servoLeft.write(angle);
@@ -161,11 +167,24 @@ void moveServosDown() {
 
 void moveServosMiddle() {
   int currentPosition = servoLeft.read();
-  for (int angle = currentPosition; angle >= 70; angle--) {
-    servoLeft.write(angle);
-    servoRight.write(abs(angle - 180));
-    delay(5);
+  int targetPosition = 70;
+  
+  if (currentPosition < targetPosition) {
+    // Move up (increase angle)
+    for (int angle = currentPosition; angle <= targetPosition; angle++) {
+      servoLeft.write(angle);
+      servoRight.write(abs(angle - 180));
+      delay(5);
+    }
+  } else if (currentPosition > targetPosition) {
+    // Move down (decrease angle)
+    for (int angle = currentPosition; angle >= targetPosition; angle--) {
+      servoLeft.write(angle);
+      servoRight.write(abs(angle - 180));
+      delay(5);
+    }
   }
+  // If currentPosition == targetPosition, do nothing
 }
 
 void emptyTrashContainer() {
@@ -195,30 +214,30 @@ void stopMotors() {
   digitalWrite(IN4, LOW);
 }
 
-void moveBackward() {
-  analogWrite(IN1, MAX_SPEED);
-  analogWrite(IN2, 0);
-  analogWrite(IN3, MAX_SPEED);
+void turnLeft() {
+  analogWrite(IN1, 0);
+  analogWrite(IN2, MAX_SPEED * 0.75 * LEFT_MOTOR_MULTIPLIER);
+  analogWrite(IN3, MAX_SPEED * 0.75 * RIGHT_MOTOR_MULTIPLIER);
   analogWrite(IN4, 0);
+}
+
+void turnRight() {
+  analogWrite(IN1, MAX_SPEED * 0.75 * LEFT_MOTOR_MULTIPLIER);
+  analogWrite(IN2, 0);
+  analogWrite(IN3, 0);
+  analogWrite(IN4, MAX_SPEED * 0.75 * RIGHT_MOTOR_MULTIPLIER);
 }
 
 void moveForward() {
   analogWrite(IN1, 0);
-  analogWrite(IN2, MAX_SPEED);
+  analogWrite(IN2, MAX_SPEED * LEFT_MOTOR_MULTIPLIER);
   analogWrite(IN3, 0);
-  analogWrite(IN4, MAX_SPEED);
+  analogWrite(IN4, MAX_SPEED * RIGHT_MOTOR_MULTIPLIER);
 }
 
-void turnRight() {
-  analogWrite(IN1, MAX_SPEED * 0.75);
+void moveBackward() {
+  analogWrite(IN1, MAX_SPEED * LEFT_MOTOR_MULTIPLIER);
   analogWrite(IN2, 0);
-  analogWrite(IN3, 0);
-  analogWrite(IN4, MAX_SPEED * 0.75);
-}
-
-void turnLeft() {
-  analogWrite(IN1, 0);
-  analogWrite(IN2, MAX_SPEED * 0.75);
-  analogWrite(IN3, MAX_SPEED * 0.75);
+  analogWrite(IN3, MAX_SPEED * RIGHT_MOTOR_MULTIPLIER);
   analogWrite(IN4, 0);
 }
