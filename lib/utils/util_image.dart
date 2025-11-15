@@ -70,14 +70,22 @@ class UtilImage {
           ),
         ),
       ),
-      errorWidget: (context, url, error) => Icon(
-        Icons.broken_image_outlined,
-        size: size,
-        color: Colors.grey,
-      ),
+      errorWidget: (context, url, error) {
+        // Log error for debugging
+        debugPrint('Error loading image from $url: $error');
+        return Icon(
+          Icons.broken_image_outlined,
+          size: size,
+          color: Colors.grey,
+        );
+      },
       // Limit image size to reduce memory usage
       maxWidthDiskCache: 400,
       maxHeightDiskCache: 400,
+      // Add error logging
+      errorListener: (error) {
+        debugPrint('CachedNetworkImage error: $error');
+      },
     );
   }
 
