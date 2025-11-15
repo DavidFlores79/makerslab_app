@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/domain/entities/module.dart';
 import '../../../core/domain/usecases/share_file_usecase.dart';
+import '../../../core/ui/snackbar_service.dart';
 import '../../../di/service_locator.dart';
 import '../index.dart';
 
@@ -34,7 +35,7 @@ class BuildMainContent extends StatelessWidget {
                 child: MainAppButton(
                   variant: ButtonVariant.outlined,
                   label: 'Descargar INO',
-                  onPressed: () => _onDownloadAndShare(),
+                  onPressed: () => _onDownloadAndShare(context),
                 ),
               ),
             ],
@@ -59,13 +60,46 @@ class BuildMainContent extends StatelessWidget {
     );
   }
 
-  Future<void> _onDownloadAndShare() async {
+  Future<void> _onDownloadAndShare(BuildContext context) async {
     final shareFileUseCase = getIt<ShareFileUseCase>();
+    final snackbarService = getIt<SnackbarService>();
 
-    await shareFileUseCase(
+    // Share file with module-specific text and subject (Decision D2)
+    final result = await shareFileUseCase(
       assetPath: mainModule.inoFile,
       fileName: mainModule.inoFile.split('/').last,
-      text: 'Aquí tienes tu archivo INO',
+      text: 'Código Arduino para ${mainModule.title}',
+      subject: 'Archivo INO - ${mainModule.title}',
+    );
+
+    // Handle Either result - only show error messages (Decision B1: silent on success/dismissal)
+    result.fold(
+      (failure) {
+        // Map failure to user-friendly Spanish error message (Decision C2: specific errors)
+        String errorMessage;
+        if (failure.message.contains('no encontrado')) {
+          errorMessage = 'Error al compartir archivo: Archivo no encontrado';
+        } else if (failure.message.contains('guardar')) {
+          errorMessage =
+              'Error al compartir archivo: No se pudo guardar el archivo';
+        } else if (failure.message.contains('plataforma')) {
+          errorMessage = 'Error al compartir archivo: Error de la plataforma';
+        } else {
+          errorMessage = 'Error al compartir archivo: Error desconocido';
+        }
+
+        // Show error snackbar with red background
+        snackbarService.show(
+          message: errorMessage,
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+          style: SnackbarStyle.withClose,
+        );
+      },
+      (_) {
+        // Success or user dismissal - show nothing (Decision B1)
+        // User knows what they did, no need for confirmation
+      },
     );
   }
 }
