@@ -5,7 +5,6 @@ import 'package:makerslab_app/core/presentation/bloc/bluetooth/bluetooth_bloc.da
 import 'package:makerslab_app/core/presentation/bloc/bluetooth/bluetooth_event.dart';
 import 'package:makerslab_app/core/presentation/bloc/bluetooth/bluetooth_state.dart';
 import 'package:makerslab_app/core/ui/snackbar_service.dart';
-import 'package:makerslab_app/theme/app_color.dart';
 
 /// Una clase de utilidad para mostrar diálogos comunes relacionados con Bluetooth.
 class BluetoothDialogs {
@@ -67,11 +66,13 @@ class BluetoothDialogs {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (modalContext) {
         final theme = Theme.of(modalContext).textTheme;
+        final colorScheme = Theme.of(modalContext).colorScheme;
         return BlocProvider<BluetoothBloc>.value(
           value: bluetoothBloc,
           child: BlocListener<BluetoothBloc, BluetoothState>(
@@ -95,16 +96,14 @@ class BluetoothDialogs {
                             'Dispositivos Bluetooth Disponibles',
                             style: theme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
                             ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(
-                            Icons.refresh,
-                            color: AppColors.gray600,
-                          ),
+                          icon: Icon(Icons.refresh, color: colorScheme.primary),
                           onPressed:
                               () => context.read<BluetoothBloc>().add(
                                 BluetoothScanRequested(),
@@ -118,29 +117,31 @@ class BluetoothDialogs {
                     Text(
                       instructionalText,
                       style: theme.bodyMedium?.copyWith(
-                        color: AppColors.gray600,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Divider(color: AppColors.gray300),
+                    Divider(color: colorScheme.outline.withOpacity(0.3)),
                     Expanded(
                       child: BlocBuilder<BluetoothBloc, BluetoothState>(
                         builder: (context, state) {
                           if (state is BluetoothScanning ||
                               state is BluetoothConnecting) {
-                            return const Center(
+                            return Center(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   CircularProgressIndicator(
                                     valueColor: AlwaysStoppedAnimation(
-                                      AppColors.gray600,
+                                      colorScheme.primary,
                                     ),
                                   ),
-                                  SizedBox(height: 16),
+                                  const SizedBox(height: 16),
                                   Text(
                                     'Buscando dispositivos...',
-                                    style: TextStyle(color: AppColors.gray500),
+                                    style: theme.bodyMedium?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -171,26 +172,24 @@ class BluetoothDialogs {
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.search_off,
                                       size: 50,
-                                      color: AppColors.gray500,
+                                      color: colorScheme.onSurfaceVariant,
                                     ),
                                     const SizedBox(height: 12),
-                                    const Text(
+                                    Text(
                                       'No se encontraron dispositivos.\nAsegúrate de que tu ESP32 esté encendido y visible.',
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: AppColors.gray500,
+                                      style: theme.bodyMedium?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                     const SizedBox(height: 12),
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            AppColors
-                                                .gray600, // Gris oscuro para botón
-                                        foregroundColor: AppColors.white,
+                                        backgroundColor: colorScheme.primary,
+                                        foregroundColor: colorScheme.onPrimary,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
                                             8,
@@ -210,8 +209,9 @@ class BluetoothDialogs {
                             return ListView.separated(
                               itemCount: sortedDevices.length,
                               separatorBuilder:
-                                  (_, __) =>
-                                      const Divider(color: AppColors.gray300),
+                                  (_, __) => Divider(
+                                    color: colorScheme.outline.withOpacity(0.3),
+                                  ),
                               itemBuilder: (context, index) {
                                 final d = sortedDevices[index];
                                 final name =
@@ -229,8 +229,8 @@ class BluetoothDialogs {
                                   ),
                                   color:
                                       isESP32
-                                          ? AppColors.gray200
-                                          : AppColors.gray100,
+                                          ? colorScheme.surfaceVariant
+                                          : colorScheme.surface,
                                   child: ListTile(
                                     contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 16,
@@ -240,14 +240,15 @@ class BluetoothDialogs {
                                       Icons.bluetooth,
                                       color:
                                           isESP32
-                                              ? AppColors.gray700
-                                              : AppColors.gray600,
+                                              ? colorScheme.primary
+                                              : colorScheme.onSurfaceVariant,
                                       size: 32,
                                     ),
                                     title: Text(
                                       name,
                                       style: theme.bodyLarge?.copyWith(
                                         fontWeight: FontWeight.w600,
+                                        color: colorScheme.onSurface,
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
@@ -255,23 +256,25 @@ class BluetoothDialogs {
                                     subtitle: Text(
                                       subtitle,
                                       style: theme.bodyMedium?.copyWith(
-                                        color: AppColors.gray600,
+                                        color: colorScheme.onSurfaceVariant,
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
                                     ),
                                     trailing:
                                         isESP32
-                                            ? const Chip(
+                                            ? Chip(
                                               side: BorderSide(
-                                                color: AppColors.primaryLight,
+                                                color: colorScheme.primary,
                                               ),
-                                              label: Text('Recomendado'),
+                                              label: const Text('Recomendado'),
                                               backgroundColor:
-                                                  AppColors.primary,
-                                              labelStyle: TextStyle(
-                                                color: AppColors.white,
-                                              ),
+                                                  colorScheme.primary,
+                                              labelStyle: theme.bodySmall
+                                                  ?.copyWith(
+                                                    color:
+                                                        colorScheme.onPrimary,
+                                                  ),
                                             )
                                             : null,
                                     onTap: () {
@@ -290,18 +293,16 @@ class BluetoothDialogs {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.error_outline,
-                                    color:
-                                        AppColors
-                                            .gray600, // Gris en lugar de rojo
+                                    color: colorScheme.error,
                                     size: 50,
                                   ),
                                   const SizedBox(height: 12),
                                   Text(
                                     'Error: ${state.message}',
                                     style: theme.bodySmall?.copyWith(
-                                      color: AppColors.gray600,
+                                      color: colorScheme.error,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -309,8 +310,13 @@ class BluetoothDialogs {
                               ),
                             );
                           }
-                          return const Center(
-                            child: Text('Iniciando búsqueda...'),
+                          return Center(
+                            child: Text(
+                              'Iniciando búsqueda...',
+                              style: theme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
                           );
                         },
                       ),

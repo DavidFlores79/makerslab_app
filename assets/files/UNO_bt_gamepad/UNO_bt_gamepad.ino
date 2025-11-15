@@ -228,14 +228,14 @@ void turnRight() {
   analogWrite(IN4, MAX_SPEED * 0.75 * RIGHT_MOTOR_MULTIPLIER);
 }
 
-void moveForward() {
+void moveBackward() {
   analogWrite(IN1, 0);
   analogWrite(IN2, MAX_SPEED * LEFT_MOTOR_MULTIPLIER);
   analogWrite(IN3, 0);
   analogWrite(IN4, MAX_SPEED * RIGHT_MOTOR_MULTIPLIER);
 }
 
-void moveBackward() {
+void moveForward() {
   analogWrite(IN1, MAX_SPEED * LEFT_MOTOR_MULTIPLIER);
   analogWrite(IN2, 0);
   analogWrite(IN3, MAX_SPEED * RIGHT_MOTOR_MULTIPLIER);

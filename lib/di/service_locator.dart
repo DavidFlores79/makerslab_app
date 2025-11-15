@@ -21,6 +21,7 @@ import '../core/network/dio_client.dart';
 import '../core/domain/repositories/file_sharing_repository.dart';
 import '../core/data/services/bluetooth_service.dart';
 import '../core/data/services/file_sharing_service.dart';
+import '../core/data/repositories/file_sharing_repository_impl.dart';
 import '../core/presentation/bloc/bluetooth/bluetooth_bloc.dart';
 import '../core/storage/secure_storage_service.dart';
 import '../core/ui/snackbar_service.dart';
@@ -185,9 +186,14 @@ Future<void> setupLocator() async {
   // cubits
   getIt.registerFactory(() => RegisterCubit());
 
+  // Services (low-level, no business logic)
+  getIt.registerLazySingleton<FileSharingService>(
+    () => FileSharingService(),
+  );
+
   // Repositorios
   getIt.registerLazySingleton<FileSharingRepository>(
-    () => FileSharingService(),
+    () => FileSharingRepositoryImpl(service: getIt<FileSharingService>()),
   );
 
   getIt.registerLazySingleton<BluetoothRepository>(
