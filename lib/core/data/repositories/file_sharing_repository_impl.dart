@@ -2,6 +2,7 @@
 // ABOUTME: Converts service exceptions into domain Failures following Clean Architecture principles
 import 'dart:io';
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/services.dart';
 import '../../domain/repositories/file_sharing_repository.dart';
 import '../../error/failure.dart';
@@ -63,10 +64,32 @@ class FileSharingRepositoryImpl implements FileSharingRepository {
           stackTrace,
         ),
       );
-    } catch (e, stackTrace) {
-      // Unknown errors
+    } on Error catch (e, stackTrace) {
+      // Dart Error class (StateError, ArgumentError, TypeError, etc.)
+      // Log diagnostic information to identify specific error type
+      debugPrint('=== DIAGNOSTIC INFO ===');
+      debugPrint('ERROR TYPE: ${e.runtimeType}');
+      debugPrint('ERROR DETAILS: $e');
+      debugPrint('STACK TRACE: $stackTrace');
+      debugPrint('======================');
       return Left(
-        UnknownFailure('Error desconocido al compartir el archivo', stackTrace),
+        ShareFailure(
+          'Error del sistema al compartir (${e.runtimeType}): ${e.toString()}',
+          stackTrace,
+        ),
+      );
+    } catch (e, stackTrace) {
+      // Unknown errors - should rarely hit this now
+      debugPrint('=== UNKNOWN ERROR DIAGNOSTIC ===');
+      debugPrint('ERROR TYPE: ${e.runtimeType}');
+      debugPrint('ERROR DETAILS: $e');
+      debugPrint('STACK TRACE: $stackTrace');
+      debugPrint('================================');
+      return Left(
+        UnknownFailure(
+          'Error desconocido al compartir el archivo (${e.runtimeType}): ${e.toString()}',
+          stackTrace,
+        ),
       );
     }
   }
