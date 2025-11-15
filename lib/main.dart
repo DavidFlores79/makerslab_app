@@ -44,6 +44,63 @@ void main() async {
         onTimeout: () => ThemeInitial(),
       );
 
+  // Configure global error widget for better user experience
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    // Log error for debugging
+    if (kDebugMode) {
+      debugPrint('Global error caught: ${details.exception}');
+      debugPrint('Stack trace: ${details.stack}');
+    }
+
+    // Show user-friendly error screen instead of red screen
+    return MaterialApp(
+      home: Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.red.shade400,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Algo salió mal',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Por favor reinicia la aplicación',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (kDebugMode) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error: ${details.exception}',
+                    style: const TextStyle(fontSize: 12, color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  };
+
   runApp(
     MultiBlocProvider(
       providers: [
