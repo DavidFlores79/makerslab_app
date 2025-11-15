@@ -106,6 +106,10 @@ flutter:
     - assets/images/static/gamepad/
     - assets/images/static/gamepad/instructions/
     - assets/files/
+    - assets/files/esp32_bt_light/
+    - assets/files/esp32_bt_servo/
+    - assets/files/esp32_bt_temp/
+    - assets/files/UNO_bt_gamepad/
     - assets/lotties/
 
   fonts:
