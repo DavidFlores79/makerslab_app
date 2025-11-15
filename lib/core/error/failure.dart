@@ -51,3 +51,15 @@ class ValidationFailure extends Failure {
 class PermissionFailure extends Failure {
   const PermissionFailure(super.message, [super.stackTrace]);
 }
+
+class FileNotFoundFailure extends Failure {
+  const FileNotFoundFailure(super.message, [super.stackTrace]);
+}
+
+class FileSystemFailure extends Failure {
+  const FileSystemFailure(super.message, [super.stackTrace]);
+}
+
+class ShareFailure extends Failure {
+  const ShareFailure(super.message, [super.stackTrace]);
+}
