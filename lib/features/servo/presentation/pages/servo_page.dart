@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/widgets/index.dart';
-import '../../../../core/domain/entities/instruction.dart';
-import '../../../../core/domain/entities/material.dart';
+import 'package:makerslab_app/features/home/domain/entities/instruction_item.dart';
+import 'package:makerslab_app/features/home/domain/entities/material_item.dart';
 import '../../../../core/domain/entities/module.dart';
 import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
 import '../widgets/servo_interface_page.dart';

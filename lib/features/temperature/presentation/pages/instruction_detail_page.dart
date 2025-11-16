@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/domain/entities/instruction.dart';
+import 'package:makerslab_app/features/home/domain/entities/instruction_item.dart';
 import '../../../../shared/widgets/instructions/helpers/instruction_actions.dart';
 
 class TemperatureInstructionDetailsPage extends StatelessWidget {

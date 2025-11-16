@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/domain/entities/instruction.dart';
+import 'package:makerslab_app/features/home/domain/entities/instruction_item.dart';
 
 class InstructionDetailsSection extends StatelessWidget {
   final InstructionItem instruction;

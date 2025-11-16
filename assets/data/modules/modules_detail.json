@@ -1,0 +1,246 @@
+{
+  "version": "1.0.0",
+  "modules": [
+    {
+      "id": "temperature",
+      "title": "Sensor Temperatura",
+      "description": "Módulo de temperatura y humedad con sensor DHT11",
+      "route": "/temperature",
+      "interfaceRoute": "/temperature-interface",
+      "image": "assets/images/static/temperature/esp32DHT11.png",
+      "videoId": "kJpdoBLSmHs",
+      "chatModuleKey": "temperature",
+      "inoFiles": [
+        {
+          "platform": "ESP32",
+          "fileName": "esp32_bt_temp.ino",
+          "filePath": "assets/files/esp32_bt_temp/esp32_bt_temp.ino",
+          "description": "Código para ESP32 con Bluetooth Classic y sensor DHT11"
+        },
+        {
+          "platform": "Arduino UNO",
+          "fileName": "uno_bt_temp.ino",
+          "filePath": "assets/files/uno_bt_temp/uno_bt_temp.ino",
+          "description": "Código para Arduino UNO con HC-05 Bluetooth y sensor DHT11"
+        }
+      ],
+      "instructions": [
+        {
+          "title": "1. Conectar el sensor DHT11 y el modulo Bluetooth HC-05 al Protoboard",
+          "description": "Descripción de la instrucción 1 para la ruta interna lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+          "imagePath": "assets/images/static/temperature/instructions/instruction1.png",
+          "actionType": "modalBottomSheet"
+        },
+        {
+          "title": "Instrucción 2",
+          "description": "Descripción de la instrucción 2",
+          "actionType": "externalUrl",
+          "actionValue": "https://www.enlacetecnologias.mx"
+        },
+        {
+          "title": "Instrucción 3",
+          "description": "Descripción de la instrucción 3",
+          "actionType": "none"
+        },
+        {
+          "title": "Instrucción 4",
+          "description": "Descripción de la instrucción 4 para la ruta interna lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+          "actionType": "modalBottomSheet"
+        }
+      ],
+      "materials": [
+        {
+          "title": "Microcontrolador ESP32",
+          "description": "Placa de desarrollo ESP32 con WiFi y Bluetooth integrados",
+          "qty": "1",
+          "imagePath": "assets/images/static/materials/esp32.png",
+          "actionType": "modalBottomSheet"
+        },
+        {
+          "title": "Sensor DHT11",
+          "description": "Sensor de temperatura y humedad digital",
+          "qty": "1",
+          "imagePath": "assets/images/static/materials/dht-11.png",
+          "actionType": "modalBottomSheet"
+        },
+        {
+          "title": "Resistencia 10k",
+          "description": "Componente para pull-up del DHT11 sensor",
+          "qty": "1",
+          "imagePath": "assets/images/static/materials/resistance10k.png",
+          "actionType": "modalBottomSheet"
+        },
+        {
+          "title": "Cables de conexión",
+          "description": "Dupont o jumper cables para conexiones",
+          "qty": "1",
+          "imagePath": "assets/images/static/materials/dupont-cables.png",
+          "actionType": "modalBottomSheet"
+        },
+        {
+          "title": "Protoboard",
+          "description": "Placa de pruebas para circuitos",
+          "qty": "1",
+          "imagePath": "assets/images/static/materials/breadboard.png",
+          "actionType": "modalBottomSheet"
+        }
+      ]
+    },
+    {
+      "id": "servo",
+      "title": "Servo Motor",
+      "description": "Control de servo motor SG90 mediante Bluetooth",
+      "route": "/servo",
+      "interfaceRoute": "/servo-interface",
+      "image": "assets/images/static/servo/servo2.png",
+      "videoId": "kJpdoBLSmHs",
+      "chatModuleKey": "servo",
+      "inoFiles": [
+        {
+          "platform": "ESP32",
+          "fileName": "esp32_bt_servo.ino",
+          "filePath": "assets/files/esp32_bt_servo/esp32_bt_servo.ino",
+          "description": "Código para ESP32 con Bluetooth y servo SG90"
+        },
+        {
+          "platform": "Arduino UNO",
+          "fileName": "uno_bt_servo.ino",
+          "filePath": "assets/files/uno_bt_servo/uno_bt_servo.ino",
+          "description": "Código para Arduino UNO con HC-05 y servo SG90"
+        }
+      ],
+      "instructions": [
+        {
+          "title": "1. Conectar el servo motor al microcontrolador",
+          "description": "Conecta el cable naranja (señal) al pin GPIO, cable rojo a 5V, cable marrón a GND.",
+          "imagePath": "assets/images/static/servo/instructions/instruction1.png",
+          "actionType": "modalBottomSheet"
+        },
+        {
+          "title": "2. Instalar biblioteca ESP32Servo",
+          "description": "Instala la biblioteca desde el gestor de bibliotecas",
+          "actionType": "externalUrl",
+          "actionValue": "https://www.arduino.cc/reference/en/libraries/esp32servo/"
+        }
+      ],
+      "materials": [
+        {
+          "title": "Servo Motor SG90",
+          "description": "Servo de 180 grados",
+          "qty": "1",
+          "imagePath": "assets/images/static/materials/servo-sg90.png",
+          "actionType": "modalBottomSheet"
+        },
+        {
+          "title": "Microcontrolador ESP32",
+          "description": "Placa ESP32 con Bluetooth",
+          "qty": "1",
+          "imagePath": "assets/images/static/materials/esp32.png",
+          "actionType": "modalBottomSheet"
+        }
+      ]
+    },
+    {
+      "id": "gamepad",
+      "title": "Gamepad",
+      "description": "Robot controlado por gamepad virtual",
+      "route": "/gamepad",
+      "interfaceRoute": "/gamepad-interface",
+      "image": "assets/images/static/gamepad/gamepad.png",
+      "videoId": "kJpdoBLSmHs",
+      "chatModuleKey": "gamepad",
+      "inoFiles": [
+        {
+          "platform": "ESP32",
+          "fileName": "esp32_bt_gamepad.ino",
+          "filePath": "assets/files/esp32_bt_gamepad/esp32_bt_gamepad.ino",
+          "description": "Código para ESP32 con Bluetooth y control de motores"
+        },
+        {
+          "platform": "Arduino UNO",
+          "fileName": "UNO_bt_gamepad.ino",
+          "filePath": "assets/files/UNO_bt_gamepad/UNO_bt_gamepad.ino",
+          "description": "Código para Arduino UNO con HC-05 y control de motores"
+        }
+      ],
+      "instructions": [
+        {
+          "title": "1. Conectar el modulo Bluetooth HC-05 al Protoboard y al Arduino a través de los pines TX y RX.",
+          "description": "Descripción de la instrucción 1 para la ruta interna lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+          "imagePath": "assets/images/static/gamepad/instructions/instruction1.png",
+          "actionType": "modalBottomSheet"
+        },
+        {
+          "title": "Instrucción 2",
+          "description": "Descripción de la instrucción 2",
+          "actionType": "externalUrl",
+          "actionValue": "https://www.enlacetecnologias.mx"
+        }
+      ],
+      "materials": [
+        {
+          "title": "Microcontrolador ESP32",
+          "description": "Placa ESP32",
+          "qty": "1",
+          "imagePath": "assets/images/static/materials/esp32.png",
+          "actionType": "modalBottomSheet"
+        },
+        {
+          "title": "Motor DC",
+          "description": "Motores para el robot",
+          "qty": "2",
+          "imagePath": "assets/images/static/materials/esp32.png",
+          "actionType": "modalBottomSheet"
+        }
+      ]
+    },
+    {
+      "id": "light",
+      "title": "Control de LED",
+      "description": "Enciende y apaga un LED mediante Bluetooth",
+      "route": "/light-control",
+      "interfaceRoute": "/light-control-interface",
+      "image": "assets/images/static/light_control/light_control.png",
+      "videoId": "kJpdoBLSmHs",
+      "chatModuleKey": "light",
+      "inoFiles": [
+        {
+          "platform": "ESP32",
+          "fileName": "esp32_bt_light.ino",
+          "filePath": "assets/files/esp32_bt_light/esp32_bt_light.ino",
+          "description": "Código para ESP32 con Bluetooth y LED"
+        },
+        {
+          "platform": "Arduino UNO",
+          "fileName": "uno_bt_light.ino",
+          "filePath": "assets/files/uno_bt_light/uno_bt_light.ino",
+          "description": "Código para Arduino UNO con HC-05 y LED"
+        }
+      ],
+      "instructions": [
+        {
+          "title": "1. Conectar LED con resistencia al microcontrolador",
+          "description": "Conecta el ánodo del LED al pin GPIO a través de una resistencia de 220Ω",
+          "imagePath": "assets/images/static/light_control/instructions/instruction1.png",
+          "actionType": "modalBottomSheet"
+        }
+      ],
+      "materials": [
+        {
+          "title": "LED 5mm",
+          "description": "LED de cualquier color",
+          "qty": "1",
+          "imagePath": "assets/images/static/materials/led.png",
+          "actionType": "modalBottomSheet"
+        },
+        {
+          "title": "Resistencia 220Ω",
+          "description": "Resistencia limitadora de corriente",
+          "qty": "1",
+          "imagePath": "assets/images/static/materials/resistance10k.png",
+          "actionType": "modalBottomSheet"
+        }
+      ]
+    }
+  ]
+}
