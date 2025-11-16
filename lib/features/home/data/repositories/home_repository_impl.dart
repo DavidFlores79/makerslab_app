@@ -2,10 +2,12 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failure.dart';
+import '../../domain/entities/module_detail.dart';
 import '../../domain/repositories/home_repository.dart';
 import '../datasources/home_local_datasource.dart';
 import '../datasources/home_remote_datesource.dart';
 import '../models/main_menu_item_model.dart';
+import '../models/module_detail_model.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
   final HomeLocalDatasource localDatasource;
@@ -45,6 +47,65 @@ class HomeRepositoryImpl implements HomeRepository {
       return Right(remoteMenu);
     } on ServerException catch (e, stackTrace) {
       return Left(ServerFailure(e.message, e.statusCode, stackTrace));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ModuleDetail>> getModuleDetailById(String id) async {
+    try {
+      final detail = await localDatasource.getModuleDetailById(id);
+      return Right(detail);
+    } on CacheException catch (e, stackTrace) {
+      return Left(CacheFailure(e.message, stackTrace));
+    } catch (e, stackTrace) {
+      return Left(
+        CacheFailure('Unexpected error: ${e.toString()}', stackTrace),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ModuleDetail>>> getAllModuleDetails() async {
+    try {
+      final details = await localDatasource.getAllModuleDetails();
+      return Right(details);
+    } on CacheException catch (e, stackTrace) {
+      return Left(CacheFailure(e.message, stackTrace));
+    } catch (e, stackTrace) {
+      return Left(
+        CacheFailure('Unexpected error: ${e.toString()}', stackTrace),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> cacheModuleDetails(
+    List<ModuleDetail> details,
+  ) async {
+    try {
+      final models = details
+          .map((d) => ModuleDetailModel(
+                id: d.id,
+                title: d.title,
+                description: d.description,
+                route: d.route,
+                interfaceRoute: d.interfaceRoute,
+                instructions: d.instructions,
+                materials: d.materials,
+                inoFiles: d.inoFiles,
+                image: d.image,
+                videoId: d.videoId,
+                chatModuleKey: d.chatModuleKey,
+              ))
+          .toList();
+      await localDatasource.cacheModuleDetails(models);
+      return const Right(null);
+    } on CacheException catch (e, stackTrace) {
+      return Left(CacheFailure(e.message, stackTrace));
+    } catch (e, stackTrace) {
+      return Left(
+        CacheFailure('Unexpected error: ${e.toString()}', stackTrace),
+      );
     }
   }
 }
