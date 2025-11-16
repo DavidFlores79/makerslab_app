@@ -49,5 +49,9 @@
 	<string>This app needs Bluetooth access to communicate with devices</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>This app needs Bluetooth access to communicate with devices</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Esta aplicación necesita acceso a la cámara para tomar fotos y enviarlas en el chat</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Esta aplicación necesita acceso a tu galería de fotos para seleccionar y compartir imágenes</string>
 </dict>
 </plist>
