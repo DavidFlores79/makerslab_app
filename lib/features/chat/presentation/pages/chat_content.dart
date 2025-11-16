@@ -8,6 +8,7 @@ import 'package:flutter_chat_core/flutter_chat_core.dart';
 import 'package:flyer_chat_file_message/flyer_chat_file_message.dart';
 import 'package:flyer_chat_image_message/flyer_chat_image_message.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 // import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart' as fcui;
@@ -56,6 +57,7 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
   // Composer measurement
   final GlobalKey _composerKey = GlobalKey();
   double _composerBottom = 16.0;
+  double _composerHeight = 60.0; // Default estimate for composer height
   bool _measuringComposer = false;
 
   @override
@@ -90,11 +92,14 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
       final topLeft = box.localToGlobal(Offset.zero);
       final screenHeight = MediaQuery.of(ctx).size.height;
       final newBottom = screenHeight - topLeft.dy - box.size.height;
+      final newHeight = box.size.height;
 
       // actualiza solo si cambió lo suficiente para evitar setState continuo
-      if ((newBottom - _composerBottom).abs() > 1.0) {
+      if ((newBottom - _composerBottom).abs() > 1.0 ||
+          (newHeight - _composerHeight).abs() > 1.0) {
         setState(() {
           _composerBottom = newBottom.clamp(0.0, screenHeight);
+          _composerHeight = newHeight;
         });
       }
     } catch (_) {
@@ -127,10 +132,55 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
     return source.startsWith('http://') || source.startsWith('https://');
   }
 
-  Future<void> _handleImageSelection() async {
+  Future<bool> _checkCameraPermission() async {
+    final status = await Permission.camera.status;
+
+    if (status.isGranted) {
+      return true;
+    }
+
+    if (status.isDenied) {
+      final result = await Permission.camera.request();
+      return result.isGranted;
+    }
+
+    if (status.isPermanentlyDenied) {
+      // Mostrar diálogo explicando que el usuario necesita habilitar el permiso en configuración
+      if (mounted) {
+        await showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Permiso de cámara requerido'),
+                content: const Text(
+                  'Para tomar fotos, debes habilitar el permiso de cámara en la configuración de la aplicación.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancelar'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      openAppSettings();
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Configuración'),
+                  ),
+                ],
+              ),
+        );
+      }
+      return false;
+    }
+
+    return false;
+  }
+
+  Future<void> _handleImageSelection(ImageSource source) async {
     final picker = ImagePicker();
     final XFile? picked = await picker.pickImage(
-      source: ImageSource.gallery,
+      source: source,
       maxWidth: 1440,
       imageQuality: 80,
     );
@@ -146,7 +196,7 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
       _pendingWidth = decoded.width.toDouble();
       _pendingHeight = decoded.height.toDouble();
       _pendingIsImage = true;
-      _pendingName = picked.name ?? picked.path.split('/').last;
+      _pendingName = picked.name;
     });
 
     // medir composer en siguiente frame (por si su posición cambió)
@@ -384,9 +434,14 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.photo),
-                  title: const Text('Imagen'),
-                  onTap: () => Navigator.pop(context, 'image'),
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Galería'),
+                  onTap: () => Navigator.pop(context, 'gallery'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: const Text('Cámara'),
+                  onTap: () => Navigator.pop(context, 'camera'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.attach_file),
@@ -403,8 +458,13 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
           ),
     );
 
-    if (choice == 'image') {
-      await _handleImageSelection();
+    if (choice == 'gallery') {
+      await _handleImageSelection(ImageSource.gallery);
+    } else if (choice == 'camera') {
+      final hasPermission = await _checkCameraPermission();
+      if (hasPermission) {
+        await _handleImageSelection(ImageSource.camera);
+      }
     } else if (choice == 'file') {
       await _handleFileSelection();
     }
@@ -617,7 +677,7 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
                     Positioned(
                       left: 8,
                       right: 8,
-                      bottom: (_composerBottom + 8).clamp(
+                      bottom: (_composerBottom + _composerHeight + 8).clamp(
                         8.0,
                         MediaQuery.of(context).size.height,
                       ),
