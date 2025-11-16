@@ -31,11 +31,22 @@
       "mcp__shadcn-components__get_component_demo",
       "mcp__shadcn-components__list_blocks",
       "mcp__shadcn-components__get_block",
-      "mcp__playwright__browser_tab_new"
+      "mcp__playwright__browser_tab_new",
+      "Bash(flutter doctor:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter test:*)",
+      "Bash(curl:*)",
+      "Bash(flutter clean:*)"
     ],
     "deny": []
   },
-  "enabledMcpjsonServers": ["context7", "sequentialthinking", "playwright", "shadcn"],
+  "enabledMcpjsonServers": [
+    "context7",
+    "sequentialthinking",
+    "playwright",
+    "shadcn"
+  ],
   "hooks": {
     "Stop": [
       {

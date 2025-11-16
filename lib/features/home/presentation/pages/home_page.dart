@@ -22,13 +22,18 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool _hasShownSnackbar = false;
+  DateTime? _lastResumeTime;
 
   @override
   void initState() {
     super.initState();
     debugPrint('>>> HomePage initState');
+
+    // Register lifecycle observer
+    WidgetsBinding.instance.addObserver(this);
+
     context.read<HomeBloc>().add(LoadHomeData());
 
     // Check auth state after frame is built
@@ -54,6 +59,46 @@ class _HomePageState extends State<HomePage> {
         );
       }
     });
+  }
+
+  @override
+  void dispose() {
+    // CRITICAL: Remove lifecycle observer to prevent memory leaks
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    debugPrint('>>> HomePage lifecycle state changed: $state');
+
+    if (state == AppLifecycleState.resumed) {
+      _handleAppResume();
+    }
+  }
+
+  /// Handles app resume with debouncing to prevent excessive reloads
+  void _handleAppResume() {
+    final now = DateTime.now();
+
+    // Debounce: Only reload if more than 2 seconds since last resume
+    if (_lastResumeTime != null) {
+      final difference = now.difference(_lastResumeTime!);
+      if (difference.inSeconds < 2) {
+        debugPrint('>>> HomePage resume debounced (${difference.inSeconds}s since last resume)');
+        return;
+      }
+    }
+
+    _lastResumeTime = now;
+    debugPrint('>>> HomePage reloading data after app resume');
+
+    // Only reload if widget is still mounted
+    if (mounted && context.mounted) {
+      context.read<HomeBloc>().add(LoadHomeData());
+    }
   }
 
   @override
@@ -114,7 +159,51 @@ class _HomePageState extends State<HomePage> {
 
                   if (state.status == HomeStatus.failure) {
                     return Center(
-                      child: Text('Error: ${state.error ?? 'Algo salió mal'}'),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: Colors.red.shade400,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No se pudo cargar el menú',
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              state.error ?? 'Algo salió mal. Por favor intenta de nuevo.',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Colors.grey.shade600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton.icon(
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Reintentar'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32,
+                                  vertical: 16,
+                                ),
+                              ),
+                              onPressed: () {
+                                context.read<HomeBloc>().add(LoadHomeData());
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
                     );
                   }
                   if (state.status == HomeStatus.success) {
@@ -150,56 +239,59 @@ class _HomePageState extends State<HomePage> {
                                   final isDarkMode =
                                       theme.brightness == Brightness.dark;
 
-                                  return Card(
-                                    color:
-                                        isDarkMode
-                                            ? theme
-                                                .colorScheme
-                                                .surfaceContainerHighest
-                                            : AppColors.gray300,
-                                    elevation: 3,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      side: BorderSide(
-                                        color:
-                                            isDarkMode
-                                                ? theme.colorScheme.outline
-                                                : AppColors.gray500,
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    child: InkWell(
-                                      onTap:
-                                          () => context.push(
-                                            menu[index].route ?? '/',
-                                          ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
+                                  // RepaintBoundary improves performance by isolating each card's paint operations
+                                  return RepaintBoundary(
+                                    child: Card(
+                                      color:
+                                          isDarkMode
+                                              ? theme
+                                                  .colorScheme
+                                                  .surfaceContainerHighest
+                                              : AppColors.gray300,
+                                      elevation: 3,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8.0),
+                                        side: BorderSide(
+                                          color:
+                                              isDarkMode
+                                                  ? theme.colorScheme.outline
+                                                  : AppColors.gray500,
+                                          width: 1.0,
                                         ),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: <Widget>[
-                                            Center(
-                                              child: UtilImage.buildIcon(m),
+                                      ),
+                                      child: InkWell(
+                                        onTap:
+                                            () => context.push(
+                                              menu[index].route ?? '/',
                                             ),
-                                            const SizedBox(height: 20),
-                                            Text(
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              menu[index].title ?? '',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color:
-                                                    theme.colorScheme.onSurface,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                          ),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: <Widget>[
+                                              Center(
+                                                child: UtilImage.buildIcon(m),
                                               ),
-                                            ),
-                                          ],
+                                              const SizedBox(height: 20),
+                                              Text(
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                menu[index].title ?? '',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  color:
+                                                      theme.colorScheme.onSurface,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
