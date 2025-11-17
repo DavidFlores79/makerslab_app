@@ -18,19 +18,32 @@ class ModuleDetailModel extends ModuleDetail {
   });
 
   factory ModuleDetailModel.fromJson(Map<String, dynamic> json) {
-    return ModuleDetailModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      route: json['route'] as String,
-      interfaceRoute: json['interfaceRoute'] as String,
-      image: json['image'] as String?,
-      videoId: json['videoId'] as String?,
-      chatModuleKey: json['chatModuleKey'] as String?,
-      platformConfigs: (json['platformConfigs'] as List<dynamic>)
-          .map((e) => PlatformConfigModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
-    );
+    try {
+      final platformConfigsJson = json['platformConfigs'];
+      if (platformConfigsJson == null) {
+        throw FormatException(
+          'Missing required field "platformConfigs" in module: ${json['id']}',
+        );
+      }
+
+      return ModuleDetailModel(
+        id: json['id'] as String,
+        title: json['title'] as String,
+        description: json['description'] as String,
+        route: json['route'] as String,
+        interfaceRoute: json['interfaceRoute'] as String,
+        image: json['image'] as String?,
+        videoId: json['videoId'] as String?,
+        chatModuleKey: json['chatModuleKey'] as String?,
+        platformConfigs: (platformConfigsJson as List<dynamic>)
+            .map((e) => PlatformConfigModel.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+    } catch (e, stackTrace) {
+      throw FormatException(
+        'Failed to parse ModuleDetail from JSON: $e\nModule ID: ${json['id']}\nJSON: $json',
+      );
+    }
   }
 
   factory ModuleDetailModel.fromEntity(ModuleDetail entity) {

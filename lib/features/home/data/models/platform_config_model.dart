@@ -16,16 +16,27 @@ class PlatformConfigModel extends PlatformConfig {
   });
 
   factory PlatformConfigModel.fromJson(Map<String, dynamic> json) {
-    return PlatformConfigModel(
-      platform: InoPlatform.fromString(json['platform'] as String),
-      inoFile: InoFileModel.fromJson(json['inoFile'] as Map<String, dynamic>),
-      instructions: (json['instructions'] as List<dynamic>)
-          .map((e) => InstructionItemModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      materials: (json['materials'] as List<dynamic>)
-          .map((e) => MaterialItemModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
-    );
+    try {
+      return PlatformConfigModel(
+        platform: InoPlatform.fromString(json['platform'] as String),
+        inoFile: InoFileModel.fromJson(json['inoFile'] as Map<String, dynamic>),
+        instructions: (json['instructions'] as List<dynamic>?)
+                ?.map(
+                  (e) =>
+                      InstructionItemModel.fromJson(e as Map<String, dynamic>),
+                )
+                .toList() ??
+            [],
+        materials: (json['materials'] as List<dynamic>?)
+                ?.map((e) => MaterialItemModel.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            [],
+      );
+    } catch (e, stackTrace) {
+      throw FormatException(
+        'Failed to parse PlatformConfig from JSON: $e\nJSON: $json',
+      );
+    }
   }
 
   factory PlatformConfigModel.fromEntity(PlatformConfig entity) {
