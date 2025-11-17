@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "2.0.0",
   "modules": [
     {
       "id": "temperature",
@@ -10,79 +10,167 @@
       "image": "assets/images/static/temperature/esp32DHT11.png",
       "videoId": "kJpdoBLSmHs",
       "chatModuleKey": "temperature",
-      "inoFiles": [
+      "platformConfigs": [
         {
           "platform": "ESP32",
-          "fileName": "esp32_bt_temp.ino",
-          "filePath": "assets/files/esp32_bt_temp/esp32_bt_temp.ino",
-          "description": "Código para ESP32 con Bluetooth Classic y sensor DHT11"
+          "inoFile": {
+            "platform": "ESP32",
+            "fileName": "esp32_bt_temp.ino",
+            "filePath": "assets/files/esp32_bt_temp/esp32_bt_temp.ino",
+            "description": "Código para ESP32 con Bluetooth Classic integrado y sensor DHT11"
+          },
+          "instructions": [
+            {
+              "title": "1. Conectar el sensor DHT11 al ESP32",
+              "description": "Conecta el pin VCC del DHT11 a 3.3V del ESP32, GND a GND, y el pin de datos al GPIO 4. El ESP32 tiene Bluetooth integrado, no necesitas módulo HC-05.",
+              "imagePath": "assets/images/static/temperature/instructions/instruction1.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Descargar bibliotecas para ESP32",
+              "description": "Instala la biblioteca 'DHT sensor library' desde el gestor de bibliotecas de Arduino IDE.",
+              "actionType": "externalUrl",
+              "actionValue": "https://www.arduino.cc/reference/en/libraries/dht-sensor-library/"
+            },
+            {
+              "title": "3. Configurar Bluetooth Classic en ESP32",
+              "description": "El ESP32 soporta Bluetooth Classic de forma nativa. Configura el nombre del dispositivo en el código INO.",
+              "actionType": "none"
+            },
+            {
+              "title": "4. Cargar el código al ESP32",
+              "description": "Usa el Arduino IDE para cargar el archivo esp32_bt_temp.ino a tu placa ESP32. Selecciona la placa correcta en Tools > Board.",
+              "actionType": "modalBottomSheet"
+            }
+          ],
+          "materials": [
+            {
+              "title": "Microcontrolador ESP32",
+              "description": "Placa de desarrollo ESP32 con WiFi y Bluetooth integrados",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/esp32.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Sensor DHT11",
+              "description": "Sensor de temperatura y humedad digital",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/dht-11.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Resistencia 10kΩ",
+              "description": "Resistencia pull-up para el pin de datos del DHT11",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/resistance10k.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Cables Dupont",
+              "description": "Cables macho-macho para conexiones en protoboard",
+              "qty": "5",
+              "imagePath": "assets/images/static/materials/dupont-cables.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Protoboard",
+              "description": "Placa de pruebas para prototipar circuitos",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/breadboard.png",
+              "actionType": "modalBottomSheet"
+            }
+          ]
         },
         {
           "platform": "Arduino UNO",
-          "fileName": "uno_bt_temp.ino",
-          "filePath": "assets/files/uno_bt_temp/uno_bt_temp.ino",
-          "description": "Código para Arduino UNO con HC-05 Bluetooth y sensor DHT11"
-        }
-      ],
-      "instructions": [
-        {
-          "title": "1. Conectar el sensor DHT11 y el modulo Bluetooth HC-05 al Protoboard",
-          "description": "Descripción de la instrucción 1 para la ruta interna lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-          "imagePath": "assets/images/static/temperature/instructions/instruction1.png",
-          "actionType": "modalBottomSheet"
-        },
-        {
-          "title": "Instrucción 2",
-          "description": "Descripción de la instrucción 2",
-          "actionType": "externalUrl",
-          "actionValue": "https://www.enlacetecnologias.mx"
-        },
-        {
-          "title": "Instrucción 3",
-          "description": "Descripción de la instrucción 3",
-          "actionType": "none"
-        },
-        {
-          "title": "Instrucción 4",
-          "description": "Descripción de la instrucción 4 para la ruta interna lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-          "actionType": "modalBottomSheet"
-        }
-      ],
-      "materials": [
-        {
-          "title": "Microcontrolador ESP32",
-          "description": "Placa de desarrollo ESP32 con WiFi y Bluetooth integrados",
-          "qty": "1",
-          "imagePath": "assets/images/static/materials/esp32.png",
-          "actionType": "modalBottomSheet"
-        },
-        {
-          "title": "Sensor DHT11",
-          "description": "Sensor de temperatura y humedad digital",
-          "qty": "1",
-          "imagePath": "assets/images/static/materials/dht-11.png",
-          "actionType": "modalBottomSheet"
-        },
-        {
-          "title": "Resistencia 10k",
-          "description": "Componente para pull-up del DHT11 sensor",
-          "qty": "1",
-          "imagePath": "assets/images/static/materials/resistance10k.png",
-          "actionType": "modalBottomSheet"
-        },
-        {
-          "title": "Cables de conexión",
-          "description": "Dupont o jumper cables para conexiones",
-          "qty": "1",
-          "imagePath": "assets/images/static/materials/dupont-cables.png",
-          "actionType": "modalBottomSheet"
-        },
-        {
-          "title": "Protoboard",
-          "description": "Placa de pruebas para circuitos",
-          "qty": "1",
-          "imagePath": "assets/images/static/materials/breadboard.png",
-          "actionType": "modalBottomSheet"
+          "inoFile": {
+            "platform": "Arduino UNO",
+            "fileName": "uno_bt_temp.ino",
+            "filePath": "assets/files/uno_bt_temp/uno_bt_temp.ino",
+            "description": "Código para Arduino UNO con módulo HC-05 Bluetooth y sensor DHT11"
+          },
+          "instructions": [
+            {
+              "title": "1. Conectar el módulo HC-05 al Arduino UNO con divisor de voltaje",
+              "description": "IMPORTANTE: El HC-05 funciona a 3.3V. Conecta VCC a 5V, GND a GND, TX del HC-05 a RX (pin 0) del Arduino. Para el pin RX del HC-05, usa un divisor de voltaje con resistencias de 1kΩ y 2kΩ antes de conectarlo al TX (pin 1) del Arduino.",
+              "imagePath": "assets/images/static/temperature/instructions/instruction1.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Conectar el sensor DHT11 al Arduino UNO",
+              "description": "Conecta VCC del DHT11 a 5V, GND a GND, y el pin de datos al pin digital 2 del Arduino UNO. Usa una resistencia de 10kΩ entre VCC y el pin de datos (pull-up).",
+              "actionType": "none"
+            },
+            {
+              "title": "3. Descargar bibliotecas para Arduino UNO",
+              "description": "Instala 'DHT sensor library' y 'SoftwareSerial' desde el gestor de bibliotecas de Arduino IDE.",
+              "actionType": "externalUrl",
+              "actionValue": "https://www.arduino.cc/reference/en/libraries/dht-sensor-library/"
+            },
+            {
+              "title": "4. Cargar el código al Arduino UNO",
+              "description": "Usa el Arduino IDE para cargar el archivo uno_bt_temp.ino. IMPORTANTE: Desconecta los pines RX/TX del HC-05 durante la carga para evitar conflictos con el puerto serial.",
+              "actionType": "modalBottomSheet"
+            }
+          ],
+          "materials": [
+            {
+              "title": "Arduino UNO R3",
+              "description": "Microcontrolador Arduino UNO con ATmega328P",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/arduino-uno.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Módulo Bluetooth HC-05",
+              "description": "Módulo Bluetooth Serial para comunicación inalámbrica (requiere divisor de voltaje)",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/hc-05.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Sensor DHT11",
+              "description": "Sensor de temperatura y humedad digital",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/dht-11.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Resistencia 10kΩ",
+              "description": "Resistencia pull-up para el sensor DHT11",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/resistance10k.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Resistencia 1kΩ",
+              "description": "Para divisor de voltaje del HC-05 (parte baja)",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/resistance1k.png",
+              "actionType": "none"
+            },
+            {
+              "title": "Resistencia 2kΩ",
+              "description": "Para divisor de voltaje del HC-05 (parte alta)",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/resistance2k.png",
+              "actionType": "none"
+            },
+            {
+              "title": "Cables Dupont",
+              "description": "Cables para conexiones en protoboard",
+              "qty": "10",
+              "imagePath": "assets/images/static/materials/dupont-cables.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Protoboard",
+              "description": "Placa de pruebas para prototipar circuitos",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/breadboard.png",
+              "actionType": "modalBottomSheet"
+            }
+          ]
         }
       ]
     },
@@ -95,48 +183,125 @@
       "image": "assets/images/static/servo/servo2.png",
       "videoId": "kJpdoBLSmHs",
       "chatModuleKey": "servo",
-      "inoFiles": [
+      "platformConfigs": [
         {
           "platform": "ESP32",
-          "fileName": "esp32_bt_servo.ino",
-          "filePath": "assets/files/esp32_bt_servo/esp32_bt_servo.ino",
-          "description": "Código para ESP32 con Bluetooth y servo SG90"
+          "inoFile": {
+            "platform": "ESP32",
+            "fileName": "esp32_bt_servo.ino",
+            "filePath": "assets/files/esp32_bt_servo/esp32_bt_servo.ino",
+            "description": "Código para ESP32 con Bluetooth Classic y servo SG90"
+          },
+          "instructions": [
+            {
+              "title": "1. Conectar el servo SG90 al ESP32",
+              "description": "Conecta el cable naranja (señal) del servo al pin GPIO 13 del ESP32, el cable rojo a 5V, y el cable marrón a GND.",
+              "imagePath": "assets/images/static/servo/instructions/instruction1.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Instalar biblioteca ESP32Servo",
+              "description": "Instala la biblioteca 'ESP32Servo' desde el gestor de bibliotecas de Arduino IDE. Esta biblioteca es específica para controlar servos en ESP32.",
+              "actionType": "externalUrl",
+              "actionValue": "https://www.arduino.cc/reference/en/libraries/esp32servo/"
+            }
+          ],
+          "materials": [
+            {
+              "title": "Microcontrolador ESP32",
+              "description": "Placa ESP32 con Bluetooth integrado",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/esp32.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Servo Motor SG90",
+              "description": "Servo de 180 grados, torque 1.8 kg/cm",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/servo-sg90.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Cables Dupont",
+              "description": "Cables para conexiones",
+              "qty": "3",
+              "imagePath": "assets/images/static/materials/dupont-cables.png",
+              "actionType": "modalBottomSheet"
+            }
+          ]
         },
         {
           "platform": "Arduino UNO",
-          "fileName": "uno_bt_servo.ino",
-          "filePath": "assets/files/uno_bt_servo/uno_bt_servo.ino",
-          "description": "Código para Arduino UNO con HC-05 y servo SG90"
-        }
-      ],
-      "instructions": [
-        {
-          "title": "1. Conectar el servo motor al microcontrolador",
-          "description": "Conecta el cable naranja (señal) al pin GPIO, cable rojo a 5V, cable marrón a GND.",
-          "imagePath": "assets/images/static/servo/instructions/instruction1.png",
-          "actionType": "modalBottomSheet"
-        },
-        {
-          "title": "2. Instalar biblioteca ESP32Servo",
-          "description": "Instala la biblioteca desde el gestor de bibliotecas",
-          "actionType": "externalUrl",
-          "actionValue": "https://www.arduino.cc/reference/en/libraries/esp32servo/"
-        }
-      ],
-      "materials": [
-        {
-          "title": "Servo Motor SG90",
-          "description": "Servo de 180 grados",
-          "qty": "1",
-          "imagePath": "assets/images/static/materials/servo-sg90.png",
-          "actionType": "modalBottomSheet"
-        },
-        {
-          "title": "Microcontrolador ESP32",
-          "description": "Placa ESP32 con Bluetooth",
-          "qty": "1",
-          "imagePath": "assets/images/static/materials/esp32.png",
-          "actionType": "modalBottomSheet"
+          "inoFile": {
+            "platform": "Arduino UNO",
+            "fileName": "uno_bt_servo.ino",
+            "filePath": "assets/files/uno_bt_servo/uno_bt_servo.ino",
+            "description": "Código para Arduino UNO con HC-05 Bluetooth y servo SG90"
+          },
+          "instructions": [
+            {
+              "title": "1. Conectar el servo SG90 al Arduino UNO",
+              "description": "Conecta el cable naranja (señal) del servo al pin digital 9 del Arduino UNO, el cable rojo a 5V, y el cable marrón a GND.",
+              "imagePath": "assets/images/static/servo/instructions/instruction1.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Conectar el módulo HC-05",
+              "description": "Conecta el módulo HC-05 al Arduino UNO con divisor de voltaje (igual que en el módulo de temperatura). VCC a 5V, GND a GND, TX a RX (pin 0), RX con divisor a TX (pin 1).",
+              "actionType": "none"
+            }
+          ],
+          "materials": [
+            {
+              "title": "Arduino UNO R3",
+              "description": "Microcontrolador Arduino UNO",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/arduino-uno.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Módulo Bluetooth HC-05",
+              "description": "Módulo Bluetooth para Arduino UNO",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/hc-05.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Servo Motor SG90",
+              "description": "Servo de 180 grados",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/servo-sg90.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Resistencia 1kΩ",
+              "description": "Para divisor de voltaje del HC-05",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/resistance1k.png",
+              "actionType": "none"
+            },
+            {
+              "title": "Resistencia 2kΩ",
+              "description": "Para divisor de voltaje del HC-05",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/resistance2k.png",
+              "actionType": "none"
+            },
+            {
+              "title": "Cables Dupont",
+              "description": "Cables para conexiones",
+              "qty": "8",
+              "imagePath": "assets/images/static/materials/dupont-cables.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Protoboard",
+              "description": "Placa de pruebas",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/breadboard.png",
+              "actionType": "modalBottomSheet"
+            }
+          ]
         }
       ]
     },
@@ -149,48 +314,129 @@
       "image": "assets/images/static/gamepad/gamepad.png",
       "videoId": "kJpdoBLSmHs",
       "chatModuleKey": "gamepad",
-      "inoFiles": [
+      "platformConfigs": [
         {
           "platform": "ESP32",
-          "fileName": "esp32_bt_gamepad.ino",
-          "filePath": "assets/files/esp32_bt_gamepad/esp32_bt_gamepad.ino",
-          "description": "Código para ESP32 con Bluetooth y control de motores"
+          "inoFile": {
+            "platform": "ESP32",
+            "fileName": "esp32_bt_gamepad.ino",
+            "filePath": "assets/files/esp32_bt_gamepad/esp32_bt_gamepad.ino",
+            "description": "Código para ESP32 con Bluetooth Classic, motores y servos"
+          },
+          "instructions": [
+            {
+              "title": "1. Conectar motores DC al driver L298N",
+              "description": "Conecta los 2 motores DC al driver L298N. Motor izquierdo a OUT1/OUT2, motor derecho a OUT3/OUT4.",
+              "imagePath": "assets/images/static/gamepad/instructions/instruction1.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Conectar ESP32 al driver L298N",
+              "description": "Conecta los pines de control del L298N al ESP32: IN1 a GPIO 27, IN2 a GPIO 26, IN3 a GPIO 25, IN4 a GPIO 33. Conecta ENA y ENB a pines PWM del ESP32.",
+              "actionType": "none"
+            }
+          ],
+          "materials": [
+            {
+              "title": "Microcontrolador ESP32",
+              "description": "ESP32 con Bluetooth integrado",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/esp32.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Driver de motores L298N",
+              "description": "Controlador dual para motores DC",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/l298n.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Motor DC con reductora",
+              "description": "Motores de 6V con caja reductora",
+              "qty": "2",
+              "imagePath": "assets/images/static/materials/dc-motor.png",
+              "actionType": "none"
+            },
+            {
+              "title": "Servo SG90",
+              "description": "Servos para brazo robótico",
+              "qty": "5",
+              "imagePath": "assets/images/static/materials/servo-sg90.png",
+              "actionType": "modalBottomSheet"
+            }
+          ]
         },
         {
           "platform": "Arduino UNO",
-          "fileName": "UNO_bt_gamepad.ino",
-          "filePath": "assets/files/UNO_bt_gamepad/UNO_bt_gamepad.ino",
-          "description": "Código para Arduino UNO con HC-05 y control de motores"
-        }
-      ],
-      "instructions": [
-        {
-          "title": "1. Conectar el modulo Bluetooth HC-05 al Protoboard y al Arduino a través de los pines TX y RX.",
-          "description": "Descripción de la instrucción 1 para la ruta interna lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-          "imagePath": "assets/images/static/gamepad/instructions/instruction1.png",
-          "actionType": "modalBottomSheet"
-        },
-        {
-          "title": "Instrucción 2",
-          "description": "Descripción de la instrucción 2",
-          "actionType": "externalUrl",
-          "actionValue": "https://www.enlacetecnologias.mx"
-        }
-      ],
-      "materials": [
-        {
-          "title": "Microcontrolador ESP32",
-          "description": "Placa ESP32",
-          "qty": "1",
-          "imagePath": "assets/images/static/materials/esp32.png",
-          "actionType": "modalBottomSheet"
-        },
-        {
-          "title": "Motor DC",
-          "description": "Motores para el robot",
-          "qty": "2",
-          "imagePath": "assets/images/static/materials/esp32.png",
-          "actionType": "modalBottomSheet"
+          "inoFile": {
+            "platform": "Arduino UNO",
+            "fileName": "UNO_bt_gamepad.ino",
+            "filePath": "assets/files/UNO_bt_gamepad/UNO_bt_gamepad.ino",
+            "description": "Código para Arduino UNO con HC-05, motores y servos"
+          },
+          "instructions": [
+            {
+              "title": "1. Conectar motores DC al driver L298N",
+              "description": "Conecta los 2 motores DC al driver L298N. Motor izquierdo a OUT1/OUT2, motor derecho a OUT3/OUT4.",
+              "imagePath": "assets/images/static/gamepad/instructions/instruction1.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Conectar Arduino UNO al driver L298N",
+              "description": "Conecta los pines de control del L298N al Arduino UNO: IN1 a pin 7, IN2 a pin 6, IN3 a pin 5, IN4 a pin 4. Conecta ENA a pin 9 (PWM) y ENB a pin 10 (PWM).",
+              "actionType": "none"
+            },
+            {
+              "title": "3. Conectar módulo HC-05",
+              "description": "Conecta el HC-05 con divisor de voltaje. IMPORTANTE: Desconecta RX/TX durante la carga del código.",
+              "actionType": "none"
+            }
+          ],
+          "materials": [
+            {
+              "title": "Arduino UNO R3",
+              "description": "Microcontrolador Arduino UNO",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/arduino-uno.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Módulo Bluetooth HC-05",
+              "description": "Módulo Bluetooth para Arduino",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/hc-05.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Driver de motores L298N",
+              "description": "Controlador dual para motores DC",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/l298n.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Motor DC con reductora",
+              "description": "Motores de 6V con caja reductora",
+              "qty": "2",
+              "imagePath": "assets/images/static/materials/dc-motor.png",
+              "actionType": "none"
+            },
+            {
+              "title": "Servo SG90",
+              "description": "Servos para brazo robótico",
+              "qty": "5",
+              "imagePath": "assets/images/static/materials/servo-sg90.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Resistencias para divisor de voltaje",
+              "description": "1kΩ y 2kΩ para el HC-05",
+              "qty": "2",
+              "imagePath": "assets/images/static/materials/resistance1k.png",
+              "actionType": "none"
+            }
+          ]
         }
       ]
     },
@@ -202,43 +448,151 @@
       "interfaceRoute": "/light-control-interface",
       "image": "assets/images/static/light_control/light_control.png",
       "videoId": "kJpdoBLSmHs",
-      "chatModuleKey": "light",
-      "inoFiles": [
+      "chatModuleKey": "light_control",
+      "platformConfigs": [
         {
           "platform": "ESP32",
-          "fileName": "esp32_bt_light.ino",
-          "filePath": "assets/files/esp32_bt_light/esp32_bt_light.ino",
-          "description": "Código para ESP32 con Bluetooth y LED"
+          "inoFile": {
+            "platform": "ESP32",
+            "fileName": "esp32_bt_light.ino",
+            "filePath": "assets/files/esp32_bt_light/esp32_bt_light.ino",
+            "description": "Código para ESP32 con Bluetooth Classic y LED"
+          },
+          "instructions": [
+            {
+              "title": "1. Conectar LED con resistencia al ESP32",
+              "description": "Conecta el ánodo del LED (+, pata larga) al pin GPIO 2 del ESP32 a través de una resistencia de 220Ω. Conecta el cátodo (-, pata corta) a GND.",
+              "imagePath": "assets/images/static/light_control/instructions/instruction1.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Cargar el código al ESP32",
+              "description": "Carga el archivo esp32_bt_light.ino usando el Arduino IDE. El ESP32 tiene Bluetooth integrado, por lo que no necesitas módulo adicional.",
+              "actionType": "none"
+            }
+          ],
+          "materials": [
+            {
+              "title": "Microcontrolador ESP32",
+              "description": "ESP32 con Bluetooth integrado",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/esp32.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "LED de 5mm",
+              "description": "LED de cualquier color (rojo, verde, azul, blanco)",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/led.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Resistencia 220Ω",
+              "description": "Resistencia limitadora de corriente para el LED",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/resistance220.png",
+              "actionType": "none"
+            },
+            {
+              "title": "Cables Dupont",
+              "description": "Cables para conexiones",
+              "qty": "2",
+              "imagePath": "assets/images/static/materials/dupont-cables.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Protoboard",
+              "description": "Placa de pruebas (opcional)",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/breadboard.png",
+              "actionType": "modalBottomSheet"
+            }
+          ]
         },
         {
           "platform": "Arduino UNO",
-          "fileName": "uno_bt_light.ino",
-          "filePath": "assets/files/uno_bt_light/uno_bt_light.ino",
-          "description": "Código para Arduino UNO con HC-05 y LED"
-        }
-      ],
-      "instructions": [
-        {
-          "title": "1. Conectar LED con resistencia al microcontrolador",
-          "description": "Conecta el ánodo del LED al pin GPIO a través de una resistencia de 220Ω",
-          "imagePath": "assets/images/static/light_control/instructions/instruction1.png",
-          "actionType": "modalBottomSheet"
-        }
-      ],
-      "materials": [
-        {
-          "title": "LED 5mm",
-          "description": "LED de cualquier color",
-          "qty": "1",
-          "imagePath": "assets/images/static/materials/led.png",
-          "actionType": "modalBottomSheet"
-        },
-        {
-          "title": "Resistencia 220Ω",
-          "description": "Resistencia limitadora de corriente",
-          "qty": "1",
-          "imagePath": "assets/images/static/materials/resistance10k.png",
-          "actionType": "modalBottomSheet"
+          "inoFile": {
+            "platform": "Arduino UNO",
+            "fileName": "uno_bt_light.ino",
+            "filePath": "assets/files/uno_bt_light/uno_bt_light.ino",
+            "description": "Código para Arduino UNO con HC-05 Bluetooth y LED"
+          },
+          "instructions": [
+            {
+              "title": "1. Conectar LED con resistencia al Arduino UNO",
+              "description": "Conecta el ánodo del LED (+, pata larga) al pin digital 13 del Arduino UNO a través de una resistencia de 220Ω. Conecta el cátodo (-, pata corta) a GND.",
+              "imagePath": "assets/images/static/light_control/instructions/instruction1.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Conectar módulo HC-05",
+              "description": "Conecta el módulo HC-05 al Arduino UNO con divisor de voltaje. VCC a 5V, GND a GND, TX del HC-05 a RX (pin 0), RX del HC-05 con divisor a TX (pin 1).",
+              "actionType": "none"
+            },
+            {
+              "title": "3. Cargar el código",
+              "description": "IMPORTANTE: Desconecta los pines RX/TX del HC-05 durante la carga del código uno_bt_light.ino. Vuelve a conectarlos después de cargar.",
+              "actionType": "none"
+            }
+          ],
+          "materials": [
+            {
+              "title": "Arduino UNO R3",
+              "description": "Microcontrolador Arduino UNO",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/arduino-uno.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Módulo Bluetooth HC-05",
+              "description": "Módulo Bluetooth para Arduino",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/hc-05.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "LED de 5mm",
+              "description": "LED de cualquier color",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/led.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Resistencia 220Ω",
+              "description": "Resistencia limitadora para el LED",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/resistance220.png",
+              "actionType": "none"
+            },
+            {
+              "title": "Resistencia 1kΩ",
+              "description": "Para divisor de voltaje del HC-05",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/resistance1k.png",
+              "actionType": "none"
+            },
+            {
+              "title": "Resistencia 2kΩ",
+              "description": "Para divisor de voltaje del HC-05",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/resistance2k.png",
+              "actionType": "none"
+            },
+            {
+              "title": "Cables Dupont",
+              "description": "Cables para conexiones",
+              "qty": "8",
+              "imagePath": "assets/images/static/materials/dupont-cables.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Protoboard",
+              "description": "Placa de pruebas",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/breadboard.png",
+              "actionType": "modalBottomSheet"
+            }
+          ]
         }
       ]
     }

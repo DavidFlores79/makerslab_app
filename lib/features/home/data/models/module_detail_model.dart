@@ -2,9 +2,7 @@
 // ABOUTME: Handles conversion between JSON and domain entity for complete module information
 
 import 'package:makerslab_app/features/home/domain/entities/module_detail.dart';
-import 'package:makerslab_app/features/home/data/models/ino_file_model.dart';
-import 'package:makerslab_app/features/home/data/models/instruction_item_model.dart';
-import 'package:makerslab_app/features/home/data/models/material_item_model.dart';
+import 'package:makerslab_app/features/home/data/models/platform_config_model.dart';
 
 class ModuleDetailModel extends ModuleDetail {
   const ModuleDetailModel({
@@ -13,9 +11,7 @@ class ModuleDetailModel extends ModuleDetail {
     required super.description,
     required super.route,
     required super.interfaceRoute,
-    required super.instructions,
-    required super.materials,
-    required super.inoFiles,
+    required super.platformConfigs,
     super.image,
     super.videoId,
     super.chatModuleKey,
@@ -31,20 +27,9 @@ class ModuleDetailModel extends ModuleDetail {
       image: json['image'] as String?,
       videoId: json['videoId'] as String?,
       chatModuleKey: json['chatModuleKey'] as String?,
-      inoFiles:
-          (json['inoFiles'] as List<dynamic>)
-              .map((e) => InoFileModel.fromJson(e as Map<String, dynamic>))
-              .toList(),
-      instructions:
-          (json['instructions'] as List<dynamic>)
-              .map(
-                (e) => InstructionItemModel.fromJson(e as Map<String, dynamic>),
-              )
-              .toList(),
-      materials:
-          (json['materials'] as List<dynamic>)
-              .map((e) => MaterialItemModel.fromJson(e as Map<String, dynamic>))
-              .toList(),
+      platformConfigs: (json['platformConfigs'] as List<dynamic>)
+          .map((e) => PlatformConfigModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -58,9 +43,7 @@ class ModuleDetailModel extends ModuleDetail {
       image: entity.image,
       videoId: entity.videoId,
       chatModuleKey: entity.chatModuleKey,
-      inoFiles: entity.inoFiles,
-      instructions: entity.instructions,
-      materials: entity.materials,
+      platformConfigs: entity.platformConfigs,
     );
   }
 
@@ -74,16 +57,9 @@ class ModuleDetailModel extends ModuleDetail {
       if (image != null) 'image': image,
       if (videoId != null) 'videoId': videoId,
       if (chatModuleKey != null) 'chatModuleKey': chatModuleKey,
-      'inoFiles':
-          inoFiles.map((e) => InoFileModel.fromEntity(e).toJson()).toList(),
-      'instructions':
-          instructions
-              .map((e) => InstructionItemModel.fromEntity(e).toJson())
-              .toList(),
-      'materials':
-          materials
-              .map((e) => MaterialItemModel.fromEntity(e).toJson())
-              .toList(),
+      'platformConfigs': platformConfigs
+          .map((e) => PlatformConfigModel.fromEntity(e).toJson())
+          .toList(),
     };
   }
 }

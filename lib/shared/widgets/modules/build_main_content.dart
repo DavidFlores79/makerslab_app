@@ -1,5 +1,5 @@
 // ABOUTME: Main content builder for module details pages with platform selection
-// ABOUTME: Uses tabs (segmented button) for ESP32 vs Arduino UNO platform selection
+// ABOUTME: Uses tabs (segmented button) for ESP32 vs Arduino UNO platform selection with platform-specific content
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../features/home/domain/entities/module_detail.dart';
 import '../../../features/home/domain/entities/ino_file.dart';
+import '../../../features/home/domain/entities/platform_config.dart';
 import '../../../core/domain/usecases/share_file_usecase.dart';
 import '../../../core/ui/snackbar_service.dart';
 import '../../../di/service_locator.dart';
@@ -54,13 +55,29 @@ class _BuildMainContentState extends State<BuildMainContent> {
     await prefs.setString(_kPlatformSelectionKey, platform.displayName);
   }
 
+  // Get the platform-specific configuration for the selected platform
+  PlatformConfig _getSelectedPlatformConfig() {
+    try {
+      return widget.moduleDetail.platformConfigs.firstWhere(
+        (config) => config.platform == _selectedPlatform,
+      );
+    } catch (e) {
+      // Fallback to first platform if selected platform not found
+      return widget.moduleDetail.platformConfigs.first;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Get platform-specific data
+    final platformConfig = _getSelectedPlatformConfig();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Platform Selector (only show if multiple platforms available)
-        if (widget.moduleDetail.inoFiles.length > 1) _buildPlatformSelector(),
+        if (widget.moduleDetail.platformConfigs.length > 1)
+          _buildPlatformSelector(),
 
         const SizedBox(height: 16),
 
@@ -72,10 +89,9 @@ class _BuildMainContentState extends State<BuildMainContent> {
               Flexible(
                 child: MainAppButton(
                   label: 'Interfaz',
-                  onPressed:
-                      () => context.push(
-                        '${widget.moduleDetail.route}${widget.moduleDetail.interfaceRoute}',
-                      ),
+                  onPressed: () => context.push(
+                    '${widget.moduleDetail.route}${widget.moduleDetail.interfaceRoute}',
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -83,15 +99,15 @@ class _BuildMainContentState extends State<BuildMainContent> {
                 child: MainAppButton(
                   variant: ButtonVariant.outlined,
                   label: 'Descargar INO',
-                  onPressed: () => _onDownloadAndShare(context),
+                  onPressed: () => _onDownloadAndShare(context, platformConfig),
                 ),
               ),
             ],
           ),
         ),
 
-        // Instructions Section
-        InstructionsSection(instructions: widget.moduleDetail.instructions),
+        // Instructions Section (platform-specific)
+        InstructionsSection(instructions: platformConfig.instructions),
         const SizedBox(height: 30),
 
         // Video Player
@@ -106,8 +122,8 @@ class _BuildMainContentState extends State<BuildMainContent> {
 
         const SizedBox(height: 30),
 
-        // Materials Section
-        BillOfMaterialsSection(materials: widget.moduleDetail.materials),
+        // Materials Section (platform-specific)
+        BillOfMaterialsSection(materials: platformConfig.materials),
         const SizedBox(height: 200),
       ],
     );
@@ -187,36 +203,20 @@ class _BuildMainContentState extends State<BuildMainContent> {
     );
   }
 
-  Future<void> _onDownloadAndShare(BuildContext context) async {
+  Future<void> _onDownloadAndShare(
+    BuildContext context,
+    PlatformConfig platformConfig,
+  ) async {
     final shareFileUseCase = getIt<ShareFileUseCase>();
     final snackbarService = getIt<SnackbarService>();
 
-    // Get selected platform's INO file
-    InoFile? selectedInoFile;
-    try {
-      selectedInoFile = widget.moduleDetail.inoFiles.firstWhere(
-        (file) => file.platform == _selectedPlatform,
-      );
-    } catch (e) {
-      // Fallback to first file if selected platform not found
-      if (widget.moduleDetail.inoFiles.isNotEmpty) {
-        selectedInoFile = widget.moduleDetail.inoFiles.first;
-      }
-    }
-
-    // Safety check - ensure we have a file to share
-    if (selectedInoFile == null) {
-      snackbarService.show(
-        message: 'No hay archivo INO disponible para esta plataforma',
-        backgroundColor: Colors.red,
-      );
-      return;
-    }
+    // Get the INO file from the platform config
+    final inoFile = platformConfig.inoFile;
 
     // Share file with platform-specific text
     final result = await shareFileUseCase(
-      assetPath: selectedInoFile.filePath,
-      fileName: selectedInoFile.fileName,
+      assetPath: inoFile.filePath,
+      fileName: inoFile.fileName,
       text:
           'Código ${_selectedPlatform.displayName} para ${widget.moduleDetail.title}',
       subject: 'Archivo INO - ${widget.moduleDetail.title}',
