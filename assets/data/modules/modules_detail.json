@@ -1,12 +1,14 @@
 {
-  "version": "2.0.0",
+  "version": "2.0.1",
   "modules": [
     {
       "id": "temperature",
       "title": "Sensor Temperatura",
-      "description": "Módulo de temperatura y humedad con sensor DHT11",
+      "description": "Aprende a medir temperatura y humedad usando el sensor DHT11. Perfecto para proyectos de monitoreo ambiental, estaciones meteorológicas y control de clima.",
+      "estimatedTime": "15-20 min",
+      "difficultyLevel": "Principiante",
       "route": "/temperature",
-      "interfaceRoute": "/temperature-interface",
+      "interfaceRoute": "/interface",
       "image": "assets/images/static/temperature/esp32DHT11.png",
       "chatModuleKey": "temperature",
       "platformConfigs": [
@@ -178,9 +180,11 @@
     {
       "id": "servo",
       "title": "Servo Motor",
-      "description": "Control de servo motor SG90 mediante Bluetooth",
+      "description": "Controla servomotores de forma precisa para crear brazos robóticos, puertas automáticas y sistemas de movimiento. Aprende a leer ángulos y programar secuencias.",
+      "estimatedTime": "20-25 min",
+      "difficultyLevel": "Principiante",
       "route": "/servo",
-      "interfaceRoute": "/servo-interface",
+      "interfaceRoute": "/interface",
       "image": "assets/images/static/servo/servo2.png",
       "chatModuleKey": "servo",
       "platformConfigs": [
@@ -310,9 +314,11 @@
     {
       "id": "gamepad",
       "title": "Gamepad",
-      "description": "Robot controlado por gamepad virtual",
+      "description": "Construye un robot controlado por Bluetooth. Aprende a programar motores DC, controladores L298N y comunicación inalámbrica para proyectos de robótica móvil.",
+      "estimatedTime": "30-35 min",
+      "difficultyLevel": "Intermedio",
       "route": "/gamepad",
-      "interfaceRoute": "/gamepad-interface",
+      "interfaceRoute": "/interface",
       "image": "assets/images/static/gamepad/gamepad.png",
       "chatModuleKey": "gamepad",
       "platformConfigs": [
@@ -446,9 +452,11 @@
     {
       "id": "light",
       "title": "Control de LED",
-      "description": "Enciende y apaga un LED mediante Bluetooth",
+      "description": "Controla LEDs mediante Bluetooth para crear efectos de iluminación. Ideal para proyectos de domótica, señalización y ambientación con Arduino.",
+      "estimatedTime": "15-20 min",
+      "difficultyLevel": "Principiante",
       "route": "/light-control",
-      "interfaceRoute": "/light-control-interface",
+      "interfaceRoute": "/interface",
       "image": "assets/images/static/light_control/light_control.png",
       "chatModuleKey": "light_control",
       "platformConfigs": [

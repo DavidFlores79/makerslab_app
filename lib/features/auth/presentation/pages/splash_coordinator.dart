@@ -21,6 +21,7 @@ class SplashCoordinator extends StatefulWidget {
 class _SplashCoordinatorState extends State<SplashCoordinator> {
   late final OnboardingBloc onboardingBloc;
   bool _isAnimationCompleted = false;
+  bool _hasNavigated = false;
 
   @override
   void initState() {
@@ -32,9 +33,12 @@ class _SplashCoordinatorState extends State<SplashCoordinator> {
   }
 
   void _tryNavigate() {
-    if (!_isAnimationCompleted || !mounted) return;
+    if (!_isAnimationCompleted || !mounted || _hasNavigated) return;
 
     final onboardingState = context.read<OnboardingBloc>().state;
+
+    _hasNavigated = true;
+
     if (onboardingState is OnboardingShouldShow) {
       context.go(OnboardingPage.routeName);
       return;

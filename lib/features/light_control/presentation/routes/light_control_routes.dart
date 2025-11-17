@@ -17,13 +17,15 @@ final lightControlRoutes = [
         (context, state) => MultiBlocProvider(
           providers: [
             BlocProvider<HomeBloc>(create: (_) => getIt<HomeBloc>()),
-            BlocProvider<LightControlBloc>(create: (_) => getIt<LightControlBloc>()),
+            BlocProvider<LightControlBloc>(
+              create: (_) => getIt<LightControlBloc>(),
+            ),
           ],
           child: LightControlPage(),
         ),
     routes: [
       GoRoute(
-        path: LightControlInterfacePage.routeName,
+        path: 'interface',
         name: LightControlInterfacePage.routeName,
         pageBuilder: (context, state) {
           return NoTransitionPage(

@@ -19,13 +19,15 @@ final temperatureRoutes = [
         (context, state) => MultiBlocProvider(
           providers: [
             BlocProvider<HomeBloc>(create: (_) => getIt<HomeBloc>()),
-            BlocProvider<TemperatureBloc>(create: (_) => getIt<TemperatureBloc>()),
+            BlocProvider<TemperatureBloc>(
+              create: (_) => getIt<TemperatureBloc>(),
+            ),
           ],
           child: TemperaturePage(),
         ),
     routes: [
       GoRoute(
-        path: TemperatureInterfacePage.routeName,
+        path: 'interface',
         name: TemperatureInterfacePage.routeName,
         pageBuilder: (context, state) {
           return NoTransitionPage(

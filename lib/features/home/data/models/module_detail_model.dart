@@ -14,6 +14,8 @@ class ModuleDetailModel extends ModuleDetail {
     required super.platformConfigs,
     super.image,
     super.chatModuleKey,
+    super.estimatedTime,
+    super.difficultyLevel,
   });
 
   factory ModuleDetailModel.fromJson(Map<String, dynamic> json) {
@@ -33,11 +35,17 @@ class ModuleDetailModel extends ModuleDetail {
         interfaceRoute: json['interfaceRoute'] as String,
         image: json['image'] as String?,
         chatModuleKey: json['chatModuleKey'] as String?,
-        platformConfigs: (platformConfigsJson as List<dynamic>)
-            .map((e) => PlatformConfigModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        estimatedTime: json['estimatedTime'] as String?,
+        difficultyLevel: json['difficultyLevel'] as String?,
+        platformConfigs:
+            (platformConfigsJson as List<dynamic>)
+                .map(
+                  (e) =>
+                      PlatformConfigModel.fromJson(e as Map<String, dynamic>),
+                )
+                .toList(),
       );
-    } catch (e, stackTrace) {
+    } catch (e) {
       throw FormatException(
         'Failed to parse ModuleDetail from JSON: $e\nModule ID: ${json['id']}\nJSON: $json',
       );
@@ -53,6 +61,8 @@ class ModuleDetailModel extends ModuleDetail {
       interfaceRoute: entity.interfaceRoute,
       image: entity.image,
       chatModuleKey: entity.chatModuleKey,
+      estimatedTime: entity.estimatedTime,
+      difficultyLevel: entity.difficultyLevel,
       platformConfigs: entity.platformConfigs,
     );
   }
@@ -66,9 +76,12 @@ class ModuleDetailModel extends ModuleDetail {
       'interfaceRoute': interfaceRoute,
       if (image != null) 'image': image,
       if (chatModuleKey != null) 'chatModuleKey': chatModuleKey,
-      'platformConfigs': platformConfigs
-          .map((e) => PlatformConfigModel.fromEntity(e).toJson())
-          .toList(),
+      if (estimatedTime != null) 'estimatedTime': estimatedTime,
+      if (difficultyLevel != null) 'difficultyLevel': difficultyLevel,
+      'platformConfigs':
+          platformConfigs
+              .map((e) => PlatformConfigModel.fromEntity(e).toJson())
+              .toList(),
     };
   }
 }

@@ -21,7 +21,7 @@ final gamepadRoutes = [
         ),
     routes: [
       GoRoute(
-        path: GamepadInterfacePage.routeName,
+        path: 'interface',
         name: GamepadInterfacePage.routeName,
         pageBuilder: (context, state) {
           return NoTransitionPage(

@@ -21,15 +21,19 @@ class PlatformConfigModel extends PlatformConfig {
       return PlatformConfigModel(
         platform: InoPlatform.fromString(json['platform'] as String),
         inoFile: InoFileModel.fromJson(json['inoFile'] as Map<String, dynamic>),
-        instructions: (json['instructions'] as List<dynamic>?)
+        instructions:
+            (json['instructions'] as List<dynamic>?)
                 ?.map(
                   (e) =>
                       InstructionItemModel.fromJson(e as Map<String, dynamic>),
                 )
                 .toList() ??
             [],
-        materials: (json['materials'] as List<dynamic>?)
-                ?.map((e) => MaterialItemModel.fromJson(e as Map<String, dynamic>))
+        materials:
+            (json['materials'] as List<dynamic>?)
+                ?.map(
+                  (e) => MaterialItemModel.fromJson(e as Map<String, dynamic>),
+                )
                 .toList() ??
             [],
         videoUrl: json['videoUrl'] as String?,
@@ -55,12 +59,14 @@ class PlatformConfigModel extends PlatformConfig {
     return {
       'platform': platform.displayName,
       'inoFile': InoFileModel.fromEntity(inoFile).toJson(),
-      'instructions': instructions
-          .map((e) => InstructionItemModel.fromEntity(e).toJson())
-          .toList(),
-      'materials': materials
-          .map((e) => MaterialItemModel.fromEntity(e).toJson())
-          .toList(),
+      'instructions':
+          instructions
+              .map((e) => InstructionItemModel.fromEntity(e).toJson())
+              .toList(),
+      'materials':
+          materials
+              .map((e) => MaterialItemModel.fromEntity(e).toJson())
+              .toList(),
       if (videoUrl != null) 'videoUrl': videoUrl,
     };
   }

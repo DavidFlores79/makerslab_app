@@ -21,7 +21,7 @@ final servoRoutes = [
         ),
     routes: [
       GoRoute(
-        path: ServoInterfacePage.routeName,
+        path: 'interface',
         name: ServoInterfacePage.routeName,
         pageBuilder: (context, state) {
           return NoTransitionPage(

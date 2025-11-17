@@ -52,8 +52,26 @@ void main() async {
       debugPrint('Stack trace: ${details.stack}');
     }
 
-    // Show user-friendly error screen instead of red screen
+    // For image loading errors and other recoverable errors, show a placeholder
+    // instead of a full error screen
+    final isRecoverableError =
+        details.exception is NetworkImageLoadException ||
+        details.exception.toString().contains('Unable to load asset') ||
+        details.exception.toString().contains('Image');
+
+    if (isRecoverableError) {
+      // Return a simple placeholder instead of crashing
+      return Container(
+        color: Colors.grey[300],
+        child: const Center(
+          child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+        ),
+      );
+    }
+
+    // Show user-friendly error screen for critical errors
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.white,
         body: Center(
@@ -137,6 +155,26 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    debugPrint('>>> MyApp lifecycle state changed: $state');
+
+    if (state == AppLifecycleState.resumed) {
+      debugPrint('>>> App resumed - forcing rebuild');
+      // Force a rebuild when app resumes to recover from any error states
+      if (mounted) {
+        setState(() {
+          debugPrint('>>> setState called to trigger rebuild');
+          // This triggers a rebuild of the MaterialApp
+        });
+      }
+    } else if (state == AppLifecycleState.paused) {
+      debugPrint('>>> App paused/backgrounded');
+    }
   }
 
   @override

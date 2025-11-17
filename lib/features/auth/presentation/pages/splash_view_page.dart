@@ -62,39 +62,55 @@ class _SplashViewPageState extends State<SplashViewPage>
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return Stack(
-      children: [
-        // Fondo de imagen
-        Positioned.fill(
-          child: Image.asset(UtilImage.SIGN_IN_BACKGROUND_1, fit: BoxFit.cover),
-        ),
-
-        // Overlay oscuro
-        Positioned.fill(
-          child: Container(color: AppColors.black3.withValues(alpha: 0.7)),
-        ),
-
-        // Logo animado
-        Center(
-          child: AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return Opacity(
-                opacity: _fadeAnimation.value,
-                child: Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: child,
-                ),
-              );
-            },
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // Fondo de imagen
+          Positioned.fill(
             child: Image.asset(
-              UtilImage.PAISAMEX_LOGO_WHITE,
-              width: size.width * 0.4,
-              fit: BoxFit.contain,
+              UtilImage.SIGN_IN_BACKGROUND_1,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(color: Colors.black);
+              },
             ),
           ),
-        ),
-      ],
+
+          // Overlay oscuro
+          Positioned.fill(
+            child: Container(color: AppColors.black3.withValues(alpha: 0.7)),
+          ),
+
+          // Logo animado
+          Center(
+            child: AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return Opacity(
+                  opacity: _fadeAnimation.value,
+                  child: Transform.scale(
+                    scale: _scaleAnimation.value,
+                    child: child,
+                  ),
+                );
+              },
+              child: Image.asset(
+                UtilImage.PAISAMEX_LOGO_WHITE,
+                width: size.width * 0.4,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    Icons.image,
+                    size: size.width * 0.4,
+                    color: Colors.white,
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

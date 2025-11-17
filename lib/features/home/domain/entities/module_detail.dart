@@ -11,6 +11,8 @@ class ModuleDetail {
   final String interfaceRoute;
   final String? image;
   final String? chatModuleKey;
+  final String? estimatedTime;
+  final String? difficultyLevel;
   final List<PlatformConfig> platformConfigs;
 
   const ModuleDetail({
@@ -22,5 +24,7 @@ class ModuleDetail {
     required this.platformConfigs,
     this.image,
     this.chatModuleKey,
+    this.estimatedTime,
+    this.difficultyLevel,
   });
 }

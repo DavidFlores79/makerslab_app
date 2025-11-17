@@ -2,22 +2,24 @@
 // ABOUTME: Uses tabs (segmented button) for ESP32 vs Arduino UNO platform selection with platform-specific content
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../features/home/domain/entities/module_detail.dart';
 import '../../../features/home/domain/entities/ino_file.dart';
 import '../../../features/home/domain/entities/platform_config.dart';
-import '../../../core/domain/usecases/share_file_usecase.dart';
-import '../../../core/ui/snackbar_service.dart';
-import '../../../di/service_locator.dart';
 import '../../../theme/app_color.dart';
 import '../index.dart';
+import 'module_description_card.dart';
 
 class BuildMainContent extends StatefulWidget {
   final ModuleDetail moduleDetail;
+  final ValueChanged<PlatformConfig>? onPlatformChanged;
 
-  const BuildMainContent({super.key, required this.moduleDetail});
+  const BuildMainContent({
+    super.key,
+    required this.moduleDetail,
+    this.onPlatformChanged,
+  });
 
   @override
   State<BuildMainContent> createState() => _BuildMainContentState();
@@ -82,37 +84,16 @@ class _BuildMainContentState extends State<BuildMainContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Module Description Card (NEW)
+        ModuleDescriptionCard(moduleDetail: widget.moduleDetail),
+
+        const SizedBox(height: 16),
+
         // Platform Selector (only show if multiple platforms available)
         if (widget.moduleDetail.platformConfigs.length > 1)
           _buildPlatformSelector(),
 
         const SizedBox(height: 16),
-
-        // Action Buttons
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Row(
-            children: [
-              Flexible(
-                child: MainAppButton(
-                  label: 'Interfaz',
-                  onPressed:
-                      () => context.push(
-                        '${widget.moduleDetail.route}${widget.moduleDetail.interfaceRoute}',
-                      ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Flexible(
-                child: MainAppButton(
-                  variant: ButtonVariant.outlined,
-                  label: 'Descargar INO',
-                  onPressed: () => _onDownloadAndShare(context, platformConfig),
-                ),
-              ),
-            ],
-          ),
-        ),
 
         // Instructions Section (platform-specific)
         InstructionsSection(instructions: platformConfig.instructions),
@@ -212,6 +193,13 @@ class _BuildMainContentState extends State<BuildMainContent> {
               color: AppColors.gray900,
             ),
           ),
+          const SizedBox(height: 4),
+
+          // Helper text (NEW)
+          const Text(
+            'Selecciona tu placa Arduino para ver instrucciones específicas',
+            style: TextStyle(fontSize: 12, color: AppColors.gray600),
+          ),
           const SizedBox(height: 8),
 
           // Segmented Button (Tabs)
@@ -236,6 +224,9 @@ class _BuildMainContentState extends State<BuildMainContent> {
                   _selectedPlatform = selected.first;
                 });
                 _saveSelectedPlatform(selected.first);
+
+                // Notify parent of platform change (NEW)
+                widget.onPlatformChanged?.call(_getSelectedPlatformConfig());
 
                 // Analytics tracking (if implemented)
                 // AnalyticsService.logEvent(
@@ -267,53 +258,6 @@ class _BuildMainContentState extends State<BuildMainContent> {
           ),
         ],
       ),
-    );
-  }
-
-  Future<void> _onDownloadAndShare(
-    BuildContext context,
-    PlatformConfig platformConfig,
-  ) async {
-    final shareFileUseCase = getIt<ShareFileUseCase>();
-    final snackbarService = getIt<SnackbarService>();
-
-    // Get the INO file from the platform config
-    final inoFile = platformConfig.inoFile;
-
-    // Share file with platform-specific text
-    final result = await shareFileUseCase(
-      assetPath: inoFile.filePath,
-      fileName: inoFile.fileName,
-      text:
-          'Código ${_selectedPlatform.displayName} para ${widget.moduleDetail.title}',
-      subject: 'Archivo INO - ${widget.moduleDetail.title}',
-    );
-
-    // Error handling
-    result.fold(
-      (failure) {
-        String errorMessage;
-        if (failure.message.contains('no encontrado')) {
-          errorMessage = 'Error al compartir archivo: Archivo no encontrado';
-        } else if (failure.message.contains('guardar')) {
-          errorMessage =
-              'Error al compartir archivo: No se pudo guardar el archivo';
-        } else if (failure.message.contains('plataforma')) {
-          errorMessage = 'Error al compartir archivo: Error de la plataforma';
-        } else {
-          errorMessage = 'Error al compartir archivo: Error desconocido';
-        }
-
-        snackbarService.show(
-          message: errorMessage,
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 5),
-          style: SnackbarStyle.withClose,
-        );
-      },
-      (_) {
-        // Success - no confirmation needed
-      },
     );
   }
 }
