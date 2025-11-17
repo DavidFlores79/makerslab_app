@@ -1,22 +1,70 @@
+// ABOUTME: Main content builder for module details pages with platform selection
+// ABOUTME: Uses tabs (segmented button) for ESP32 vs Arduino UNO platform selection
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../core/domain/entities/module.dart';
+import '../../../features/home/domain/entities/module_detail.dart';
+import '../../../features/home/domain/entities/ino_file.dart';
 import '../../../core/domain/usecases/share_file_usecase.dart';
 import '../../../core/ui/snackbar_service.dart';
 import '../../../di/service_locator.dart';
+import '../../../theme/app_color.dart';
 import '../index.dart';
 
-class BuildMainContent extends StatelessWidget {
-  final MainModule mainModule;
+class BuildMainContent extends StatefulWidget {
+  final ModuleDetail moduleDetail;
 
-  const BuildMainContent({super.key, required this.mainModule});
+  const BuildMainContent({super.key, required this.moduleDetail});
+
+  @override
+  State<BuildMainContent> createState() => _BuildMainContentState();
+}
+
+class _BuildMainContentState extends State<BuildMainContent> {
+  late InoPlatform _selectedPlatform;
+  static const String _kPlatformSelectionKey = 'LAST_SELECTED_PLATFORM';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastSelectedPlatform();
+  }
+
+  Future<void> _loadLastSelectedPlatform() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastPlatform = prefs.getString(_kPlatformSelectionKey);
+
+    setState(() {
+      if (lastPlatform != null) {
+        try {
+          _selectedPlatform = InoPlatform.fromString(lastPlatform);
+        } catch (e) {
+          _selectedPlatform = InoPlatform.esp32; // Fallback
+        }
+      } else {
+        _selectedPlatform = InoPlatform.esp32; // Default
+      }
+    });
+  }
+
+  Future<void> _saveSelectedPlatform(InoPlatform platform) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kPlatformSelectionKey, platform.displayName);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start, // mejor alineación
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Platform Selector (only show if multiple platforms available)
+        if (widget.moduleDetail.inoFiles.length > 1) _buildPlatformSelector(),
+
+        const SizedBox(height: 16),
+
+        // Action Buttons
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Row(
@@ -26,7 +74,7 @@ class BuildMainContent extends StatelessWidget {
                   label: 'Interfaz',
                   onPressed:
                       () => context.push(
-                        '${mainModule.moduleRoute}${mainModule.interfaceRoute}',
+                        '${widget.moduleDetail.route}${widget.moduleDetail.interfaceRoute}',
                       ),
                 ),
               ),
@@ -41,22 +89,101 @@ class BuildMainContent extends StatelessWidget {
             ],
           ),
         ),
-        InstructionsSection(instructions: mainModule.instructions ?? []),
+
+        // Instructions Section
+        InstructionsSection(instructions: widget.moduleDetail.instructions),
         const SizedBox(height: 30),
 
-        // 👇 Aquí el cambio importante
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: AspectRatio(
-            aspectRatio: 16 / 9, // proporción estándar de video
-            child: YouTubePlayer(videoId: mainModule.videoId ?? 'K98h51XuqBE'),
+        // Video Player
+        if (widget.moduleDetail.videoId != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: YouTubePlayer(videoId: widget.moduleDetail.videoId!),
+            ),
           ),
-        ),
 
         const SizedBox(height: 30),
-        BillOfMaterialsSection(materials: mainModule.materials ?? []),
+
+        // Materials Section
+        BillOfMaterialsSection(materials: widget.moduleDetail.materials),
         const SizedBox(height: 200),
       ],
+    );
+  }
+
+  /// Platform Selector Widget (Tabs/Segmented Button)
+  Widget _buildPlatformSelector() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Label
+          const Text(
+            'Plataforma:',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.gray900,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Segmented Button (Tabs)
+          SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<InoPlatform>(
+              segments: [
+                ButtonSegment<InoPlatform>(
+                  value: InoPlatform.esp32,
+                  label: const Text('ESP32'),
+                  icon: const Icon(Icons.memory, size: 18),
+                ),
+                ButtonSegment<InoPlatform>(
+                  value: InoPlatform.arduinoUno,
+                  label: const Text('Arduino UNO'),
+                  icon: const Icon(Icons.developer_board, size: 18),
+                ),
+              ],
+              selected: {_selectedPlatform},
+              onSelectionChanged: (Set<InoPlatform> selected) {
+                setState(() {
+                  _selectedPlatform = selected.first;
+                });
+                _saveSelectedPlatform(selected.first);
+
+                // Analytics tracking (if implemented)
+                // AnalyticsService.logEvent(
+                //   name: 'platform_selected',
+                //   parameters: {
+                //     'module_id': widget.moduleDetail.id,
+                //     'platform': selected.first.name,
+                //   },
+                // );
+              },
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return AppColors.primary;
+                  }
+                  return Colors.transparent;
+                }),
+                foregroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return AppColors.white;
+                  }
+                  return AppColors.primary;
+                }),
+                side: WidgetStateProperty.all(
+                  const BorderSide(color: AppColors.primary, width: 1),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -64,18 +191,24 @@ class BuildMainContent extends StatelessWidget {
     final shareFileUseCase = getIt<ShareFileUseCase>();
     final snackbarService = getIt<SnackbarService>();
 
-    // Share file with module-specific text and subject (Decision D2)
-    final result = await shareFileUseCase(
-      assetPath: mainModule.inoFile,
-      fileName: mainModule.inoFile.split('/').last,
-      text: 'Código Arduino para ${mainModule.title}',
-      subject: 'Archivo INO - ${mainModule.title}',
+    // Get selected platform's INO file
+    final selectedInoFile = widget.moduleDetail.inoFiles.firstWhere(
+      (file) => file.platform == _selectedPlatform,
+      orElse: () => widget.moduleDetail.inoFiles.first, // Fallback
     );
 
-    // Handle Either result - only show error messages (Decision B1: silent on success/dismissal)
+    // Share file with platform-specific text
+    final result = await shareFileUseCase(
+      assetPath: selectedInoFile.filePath,
+      fileName: selectedInoFile.fileName,
+      text:
+          'Código ${_selectedPlatform.displayName} para ${widget.moduleDetail.title}',
+      subject: 'Archivo INO - ${widget.moduleDetail.title}',
+    );
+
+    // Error handling
     result.fold(
       (failure) {
-        // Map failure to user-friendly Spanish error message (Decision C2: specific errors)
         String errorMessage;
         if (failure.message.contains('no encontrado')) {
           errorMessage = 'Error al compartir archivo: Archivo no encontrado';
@@ -88,7 +221,6 @@ class BuildMainContent extends StatelessWidget {
           errorMessage = 'Error al compartir archivo: Error desconocido';
         }
 
-        // Show error snackbar with red background
         snackbarService.show(
           message: errorMessage,
           backgroundColor: Colors.red,
@@ -97,8 +229,7 @@ class BuildMainContent extends StatelessWidget {
         );
       },
       (_) {
-        // Success or user dismissal - show nothing (Decision B1)
-        // User knows what they did, no need for confirmation
+        // Success - no confirmation needed
       },
     );
   }

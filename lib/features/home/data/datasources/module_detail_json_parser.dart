@@ -47,7 +47,9 @@ class ModuleDetailJsonParser {
         throw const FormatException('All modules failed to parse');
       }
 
-      logger.info('Successfully parsed ${modules.length} of ${modulesJson.length} modules');
+      logger.info(
+        'Successfully parsed ${modules.length} of ${modulesJson.length} modules',
+      );
       return modules;
     } catch (e, stackTrace) {
       logger.error('Failed to parse modules JSON', e, stackTrace);

@@ -194,9 +194,7 @@ Future<void> setupLocator() async {
   getIt.registerFactory(() => RegisterCubit());
 
   // Services (low-level, no business logic)
-  getIt.registerLazySingleton<FileSharingService>(
-    () => FileSharingService(),
-  );
+  getIt.registerLazySingleton<FileSharingService>(() => FileSharingService());
 
   // Repositorios
   getIt.registerLazySingleton<FileSharingRepository>(
@@ -375,11 +373,13 @@ Future<void> setupLocator() async {
     () => ThemeBloc(loadThemeUseCase: getIt(), saveThemeUseCase: getIt()),
   );
 
-  getIt.registerFactory(() => HomeBloc(
-        getCombinedMenu: getIt(),
-        getModuleDetail: getIt(),
-        getAllModuleDetails: getIt(),
-      ));
+  getIt.registerFactory(
+    () => HomeBloc(
+      getCombinedMenu: getIt(),
+      getModuleDetail: getIt(),
+      getAllModuleDetails: getIt(),
+    ),
+  );
   getIt.registerFactory(
     () => ChatBloc(
       repository: getIt<ChatRepository>(),

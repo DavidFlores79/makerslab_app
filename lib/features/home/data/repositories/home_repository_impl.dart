@@ -83,21 +83,24 @@ class HomeRepositoryImpl implements HomeRepository {
     List<ModuleDetail> details,
   ) async {
     try {
-      final models = details
-          .map((d) => ModuleDetailModel(
-                id: d.id,
-                title: d.title,
-                description: d.description,
-                route: d.route,
-                interfaceRoute: d.interfaceRoute,
-                instructions: d.instructions,
-                materials: d.materials,
-                inoFiles: d.inoFiles,
-                image: d.image,
-                videoId: d.videoId,
-                chatModuleKey: d.chatModuleKey,
-              ))
-          .toList();
+      final models =
+          details
+              .map(
+                (d) => ModuleDetailModel(
+                  id: d.id,
+                  title: d.title,
+                  description: d.description,
+                  route: d.route,
+                  interfaceRoute: d.interfaceRoute,
+                  instructions: d.instructions,
+                  materials: d.materials,
+                  inoFiles: d.inoFiles,
+                  image: d.image,
+                  videoId: d.videoId,
+                  chatModuleKey: d.chatModuleKey,
+                ),
+              )
+              .toList();
       await localDatasource.cacheModuleDetails(models);
       return const Right(null);
     } on CacheException catch (e, stackTrace) {

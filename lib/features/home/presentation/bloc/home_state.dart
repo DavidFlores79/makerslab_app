@@ -27,16 +27,15 @@ class HomeState {
     Map<String, ModuleDetail>? moduleDetails,
     bool? isLoadingModuleDetails,
     String? moduleDetailError,
-  }) =>
-      HomeState(
-        status: status ?? this.status,
-        mainMenuItems: mainMenuItems ?? this.mainMenuItems,
-        error: error ?? this.error,
-        moduleDetails: moduleDetails ?? this.moduleDetails,
-        isLoadingModuleDetails:
-            isLoadingModuleDetails ?? this.isLoadingModuleDetails,
-        moduleDetailError: moduleDetailError ?? this.moduleDetailError,
-      );
+  }) => HomeState(
+    status: status ?? this.status,
+    mainMenuItems: mainMenuItems ?? this.mainMenuItems,
+    error: error ?? this.error,
+    moduleDetails: moduleDetails ?? this.moduleDetails,
+    isLoadingModuleDetails:
+        isLoadingModuleDetails ?? this.isLoadingModuleDetails,
+    moduleDetailError: moduleDetailError ?? this.moduleDetailError,
+  );
 
   ModuleDetail? getModuleDetail(String moduleId) {
     return moduleDetails[moduleId];

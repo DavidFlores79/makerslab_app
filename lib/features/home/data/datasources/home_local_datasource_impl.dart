@@ -95,10 +95,12 @@ class HomeLocalDatasourceImpl implements HomeLocalDatasource {
       final all = await getAllModuleDetails();
       final detail = all.firstWhere(
         (m) => m.id == id,
-        orElse: () => throw CacheException(
-          'Module detail not found: $id',
-          StackTrace.current,
-        ),
+        orElse:
+            () =>
+                throw CacheException(
+                  'Module detail not found: $id',
+                  StackTrace.current,
+                ),
       );
       return detail;
     } catch (e, stackTrace) {

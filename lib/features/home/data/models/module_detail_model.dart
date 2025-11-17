@@ -31,15 +31,20 @@ class ModuleDetailModel extends ModuleDetail {
       image: json['image'] as String?,
       videoId: json['videoId'] as String?,
       chatModuleKey: json['chatModuleKey'] as String?,
-      inoFiles: (json['inoFiles'] as List<dynamic>)
-          .map((e) => InoFileModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      instructions: (json['instructions'] as List<dynamic>)
-          .map((e) => InstructionItemModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      materials: (json['materials'] as List<dynamic>)
-          .map((e) => MaterialItemModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      inoFiles:
+          (json['inoFiles'] as List<dynamic>)
+              .map((e) => InoFileModel.fromJson(e as Map<String, dynamic>))
+              .toList(),
+      instructions:
+          (json['instructions'] as List<dynamic>)
+              .map(
+                (e) => InstructionItemModel.fromJson(e as Map<String, dynamic>),
+              )
+              .toList(),
+      materials:
+          (json['materials'] as List<dynamic>)
+              .map((e) => MaterialItemModel.fromJson(e as Map<String, dynamic>))
+              .toList(),
     );
   }
 
@@ -69,9 +74,16 @@ class ModuleDetailModel extends ModuleDetail {
       if (image != null) 'image': image,
       if (videoId != null) 'videoId': videoId,
       if (chatModuleKey != null) 'chatModuleKey': chatModuleKey,
-      'inoFiles': inoFiles.map((e) => InoFileModel.fromEntity(e).toJson()).toList(),
-      'instructions': instructions.map((e) => InstructionItemModel.fromEntity(e).toJson()).toList(),
-      'materials': materials.map((e) => MaterialItemModel.fromEntity(e).toJson()).toList(),
+      'inoFiles':
+          inoFiles.map((e) => InoFileModel.fromEntity(e).toJson()).toList(),
+      'instructions':
+          instructions
+              .map((e) => InstructionItemModel.fromEntity(e).toJson())
+              .toList(),
+      'materials':
+          materials
+              .map((e) => MaterialItemModel.fromEntity(e).toJson())
+              .toList(),
     };
   }
 }

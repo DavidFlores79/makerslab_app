@@ -54,21 +54,25 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final result = await getModuleDetail(event.moduleId);
 
     result.fold(
-      (failure) => emit(state.copyWith(
-        isLoadingModuleDetails: false,
-        moduleDetailError: failure.message,
-      )),
+      (failure) => emit(
+        state.copyWith(
+          isLoadingModuleDetails: false,
+          moduleDetailError: failure.message,
+        ),
+      ),
       (detail) {
         final updatedDetails = Map<String, ModuleDetail>.from(
           state.moduleDetails,
         );
         updatedDetails[event.moduleId] = detail;
 
-        emit(state.copyWith(
-          isLoadingModuleDetails: false,
-          moduleDetails: updatedDetails,
-          moduleDetailError: null,
-        ));
+        emit(
+          state.copyWith(
+            isLoadingModuleDetails: false,
+            moduleDetails: updatedDetails,
+            moduleDetailError: null,
+          ),
+        );
       },
     );
   }
@@ -82,21 +86,25 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final result = await getAllModuleDetails();
 
     result.fold(
-      (failure) => emit(state.copyWith(
-        isLoadingModuleDetails: false,
-        moduleDetailError: failure.message,
-      )),
+      (failure) => emit(
+        state.copyWith(
+          isLoadingModuleDetails: false,
+          moduleDetailError: failure.message,
+        ),
+      ),
       (details) {
         final detailsMap = <String, ModuleDetail>{};
         for (final detail in details) {
           detailsMap[detail.id] = detail;
         }
 
-        emit(state.copyWith(
-          isLoadingModuleDetails: false,
-          moduleDetails: detailsMap,
-          moduleDetailError: null,
-        ));
+        emit(
+          state.copyWith(
+            isLoadingModuleDetails: false,
+            moduleDetails: detailsMap,
+            moduleDetailError: null,
+          ),
+        );
       },
     );
   }
