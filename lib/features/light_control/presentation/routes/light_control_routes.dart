@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 // import 'package:makerslab_app/features/home/domain/entities/instruction_item.dart';
 // import 'package:makerslab_app/features/home/domain/entities/material_item.dart';
 import '../../../../di/service_locator.dart';
+import '../../../../features/home/presentation/bloc/home_bloc.dart';
 import '../bloc/light_control_bloc.dart';
 import '../pages/light_control_page.dart';
 import '../widgets/light_control_interface_page.dart';
@@ -13,8 +14,11 @@ final lightControlRoutes = [
     path: LightControlPage.routeName,
     name: LightControlPage.routeName,
     builder:
-        (context, state) => BlocProvider(
-          create: (_) => getIt<LightControlBloc>(),
+        (context, state) => MultiBlocProvider(
+          providers: [
+            BlocProvider<HomeBloc>(create: (_) => getIt<HomeBloc>()),
+            BlocProvider<LightControlBloc>(create: (_) => getIt<LightControlBloc>()),
+          ],
           child: LightControlPage(),
         ),
     routes: [

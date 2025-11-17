@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:makerslab_app/features/home/domain/entities/instruction_item.dart';
 import 'package:makerslab_app/features/home/domain/entities/material_item.dart';
 import '../../../../di/service_locator.dart';
+import '../../../../features/home/presentation/bloc/home_bloc.dart';
 import '../bloc/temperature_bloc.dart';
 import '../pages/instruction_detail_page.dart';
 import '../pages/material_details_page.dart';
@@ -15,8 +16,11 @@ final temperatureRoutes = [
     path: TemperaturePage.routeName,
     name: TemperaturePage.routeName,
     builder:
-        (context, state) => BlocProvider(
-          create: (_) => getIt<TemperatureBloc>(),
+        (context, state) => MultiBlocProvider(
+          providers: [
+            BlocProvider<HomeBloc>(create: (_) => getIt<HomeBloc>()),
+            BlocProvider<TemperatureBloc>(create: (_) => getIt<TemperatureBloc>()),
+          ],
           child: TemperaturePage(),
         ),
     routes: [
