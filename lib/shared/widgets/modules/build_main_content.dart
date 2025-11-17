@@ -192,10 +192,26 @@ class _BuildMainContentState extends State<BuildMainContent> {
     final snackbarService = getIt<SnackbarService>();
 
     // Get selected platform's INO file
-    final selectedInoFile = widget.moduleDetail.inoFiles.firstWhere(
-      (file) => file.platform == _selectedPlatform,
-      orElse: () => widget.moduleDetail.inoFiles.first, // Fallback
-    );
+    InoFile? selectedInoFile;
+    try {
+      selectedInoFile = widget.moduleDetail.inoFiles.firstWhere(
+        (file) => file.platform == _selectedPlatform,
+      );
+    } catch (e) {
+      // Fallback to first file if selected platform not found
+      if (widget.moduleDetail.inoFiles.isNotEmpty) {
+        selectedInoFile = widget.moduleDetail.inoFiles.first;
+      }
+    }
+
+    // Safety check - ensure we have a file to share
+    if (selectedInoFile == null) {
+      snackbarService.show(
+        message: 'No hay archivo INO disponible para esta plataforma',
+        backgroundColor: Colors.red,
+      );
+      return;
+    }
 
     // Share file with platform-specific text
     final result = await shareFileUseCase(
