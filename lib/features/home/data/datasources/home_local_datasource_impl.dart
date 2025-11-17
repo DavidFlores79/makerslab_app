@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:makerslab_app/core/mocks/main_menu_mock.dart';
 import 'package:makerslab_app/features/home/data/models/main_menu_item_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,7 +11,8 @@ import 'home_local_datasource.dart';
 import 'module_detail_json_parser.dart';
 
 const _kModulesKey = 'CACHED_MODULES_v1';
-const _kModuleDetailsKey = 'CACHED_MODULE_DETAILS_v3'; // Bumped to v3 for platform-specific videoUrl
+const _kModuleDetailsKey =
+    'CACHED_MODULE_DETAILS_v4'; // Bumped to v3 for platform-specific videoUrl
 
 class HomeLocalDatasourceImpl implements HomeLocalDatasource {
   final SharedPreferences prefs;

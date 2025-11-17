@@ -83,7 +83,7 @@
         },
         {
           "platform": "Arduino UNO",
-          "videoUrl": "https://www.youtube.com/watch?v=kJpdoBLSmHs",
+          "videoUrl": "https://www.youtube.com/watch?v=RL79qw18QXY",
           "inoFile": {
             "platform": "Arduino UNO",
             "fileName": "uno_bt_temp.ino",
@@ -318,7 +318,7 @@
       "platformConfigs": [
         {
           "platform": "ESP32",
-          "videoUrl": "https://www.youtube.com/watch?v=kJpdoBLSmHs",
+          "videoUrl": "https://www.youtube.com/watch?v=DeE5_g14CdE",
           "inoFile": {
             "platform": "ESP32",
             "fileName": "esp32_bt_gamepad.ino",
@@ -454,7 +454,7 @@
       "platformConfigs": [
         {
           "platform": "ESP32",
-          "videoUrl": "https://www.youtube.com/watch?v=kJpdoBLSmHs",
+          "videoUrl": "https://www.youtube.com/watch?v=7Hke_3JNErM",
           "inoFile": {
             "platform": "ESP32",
             "fileName": "esp32_bt_light.ino",
@@ -514,7 +514,7 @@
         },
         {
           "platform": "Arduino UNO",
-          "videoUrl": "https://www.youtube.com/watch?v=kJpdoBLSmHs",
+          "videoUrl": "https://www.youtube.com/watch?v=L_WScedsopA",
           "inoFile": {
             "platform": "Arduino UNO",
             "fileName": "uno_bt_light.ino",
