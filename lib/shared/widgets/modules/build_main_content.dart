@@ -96,9 +96,10 @@ class _BuildMainContentState extends State<BuildMainContent> {
               Flexible(
                 child: MainAppButton(
                   label: 'Interfaz',
-                  onPressed: () => context.push(
-                    '${widget.moduleDetail.route}${widget.moduleDetail.interfaceRoute}',
-                  ),
+                  onPressed:
+                      () => context.push(
+                        '${widget.moduleDetail.route}${widget.moduleDetail.interfaceRoute}',
+                      ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -123,6 +124,8 @@ class _BuildMainContentState extends State<BuildMainContent> {
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: AspectRatio(
               aspectRatio: 16 / 9,
+              // Use unique key to force rebuild when video URL changes
+              key: ValueKey('video_${platformConfig.videoUrl}'),
               child: _buildVideoPlayer(platformConfig.videoUrl!),
             ),
           ),

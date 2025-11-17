@@ -55,6 +55,17 @@ class _YouTubePlayerState extends State<YouTubePlayer> {
   }
 
   @override
+  void didUpdateWidget(YouTubePlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // If the videoId changed, load the new video
+    if (oldWidget.videoId != widget.videoId) {
+      _controller.load(widget.videoId);
+      _controller.seekTo(Duration.zero);
+    }
+  }
+
+  @override
   void dispose() {
     _controller.removeListener(_listener);
     _controller.dispose();
