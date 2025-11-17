@@ -93,6 +93,7 @@ flutter:
 
   assets:
     - assets/
+    - assets/data/modules/
     - assets/images/
     - assets/images/brand/
     - assets/images/modules/
@@ -110,7 +111,11 @@ flutter:
     - assets/files/esp32_bt_light/
     - assets/files/esp32_bt_servo/
     - assets/files/esp32_bt_temp/
+    - assets/files/esp32_bt_gamepad/
     - assets/files/UNO_bt_gamepad/
+    - assets/files/uno_bt_temp/
+    - assets/files/uno_bt_servo/
+    - assets/files/uno_bt_light/
     - assets/lotties/
 
   fonts:

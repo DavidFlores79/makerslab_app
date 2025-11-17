@@ -87,7 +87,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (_lastResumeTime != null) {
       final difference = now.difference(_lastResumeTime!);
       if (difference.inSeconds < 2) {
-        debugPrint('>>> HomePage resume debounced (${difference.inSeconds}s since last resume)');
+        debugPrint(
+          '>>> HomePage resume debounced (${difference.inSeconds}s since last resume)',
+        );
         return;
       }
     }
@@ -172,17 +174,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             const SizedBox(height: 16),
                             Text(
                               'No se pudo cargar el menú',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              state.error ?? 'Algo salió mal. Por favor intenta de nuevo.',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.grey.shade600,
-                              ),
+                              state.error ??
+                                  'Algo salió mal. Por favor intenta de nuevo.',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.grey.shade600),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 24),
@@ -250,7 +251,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                               : AppColors.gray300,
                                       elevation: 3,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8.0),
+                                        borderRadius: BorderRadius.circular(
+                                          8.0,
+                                        ),
                                         side: BorderSide(
                                           color:
                                               isDarkMode
@@ -287,7 +290,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                   fontSize: 20,
                                                   fontWeight: FontWeight.bold,
                                                   color:
-                                                      theme.colorScheme.onSurface,
+                                                      theme
+                                                          .colorScheme
+                                                          .onSurface,
                                                 ),
                                               ),
                                             ],

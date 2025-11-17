@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:makerslab_app/shared/widgets/index.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/domain/entities/material.dart';
+import 'package:makerslab_app/features/home/domain/entities/material_item.dart';
 import '../../../theme/app_color.dart';
 
 class BillOfMaterialsSection extends StatelessWidget {
@@ -23,19 +23,27 @@ class BillOfMaterialsSection extends StatelessWidget {
 
         return ListTile(
           onTap: () => onMaterialItemTap(item, context),
-          leading: Container(
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.gray200,
-              border: Border.all(color: AppColors.gray400, width: 2),
-            ),
-            child: ClipOval(
-              child: Image.asset(
-                item.imagePath,
-                fit: BoxFit.cover,
-                width: 48,
-                height: 48,
+          leading: SizedBox(
+            width: 48,
+            height: 48,
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.gray200,
+                border: Border.all(color: AppColors.gray400, width: 2),
+              ),
+              child: ClipOval(
+                child: Image.asset(
+                  item.imagePath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      'assets/images/static/placeholder.png',
+                      fit: BoxFit.cover,
+                    );
+                  },
+                ),
               ),
             ),
           ),

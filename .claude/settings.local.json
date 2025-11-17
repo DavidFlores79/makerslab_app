@@ -37,7 +37,10 @@
       "Bash(flutter analyze:*)",
       "Bash(flutter test:*)",
       "Bash(curl:*)",
-      "Bash(flutter clean:*)"
+      "Bash(flutter clean:*)",
+      "Bash(dart format:*)",
+      "Bash(flutter build:*)",
+      "Bash(flutter run:*)"
     ],
     "deny": []
   },

@@ -1,128 +1,216 @@
+// ABOUTME: LED light control module page with dynamic module detail loading and sticky action bar
+// ABOUTME: Uses HomeBloc for lazy loading module details with scroll-triggered action buttons
+
 import 'package:flutter/material.dart';
-import '../../../../../shared/widgets/index.dart';
-import '../../../../core/domain/entities/instruction.dart';
-import '../../../../core/domain/entities/material.dart';
-import '../../../../core/domain/entities/module.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../features/home/presentation/bloc/home_bloc.dart';
+import '../../../../features/home/presentation/bloc/home_event.dart';
+import '../../../../features/home/presentation/bloc/home_state.dart';
+import '../../../../features/home/domain/entities/module_detail.dart';
+import '../../../../features/home/domain/entities/platform_config.dart';
+import '../../../../core/domain/usecases/share_file_usecase.dart';
+import '../../../../core/ui/snackbar_service.dart';
+import '../../../../di/service_locator.dart';
+import '../../../../shared/widgets/index.dart';
 import '../../../../shared/widgets/chat/px_chatbot_floating_button.dart';
-import '../widgets/light_control_interface_page.dart';
 
-class LightControlPage extends StatelessWidget {
+class LightControlPage extends StatefulWidget {
   static const String routeName = '/light-control';
-  LightControlPage({super.key});
+  static const String moduleId = 'light';
 
-  final MainModule mainModule = MainModule(
-    title: 'Control de Luz',
-    description: '',
-    moduleRoute: LightControlPage.routeName,
-    interfaceRoute: LightControlInterfacePage.routeName,
-    image: 'assets/images/static/light_control/light_control.png',
-    videoId: 'kJpdoBLSmHs',
-    inoFile: 'assets/files/esp32_bt_light/esp32_bt_light.ino',
-    instructions: [
-      InstructionItem(
-        title:
-            '1. Conectar el sensor DHT11 y el modulo Bluetooth HC-05 al Protoboard ',
-        description:
-            'Descripción de la instrucción 1 para la ruta interna lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        imagePath:
-            'assets/images/static/light_control/instructions/instruction1.png',
-        actionType: IntructionItemType.modalBottomSheet,
-      ),
-      InstructionItem(
-        title: 'Instrucción 2',
-        description: 'Descripción de la instrucción 2',
-        actionType: IntructionItemType.externalUrl,
-        actionValue: 'https://www.enlacetecnologias.mx',
-      ),
-      InstructionItem(
-        title: 'Instrucción 3',
-        description: 'Descripción de la instrucción 3',
-        actionType: IntructionItemType.none,
-      ),
-      InstructionItem(
-        title: 'Instrucción 4',
-        description:
-            'Descripción de la instrucción 4 para la ruta interna lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        actionType: IntructionItemType.modalBottomSheet,
-      ),
-    ],
-    materials: [
-      MaterialItem(
-        title: 'Microcontrolador ESP32',
-        description:
-            'Placa de desarrollo ESP32 con WiFi y Bluetooth integrados alskjdl askdjl aksdjlaks jdlak sjdlka sjldkaj sldk jalskd jlaksjd laksdl jalsdkjlaksjdlakjsdlakj sdlkaj sdl kajlsd kjalskdj lakdsjlaksjd lakjsdlakjds',
-        qty: '1',
-        imagePath: 'assets/images/static/materials/esp32.png',
-        actionType: MaterialItemType.modalBottomSheet,
-      ),
-      MaterialItem(
-        title: 'Sensor DHT11',
-        description: 'Sensor de temperatura y humedad digital',
-        qty: '1',
-        imagePath: 'assets/images/static/materials/dht-11.png',
-        actionType: MaterialItemType.modalBottomSheet,
-      ),
-      MaterialItem(
-        title: 'Resistencia 10k',
-        description: 'Componente para pull-up del DHT11 sensor',
-        qty: '1',
-        imagePath: 'assets/images/static/materials/resistance10k.png',
-        actionType: MaterialItemType.modalBottomSheet,
-      ),
-      MaterialItem(
-        title: 'Cables de conexión',
-        description: 'Dupont o jumper cables para conexiones',
-        qty: '1',
-        imagePath: 'assets/images/static/materials/dupont-cables.png',
-        actionType: MaterialItemType.modalBottomSheet,
-      ),
-      MaterialItem(
-        title: 'Protoboard',
-        description: 'Placa de pruebas para circuitos',
-        qty: '1',
-        imagePath: 'assets/images/static/materials/breadboard.png',
-        actionType: MaterialItemType.modalBottomSheet,
-      ),
-      MaterialItem(
-        title: 'Fuente de alimentación',
-        description: '5V DC (USB) o 3.3V DC (3.3V) conector Molex',
-        qty: '1',
-        imagePath: 'assets/images/static/materials/powersupply.png',
-        actionType: MaterialItemType.modalBottomSheet,
-      ),
-      MaterialItem(
-        title: 'Software de programación',
-        description: 'Instalar Arduino IDE',
-        qty: '1',
-        imagePath: 'assets/images/static/materials/arduino-uno.png',
-        actionType: MaterialItemType.externalUrl,
-        actionValue: 'https://www.arduino.cc/es/software',
-      ),
-    ],
-  );
+  const LightControlPage({super.key});
+
+  @override
+  State<LightControlPage> createState() => _LightControlPageState();
+}
+
+class _LightControlPageState extends State<LightControlPage> {
+  final ScrollController _scrollController = ScrollController();
+  bool _showActionBar = false;
+  PlatformConfig? _currentPlatformConfig;
+
+  static const double _scrollThreshold = 250.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final shouldShow = _scrollController.offset > _scrollThreshold;
+
+    if (shouldShow != _showActionBar) {
+      setState(() {
+        _showActionBar = shouldShow;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        // Trigger lazy load if not already loaded
+        if (state.getModuleDetail(LightControlPage.moduleId) == null &&
+            !state.isLoadingModuleDetails) {
+          context.read<HomeBloc>().add(
+            LoadModuleDetail(moduleId: LightControlPage.moduleId),
+          );
+        }
+
+        final moduleDetail = state.getModuleDetail(LightControlPage.moduleId);
+
+        return Scaffold(
+          body: Stack(
+            children: [
+              SafeArea(child: _buildBody(context, state, moduleDetail)),
+              // Sticky bottom action bar
+              if (moduleDetail != null)
+                StickyBottomActionBar(
+                  isVisible: _showActionBar,
+                  moduleDetail: moduleDetail,
+                  platformConfig:
+                      _currentPlatformConfig ??
+                      moduleDetail.platformConfigs.first,
+                  onInterfacePressed:
+                      () => context.push(
+                        '${moduleDetail.route}${moduleDetail.interfaceRoute}',
+                      ),
+                  onDownloadPressed: () => _handleDownload(moduleDetail),
+                ),
+            ],
+          ),
+          floatingActionButton: AnimatedPadding(
+            duration: const Duration(milliseconds: 300),
+            padding: EdgeInsets.only(bottom: _showActionBar ? 80 : 0),
+            child: PxChatBotFloatingButton(
+              moduleKey: moduleDetail?.chatModuleKey ?? 'light',
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    HomeState state,
+    ModuleDetail? moduleDetail,
+  ) {
+    // Loading state
+    if (moduleDetail == null && state.isLoadingModuleDetails) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Error state
+    if (moduleDetail == null && state.moduleDetailError != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              state.moduleDetailError!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed:
+                  () => context.read<HomeBloc>().add(
+                    LoadModuleDetail(moduleId: LightControlPage.moduleId),
+                  ),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Reintentar'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Success state
+    if (moduleDetail != null) {
+      return CustomScrollView(
+        controller: _scrollController,
         slivers: [
           MainSliverBackAppBar(
             assetImagePath:
-                mainModule.image ?? 'assets/images/static/placeholder.png',
+                moduleDetail.image ?? 'assets/images/static/placeholder.png',
             centerTitle: true,
-            backLabel: 'Control de Luces',
+            backLabel: moduleDetail.title,
           ),
           SliverList(
             delegate: SliverChildListDelegate([
               const SizedBox(height: 16),
-              BuildMainContent(mainModule: mainModule),
+              BuildMainContent(
+                moduleDetail: moduleDetail,
+                onPlatformChanged: (config) {
+                  setState(() {
+                    _currentPlatformConfig = config;
+                  });
+                },
+              ),
             ]),
           ),
         ],
-      ),
-      floatingActionButton: const PxChatBotFloatingButton(
-        moduleKey: 'led_control',
-      ),
+      );
+    }
+
+    // Fallback (should never reach here)
+    return const Center(child: Text('No se pudo cargar el módulo'));
+  }
+
+  Future<void> _handleDownload(ModuleDetail moduleDetail) async {
+    final shareFileUseCase = getIt<ShareFileUseCase>();
+    final snackbarService = getIt<SnackbarService>();
+
+    final platformConfig =
+        _currentPlatformConfig ?? moduleDetail.platformConfigs.first;
+    final inoFile = platformConfig.inoFile;
+
+    final result = await shareFileUseCase(
+      assetPath: inoFile.filePath,
+      fileName: inoFile.fileName,
+      text:
+          'Código ${platformConfig.platform.displayName} para ${moduleDetail.title}',
+      subject: 'Archivo INO - ${moduleDetail.title}',
+    );
+
+    result.fold(
+      (failure) {
+        String errorMessage;
+        if (failure.message.contains('no encontrado')) {
+          errorMessage = 'Error al compartir archivo: Archivo no encontrado';
+        } else if (failure.message.contains('guardar')) {
+          errorMessage =
+              'Error al compartir archivo: No se pudo guardar el archivo';
+        } else if (failure.message.contains('plataforma')) {
+          errorMessage = 'Error al compartir archivo: Error de la plataforma';
+        } else {
+          errorMessage = 'Error al compartir archivo: Error desconocido';
+        }
+
+        snackbarService.show(
+          message: errorMessage,
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+          style: SnackbarStyle.withClose,
+        );
+      },
+      (_) {
+        // Success - no confirmation needed
+      },
     );
   }
 }

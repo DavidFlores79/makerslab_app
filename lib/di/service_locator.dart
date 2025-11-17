@@ -68,8 +68,11 @@ import '../features/gamepad/domain/repositories/gamepad_repository.dart';
 import '../features/gamepad/presentation/bloc/gamepad_bloc.dart';
 import '../features/home/data/datasources/home_local_datasource_impl.dart';
 import '../features/home/data/datasources/home_remote_datesource.dart';
+import '../features/home/data/datasources/module_detail_json_parser.dart';
 import '../features/home/data/repositories/home_repository_impl.dart';
 import '../features/home/domain/repositories/home_repository.dart';
+import '../features/home/domain/usecases/get_all_module_details.dart';
+import '../features/home/domain/usecases/get_module_detail.dart';
 import '../features/home/domain/usecases/get_remote_home_menu.dart';
 import '../features/home/presentation/bloc/home_bloc.dart';
 import '../features/light_control/data/repositories/light_control_repository_impl.dart';
@@ -150,9 +153,13 @@ Future<void> setupLocator() async {
   final userLocalDataSource = AuthUserLocalDataSourceImpl(
     secureStorage: getIt(),
   );
+  // JSON Parser for module details
+  final moduleDetailJsonParser = ModuleDetailJsonParser(logger: logger);
+
   final homeLocalDatasource = HomeLocalDatasourceImpl(
     logger: logger,
     prefs: sharedPreferences,
+    jsonParser: moduleDetailJsonParser,
   );
   final homeRemoteDatasource = HomeRemoteDataSourceImpl(dio: getIt());
   final chatLocalDataSource = LocalChatDataSourceImpl(logger: logger);
@@ -187,9 +194,7 @@ Future<void> setupLocator() async {
   getIt.registerFactory(() => RegisterCubit());
 
   // Services (low-level, no business logic)
-  getIt.registerLazySingleton<FileSharingService>(
-    () => FileSharingService(),
-  );
+  getIt.registerLazySingleton<FileSharingService>(() => FileSharingService());
 
   // Repositorios
   getIt.registerLazySingleton<FileSharingRepository>(
@@ -263,6 +268,8 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(
     () => GetCombinedMenu(homeRepository: getIt(), checkSession: getIt()),
   );
+  getIt.registerLazySingleton(() => GetModuleDetail(repository: getIt()));
+  getIt.registerLazySingleton(() => GetAllModuleDetails(repository: getIt()));
   getIt.registerLazySingleton(() => GetCountries(repository: getIt()));
   // Bluetooth usecases
   getIt.registerLazySingleton(
@@ -366,7 +373,13 @@ Future<void> setupLocator() async {
     () => ThemeBloc(loadThemeUseCase: getIt(), saveThemeUseCase: getIt()),
   );
 
-  getIt.registerFactory(() => HomeBloc(getCombinedMenu: getIt()));
+  getIt.registerFactory(
+    () => HomeBloc(
+      getCombinedMenu: getIt(),
+      getModuleDetail: getIt(),
+      getAllModuleDetails: getIt(),
+    ),
+  );
   getIt.registerFactory(
     () => ChatBloc(
       repository: getIt<ChatRepository>(),

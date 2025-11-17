@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../di/service_locator.dart';
+import '../../../../features/home/presentation/bloc/home_bloc.dart';
 import '../bloc/gamepad_bloc.dart';
 import '../pages/gamepad_page.dart';
 import '../widgets/gamepad_interface_page.dart';
@@ -11,13 +12,16 @@ final gamepadRoutes = [
     path: GamepadPage.routeName,
     name: GamepadPage.routeName,
     builder:
-        (context, state) => BlocProvider(
-          create: (_) => getIt<GamepadBloc>(),
+        (context, state) => MultiBlocProvider(
+          providers: [
+            BlocProvider<HomeBloc>(create: (_) => getIt<HomeBloc>()),
+            BlocProvider<GamepadBloc>(create: (_) => getIt<GamepadBloc>()),
+          ],
           child: GamepadPage(),
         ),
     routes: [
       GoRoute(
-        path: GamepadInterfacePage.routeName,
+        path: 'interface',
         name: GamepadInterfacePage.routeName,
         pageBuilder: (context, state) {
           return NoTransitionPage(

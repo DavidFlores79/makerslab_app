@@ -1,5 +1,5 @@
-import 'instruction.dart';
-import 'material.dart';
+import 'package:makerslab_app/features/home/domain/entities/instruction_item.dart';
+import 'package:makerslab_app/features/home/domain/entities/material_item.dart';
 
 class MainModule {
   final String title;

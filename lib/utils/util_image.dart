@@ -59,17 +59,18 @@ class UtilImage {
       width: size,
       height: size,
       fit: BoxFit.contain,
-      placeholder: (context, url) => SizedBox(
-        width: size,
-        height: size,
-        child: Center(
-          child: SizedBox(
-            width: size * 0.4,
-            height: size * 0.4,
-            child: const CircularProgressIndicator(strokeWidth: 2),
+      placeholder:
+          (context, url) => SizedBox(
+            width: size,
+            height: size,
+            child: Center(
+              child: SizedBox(
+                width: size * 0.4,
+                height: size * 0.4,
+                child: const CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
           ),
-        ),
-      ),
       errorWidget: (context, url, error) {
         // Log error for debugging
         debugPrint('Error loading image from $url: $error');
@@ -149,9 +150,9 @@ class UtilImage {
   /// Fetches SVG content as a string from network
   static Future<String> _fetchSvgString(String url) async {
     try {
-      final response = await http.get(Uri.parse(url)).timeout(
-        const Duration(seconds: 10),
-      );
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         return response.body;

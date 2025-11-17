@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../di/service_locator.dart';
+import '../../../../features/home/presentation/bloc/home_bloc.dart';
 import '../bloc/servo_bloc.dart';
 import '../pages/servo_page.dart';
 import '../widgets/servo_interface_page.dart';
@@ -11,11 +12,16 @@ final servoRoutes = [
     path: ServoPage.routeName,
     name: ServoPage.routeName,
     builder:
-        (context, state) =>
-            BlocProvider(create: (_) => getIt<ServoBloc>(), child: ServoPage()),
+        (context, state) => MultiBlocProvider(
+          providers: [
+            BlocProvider<HomeBloc>(create: (_) => getIt<HomeBloc>()),
+            BlocProvider<ServoBloc>(create: (_) => getIt<ServoBloc>()),
+          ],
+          child: ServoPage(),
+        ),
     routes: [
       GoRoute(
-        path: ServoInterfacePage.routeName,
+        path: 'interface',
         name: ServoInterfacePage.routeName,
         pageBuilder: (context, state) {
           return NoTransitionPage(
