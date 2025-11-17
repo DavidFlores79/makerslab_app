@@ -24,7 +24,7 @@ class BuildMainContent extends StatefulWidget {
 }
 
 class _BuildMainContentState extends State<BuildMainContent> {
-  late InoPlatform _selectedPlatform;
+  InoPlatform _selectedPlatform = InoPlatform.esp32; // Initialize with default
   static const String _kPlatformSelectionKey = 'LAST_SELECTED_PLATFORM';
 
   @override
@@ -37,17 +37,18 @@ class _BuildMainContentState extends State<BuildMainContent> {
     final prefs = await SharedPreferences.getInstance();
     final lastPlatform = prefs.getString(_kPlatformSelectionKey);
 
-    setState(() {
-      if (lastPlatform != null) {
-        try {
-          _selectedPlatform = InoPlatform.fromString(lastPlatform);
-        } catch (e) {
-          _selectedPlatform = InoPlatform.esp32; // Fallback
+    if (lastPlatform != null) {
+      try {
+        final platform = InoPlatform.fromString(lastPlatform);
+        if (mounted) {
+          setState(() {
+            _selectedPlatform = platform;
+          });
         }
-      } else {
-        _selectedPlatform = InoPlatform.esp32; // Default
+      } catch (e) {
+        // Keep default ESP32 if parsing fails
       }
-    });
+    }
   }
 
   Future<void> _saveSelectedPlatform(InoPlatform platform) async {
