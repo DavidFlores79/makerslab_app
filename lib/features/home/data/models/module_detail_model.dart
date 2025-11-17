@@ -13,7 +13,6 @@ class ModuleDetailModel extends ModuleDetail {
     required super.interfaceRoute,
     required super.platformConfigs,
     super.image,
-    super.videoId,
     super.chatModuleKey,
   });
 
@@ -33,7 +32,6 @@ class ModuleDetailModel extends ModuleDetail {
         route: json['route'] as String,
         interfaceRoute: json['interfaceRoute'] as String,
         image: json['image'] as String?,
-        videoId: json['videoId'] as String?,
         chatModuleKey: json['chatModuleKey'] as String?,
         platformConfigs: (platformConfigsJson as List<dynamic>)
             .map((e) => PlatformConfigModel.fromJson(e as Map<String, dynamic>))
@@ -54,7 +52,6 @@ class ModuleDetailModel extends ModuleDetail {
       route: entity.route,
       interfaceRoute: entity.interfaceRoute,
       image: entity.image,
-      videoId: entity.videoId,
       chatModuleKey: entity.chatModuleKey,
       platformConfigs: entity.platformConfigs,
     );
@@ -68,7 +65,6 @@ class ModuleDetailModel extends ModuleDetail {
       'route': route,
       'interfaceRoute': interfaceRoute,
       if (image != null) 'image': image,
-      if (videoId != null) 'videoId': videoId,
       if (chatModuleKey != null) 'chatModuleKey': chatModuleKey,
       'platformConfigs': platformConfigs
           .map((e) => PlatformConfigModel.fromEntity(e).toJson())

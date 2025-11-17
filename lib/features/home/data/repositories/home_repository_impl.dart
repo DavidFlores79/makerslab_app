@@ -94,7 +94,6 @@ class HomeRepositoryImpl implements HomeRepository {
                   interfaceRoute: d.interfaceRoute,
                   platformConfigs: d.platformConfigs,
                   image: d.image,
-                  videoId: d.videoId,
                   chatModuleKey: d.chatModuleKey,
                 ),
               )

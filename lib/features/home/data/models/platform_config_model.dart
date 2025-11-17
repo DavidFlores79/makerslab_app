@@ -13,6 +13,7 @@ class PlatformConfigModel extends PlatformConfig {
     required super.inoFile,
     required super.instructions,
     required super.materials,
+    super.videoUrl,
   });
 
   factory PlatformConfigModel.fromJson(Map<String, dynamic> json) {
@@ -31,6 +32,7 @@ class PlatformConfigModel extends PlatformConfig {
                 ?.map((e) => MaterialItemModel.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             [],
+        videoUrl: json['videoUrl'] as String?,
       );
     } catch (e, stackTrace) {
       throw FormatException(
@@ -45,6 +47,7 @@ class PlatformConfigModel extends PlatformConfig {
       inoFile: entity.inoFile,
       instructions: entity.instructions,
       materials: entity.materials,
+      videoUrl: entity.videoUrl,
     );
   }
 
@@ -58,6 +61,7 @@ class PlatformConfigModel extends PlatformConfig {
       'materials': materials
           .map((e) => MaterialItemModel.fromEntity(e).toJson())
           .toList(),
+      if (videoUrl != null) 'videoUrl': videoUrl,
     };
   }
 }

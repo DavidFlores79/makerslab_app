@@ -110,13 +110,13 @@ class _BuildMainContentState extends State<BuildMainContent> {
         InstructionsSection(instructions: platformConfig.instructions),
         const SizedBox(height: 30),
 
-        // Video Player
-        if (widget.moduleDetail.videoId != null)
+        // Video Player (platform-specific)
+        if (platformConfig.videoUrl != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: AspectRatio(
               aspectRatio: 16 / 9,
-              child: YouTubePlayer(videoId: widget.moduleDetail.videoId!),
+              child: _buildVideoPlayer(platformConfig.videoUrl!),
             ),
           ),
 
@@ -127,6 +127,63 @@ class _BuildMainContentState extends State<BuildMainContent> {
         const SizedBox(height: 200),
       ],
     );
+  }
+
+  /// Video Player Builder - Handles YouTube, Vimeo, and other platforms
+  Widget _buildVideoPlayer(String videoUrl) {
+    // Extract video ID from YouTube URL
+    if (videoUrl.contains('youtube.com') || videoUrl.contains('youtu.be')) {
+      final videoId = _extractYouTubeVideoId(videoUrl);
+      if (videoId != null) {
+        return YouTubePlayer(videoId: videoId);
+      }
+    }
+
+    // TODO: Add support for other video platforms (Vimeo, custom players)
+    // For now, fallback to showing a message if URL format is not recognized
+    return Container(
+      color: AppColors.gray100,
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.video_library, size: 48, color: AppColors.gray400),
+            SizedBox(height: 8),
+            Text(
+              'Video no disponible',
+              style: TextStyle(color: AppColors.gray600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Extract YouTube video ID from various URL formats
+  String? _extractYouTubeVideoId(String url) {
+    // Handle youtube.com/watch?v=VIDEO_ID
+    final regExp1 = RegExp(r'youtube\.com/watch\?v=([a-zA-Z0-9_-]+)');
+    final match1 = regExp1.firstMatch(url);
+    if (match1 != null) {
+      return match1.group(1);
+    }
+
+    // Handle youtu.be/VIDEO_ID
+    final regExp2 = RegExp(r'youtu\.be/([a-zA-Z0-9_-]+)');
+    final match2 = regExp2.firstMatch(url);
+    if (match2 != null) {
+      return match2.group(1);
+    }
+
+    // Handle youtube.com/embed/VIDEO_ID
+    final regExp3 = RegExp(r'youtube\.com/embed/([a-zA-Z0-9_-]+)');
+    final match3 = regExp3.firstMatch(url);
+    if (match3 != null) {
+      return match3.group(1);
+    }
+
+    // If none of the patterns match, return null
+    return null;
   }
 
   /// Platform Selector Widget (Tabs/Segmented Button)

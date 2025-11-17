@@ -10,7 +10,6 @@ class ModuleDetail {
   final String route;
   final String interfaceRoute;
   final String? image;
-  final String? videoId;
   final String? chatModuleKey;
   final List<PlatformConfig> platformConfigs;
 
@@ -22,7 +21,6 @@ class ModuleDetail {
     required this.interfaceRoute,
     required this.platformConfigs,
     this.image,
-    this.videoId,
     this.chatModuleKey,
   });
 }

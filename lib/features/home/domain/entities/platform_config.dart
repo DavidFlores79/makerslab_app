@@ -10,11 +10,13 @@ class PlatformConfig {
   final InoFile inoFile;
   final List<InstructionItem> instructions;
   final List<MaterialItem> materials;
+  final String? videoUrl;
 
   const PlatformConfig({
     required this.platform,
     required this.inoFile,
     required this.instructions,
     required this.materials,
+    this.videoUrl,
   });
 }

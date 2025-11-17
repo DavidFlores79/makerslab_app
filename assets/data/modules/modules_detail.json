@@ -8,11 +8,11 @@
       "route": "/temperature",
       "interfaceRoute": "/temperature-interface",
       "image": "assets/images/static/temperature/esp32DHT11.png",
-      "videoId": "kJpdoBLSmHs",
       "chatModuleKey": "temperature",
       "platformConfigs": [
         {
           "platform": "ESP32",
+          "videoUrl": "https://www.youtube.com/watch?v=kJpdoBLSmHs",
           "inoFile": {
             "platform": "ESP32",
             "fileName": "esp32_bt_temp.ino",
@@ -83,6 +83,7 @@
         },
         {
           "platform": "Arduino UNO",
+          "videoUrl": "https://www.youtube.com/watch?v=kJpdoBLSmHs",
           "inoFile": {
             "platform": "Arduino UNO",
             "fileName": "uno_bt_temp.ino",
@@ -181,11 +182,11 @@
       "route": "/servo",
       "interfaceRoute": "/servo-interface",
       "image": "assets/images/static/servo/servo2.png",
-      "videoId": "kJpdoBLSmHs",
       "chatModuleKey": "servo",
       "platformConfigs": [
         {
           "platform": "ESP32",
+          "videoUrl": "https://www.youtube.com/watch?v=kJpdoBLSmHs",
           "inoFile": {
             "platform": "ESP32",
             "fileName": "esp32_bt_servo.ino",
@@ -232,6 +233,7 @@
         },
         {
           "platform": "Arduino UNO",
+          "videoUrl": "https://www.youtube.com/watch?v=kJpdoBLSmHs",
           "inoFile": {
             "platform": "Arduino UNO",
             "fileName": "uno_bt_servo.ino",
@@ -312,11 +314,11 @@
       "route": "/gamepad",
       "interfaceRoute": "/gamepad-interface",
       "image": "assets/images/static/gamepad/gamepad.png",
-      "videoId": "kJpdoBLSmHs",
       "chatModuleKey": "gamepad",
       "platformConfigs": [
         {
           "platform": "ESP32",
+          "videoUrl": "https://www.youtube.com/watch?v=kJpdoBLSmHs",
           "inoFile": {
             "platform": "ESP32",
             "fileName": "esp32_bt_gamepad.ino",
@@ -369,6 +371,7 @@
         },
         {
           "platform": "Arduino UNO",
+          "videoUrl": "https://www.youtube.com/watch?v=kJpdoBLSmHs",
           "inoFile": {
             "platform": "Arduino UNO",
             "fileName": "UNO_bt_gamepad.ino",
@@ -447,11 +450,11 @@
       "route": "/light-control",
       "interfaceRoute": "/light-control-interface",
       "image": "assets/images/static/light_control/light_control.png",
-      "videoId": "kJpdoBLSmHs",
       "chatModuleKey": "light_control",
       "platformConfigs": [
         {
           "platform": "ESP32",
+          "videoUrl": "https://www.youtube.com/watch?v=kJpdoBLSmHs",
           "inoFile": {
             "platform": "ESP32",
             "fileName": "esp32_bt_light.ino",
@@ -511,6 +514,7 @@
         },
         {
           "platform": "Arduino UNO",
+          "videoUrl": "https://www.youtube.com/watch?v=kJpdoBLSmHs",
           "inoFile": {
             "platform": "Arduino UNO",
             "fileName": "uno_bt_light.ino",
