@@ -73,6 +73,12 @@ class _BuildMainContentState extends State<BuildMainContent> {
     // Get platform-specific data
     final platformConfig = _getSelectedPlatformConfig();
 
+    // DEBUG: Print video URL to console
+    print('DEBUG: Module ID: ${widget.moduleDetail.id}');
+    print('DEBUG: Selected Platform: ${_selectedPlatform.displayName}');
+    print('DEBUG: Video URL: ${platformConfig.videoUrl}');
+    print('DEBUG: Has videoUrl: ${platformConfig.videoUrl != null}');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

@@ -12,7 +12,7 @@ import 'home_local_datasource.dart';
 import 'module_detail_json_parser.dart';
 
 const _kModulesKey = 'CACHED_MODULES_v1';
-const _kModuleDetailsKey = 'CACHED_MODULE_DETAILS_v2'; // Bumped to v2 for platform-specific structure
+const _kModuleDetailsKey = 'CACHED_MODULE_DETAILS_v3'; // Bumped to v3 for platform-specific videoUrl
 
 class HomeLocalDatasourceImpl implements HomeLocalDatasource {
   final SharedPreferences prefs;
