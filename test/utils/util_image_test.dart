@@ -9,8 +9,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 void main() {
   group('UtilImage.buildIcon', () {
-    testWidgets('returns Icon when no assetPath or imageUrl provided',
-        (WidgetTester tester) async {
+    testWidgets('returns Icon when no assetPath or imageUrl provided', (
+      WidgetTester tester,
+    ) async {
       final menuItem = MainMenuItemModel(
         id: '1',
         title: 'Test',
@@ -20,18 +21,15 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: UtilImage.buildIcon(menuItem),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: UtilImage.buildIcon(menuItem))),
       );
 
       expect(find.byIcon(Icons.extension), findsOneWidget);
     });
 
-    testWidgets('returns CachedNetworkImage for network PNG imageUrl',
-        (WidgetTester tester) async {
+    testWidgets('returns CachedNetworkImage for network PNG imageUrl', (
+      WidgetTester tester,
+    ) async {
       final menuItem = MainMenuItemModel(
         id: '1',
         title: 'Test',
@@ -41,47 +39,41 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: UtilImage.buildIcon(menuItem),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: UtilImage.buildIcon(menuItem))),
       );
 
       expect(find.byType(CachedNetworkImage), findsOneWidget);
     });
 
-    testWidgets('returns FutureBuilder for network SVG imageUrl and shows error icon on failure',
-        (WidgetTester tester) async {
-      final menuItem = MainMenuItemModel(
-        id: '1',
-        title: 'Test',
-        route: '/test',
-        assetPath: null,
-        imageUrl: 'https://example.com/image.svg',
-      );
+    testWidgets(
+      'returns FutureBuilder for network SVG imageUrl and shows error icon on failure',
+      (WidgetTester tester) async {
+        final menuItem = MainMenuItemModel(
+          id: '1',
+          title: 'Test',
+          route: '/test',
+          assetPath: null,
+          imageUrl: 'https://example.com/image.svg',
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: UtilImage.buildIcon(menuItem),
-          ),
-        ),
-      );
+        await tester.pumpWidget(
+          MaterialApp(home: Scaffold(body: UtilImage.buildIcon(menuItem))),
+        );
 
-      // FutureBuilder starts in waiting state, showing CircularProgressIndicator
-      expect(find.byType(FutureBuilder<String>), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        // FutureBuilder starts in waiting state, showing CircularProgressIndicator
+        expect(find.byType(FutureBuilder<String>), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-      // Pump frames to let the future complete (will fail in test environment)
-      // This tests that error handling works correctly
-      await tester.pump(const Duration(seconds: 1));
-      await tester.pump(const Duration(seconds: 11)); // Wait past timeout
-      await tester.pumpAndSettle();
+        // Pump frames to let the future complete (will fail in test environment)
+        // This tests that error handling works correctly
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 11)); // Wait past timeout
+        await tester.pumpAndSettle();
 
-      // Should show error icon when SVG fails to load (proves error handling works!)
-      expect(find.byIcon(Icons.broken_image_outlined), findsOneWidget);
-    });
+        // Should show error icon when SVG fails to load (proves error handling works!)
+        expect(find.byIcon(Icons.broken_image_outlined), findsOneWidget);
+      },
+    );
 
     testWidgets('respects custom size parameter', (WidgetTester tester) async {
       final menuItem = MainMenuItemModel(
@@ -96,9 +88,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: UtilImage.buildIcon(menuItem, size: customSize),
-          ),
+          home: Scaffold(body: UtilImage.buildIcon(menuItem, size: customSize)),
         ),
       );
 
@@ -106,9 +96,9 @@ void main() {
       expect(icon.size, customSize);
     });
 
-
-    testWidgets('CachedNetworkImage has error widget configured',
-        (WidgetTester tester) async {
+    testWidgets('CachedNetworkImage has error widget configured', (
+      WidgetTester tester,
+    ) async {
       final menuItem = MainMenuItemModel(
         id: '1',
         title: 'Test',
@@ -118,22 +108,20 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: UtilImage.buildIcon(menuItem),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: UtilImage.buildIcon(menuItem))),
       );
 
-      final cachedImage =
-          tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
+      final cachedImage = tester.widget<CachedNetworkImage>(
+        find.byType(CachedNetworkImage),
+      );
 
       expect(cachedImage.errorWidget, isNotNull);
       expect(cachedImage.placeholder, isNotNull);
     });
 
-    testWidgets('CachedNetworkImage has disk cache size limits',
-        (WidgetTester tester) async {
+    testWidgets('CachedNetworkImage has disk cache size limits', (
+      WidgetTester tester,
+    ) async {
       final menuItem = MainMenuItemModel(
         id: '1',
         title: 'Test',
@@ -143,15 +131,12 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: UtilImage.buildIcon(menuItem),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: UtilImage.buildIcon(menuItem))),
       );
 
-      final cachedImage =
-          tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
+      final cachedImage = tester.widget<CachedNetworkImage>(
+        find.byType(CachedNetworkImage),
+      );
 
       expect(cachedImage.maxWidthDiskCache, 400);
       expect(cachedImage.maxHeightDiskCache, 400);

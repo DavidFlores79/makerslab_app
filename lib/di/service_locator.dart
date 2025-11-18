@@ -51,6 +51,11 @@ import '../features/catalogs/data/datasources/catalogs_remote_datasource.dart';
 import '../features/catalogs/data/repositories/catalogs_repository_impl.dart';
 import '../features/catalogs/domain/repositories/catalogs_repository.dart';
 import '../features/catalogs/domain/usecases/get_countries.dart';
+import '../features/legal/data/datasources/legal_remote_datasource.dart';
+import '../features/legal/data/repositories/legal_repository_impl.dart';
+import '../features/legal/domain/repositories/legal_repository.dart';
+import '../features/legal/domain/usecases/get_legal_document.dart';
+import '../features/legal/presentation/bloc/legal_bloc.dart';
 import '../features/chat/data/datasources/chat_local_datasource_impl.dart';
 import '../features/chat/data/datasources/chat_remote_datasource.dart';
 import '../features/chat/data/repositories/chat_repository_impl.dart';
@@ -190,6 +195,10 @@ Future<void> setupLocator() async {
     () => CatalogsRemoteDataSourceImpl(dio: getIt()),
   );
 
+  getIt.registerLazySingleton<LegalRemoteDataSource>(
+    () => LegalRemoteDataSourceImpl(dio: getIt()),
+  );
+
   // cubits
   getIt.registerFactory(() => RegisterCubit());
 
@@ -254,6 +263,10 @@ Future<void> setupLocator() async {
     () => CatalogsRepositoryImpl(remoteDataSource: getIt()),
   );
 
+  getIt.registerLazySingleton<LegalRepository>(
+    () => LegalRepositoryImpl(remoteDataSource: getIt()),
+  );
+
   // Theme repository
   getIt.registerLazySingleton<ThemeRepository>(
     () => ThemeRepositoryImpl(localDataSource: getIt()),
@@ -271,6 +284,7 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(() => GetModuleDetail(repository: getIt()));
   getIt.registerLazySingleton(() => GetAllModuleDetails(repository: getIt()));
   getIt.registerLazySingleton(() => GetCountries(repository: getIt()));
+  getIt.registerLazySingleton(() => GetLegalDocument(legalRepository: getIt()));
   // Bluetooth usecases
   getIt.registerLazySingleton(
     () => DiscoverDevicesUseCase(repository: getIt()),
@@ -335,6 +349,7 @@ Future<void> setupLocator() async {
 
   // Blocs
   getIt.registerFactory(() => OnboardingBloc(getIt(), getIt()));
+  getIt.registerFactory(() => LegalBloc(getLegalDocument: getIt()));
 
   getIt.registerFactory(
     () => AuthBloc(
