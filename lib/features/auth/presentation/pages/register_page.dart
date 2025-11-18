@@ -153,7 +153,7 @@ class RegisterPage extends StatelessWidget {
     return Image.asset(
       UtilImage.LOGO_MAIN,
       fit: BoxFit.fitWidth,
-      width: size.width * 0.5,
+      width: size.width * 0.35,
     );
   }
 

@@ -9,6 +9,7 @@ class RegisterState {
   final String? password;
   final String? confirmPassword;
   final String? name;
+  final bool acceptedTerms;
   final bool isValid;
 
   const RegisterState({
@@ -19,6 +20,7 @@ class RegisterState {
     this.password,
     this.confirmPassword,
     this.name,
+    this.acceptedTerms = false,
     this.isValid = false,
   });
 
@@ -30,6 +32,7 @@ class RegisterState {
     String? password,
     String? confirmPassword,
     String? name,
+    bool? acceptedTerms,
     bool? isValid,
   }) {
     return RegisterState(
@@ -40,6 +43,7 @@ class RegisterState {
       password: password ?? this.password,
       confirmPassword: confirmPassword ?? this.confirmPassword,
       name: name ?? this.name,
+      acceptedTerms: acceptedTerms ?? this.acceptedTerms,
       isValid: isValid ?? this.isValid,
     );
   }

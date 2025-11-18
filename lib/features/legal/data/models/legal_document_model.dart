@@ -26,7 +26,7 @@ class LegalDocumentModel extends LegalDocument {
   factory LegalDocumentModel.fromJson(
     Map<String, dynamic> json,
   ) => LegalDocumentModel(
-    id: json["id"],
+    id: json["id"] ?? json["_id"],
     type: json["type"],
     language: json["language"],
     title: json["title"],

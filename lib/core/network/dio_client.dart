@@ -22,6 +22,15 @@ class DioClient {
     dio.interceptors.add(AuthInterceptor(secureStorage));
     // dio.interceptors.add(SimpleLoggingInterceptor());
     dio.interceptors.add(ErrorInterceptor());
-    // Opcional: dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+    // Enable detailed logging for debugging
+    dio.interceptors.add(
+      LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        requestHeader: true,
+        responseHeader: false,
+        error: true,
+      ),
+    );
   }
 }

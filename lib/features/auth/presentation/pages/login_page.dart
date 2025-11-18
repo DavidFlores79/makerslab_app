@@ -92,11 +92,14 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _closeButton(BuildContext context) {
-    return Align(
-      alignment: Alignment.topRight,
-      child: IconButton(
-        icon: const Icon(Icons.close),
-        onPressed: () => context.pop(false),
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, right: 8),
+      child: Align(
+        alignment: Alignment.topRight,
+        child: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => context.pop(false),
+        ),
       ),
     );
   }
@@ -182,7 +185,7 @@ class _LoginPageState extends State<LoginPage> {
     return Image.asset(
       UtilImage.LOGO_MAIN,
       fit: BoxFit.fitWidth,
-      width: size.width * 0.5,
+      width: size.width * 0.35,
     );
   }
 

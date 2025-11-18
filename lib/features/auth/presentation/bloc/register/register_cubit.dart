@@ -39,6 +39,11 @@ class RegisterCubit extends Cubit<RegisterState> {
     emit(newState.copyWith(isValid: _validate(newState)));
   }
 
+  void updateAcceptedTerms(bool accepted) {
+    final newState = state.copyWith(acceptedTerms: accepted);
+    emit(newState.copyWith(isValid: _validate(newState)));
+  }
+
   void nextStep() => emit(state.copyWith(step: state.step + 1));
   void prevStep() => emit(state.copyWith(step: state.step - 1));
   void updateStep(int step) => emit(state.copyWith(step: step));
@@ -49,6 +54,7 @@ class RegisterCubit extends Cubit<RegisterState> {
         (s.countryCode?.isNotEmpty ?? false) &&
         (s.password?.isNotEmpty ?? false) &&
         (s.confirmPassword == s.password) &&
-        (s.name?.isNotEmpty ?? false);
+        (s.name?.isNotEmpty ?? false) &&
+        s.acceptedTerms;
   }
 }

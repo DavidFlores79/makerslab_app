@@ -38,11 +38,27 @@ class LegalRemoteDataSourceImpl implements LegalRemoteDataSource {
 
     final data = _ensureMap(response.data);
 
-    if (!data.containsKey('data') || data['data'] is! Map) {
-      throw ApiException('Invalid response format: missing data object');
+    // Handle multiple response formats
+    if (data.containsKey('data')) {
+      final dataField = data['data'];
+      
+      // If data is an array, get the first element
+      if (dataField is List && dataField.isNotEmpty) {
+        return LegalDocumentModel.fromJson(dataField[0] as Map<String, dynamic>);
+      }
+      
+      // If data is an object
+      if (dataField is Map) {
+        return LegalDocumentModel.fromJson(dataField as Map<String, dynamic>);
+      }
+      
+      throw ApiException('No legal documents found for the specified criteria');
+    } else if (data.containsKey('_id') || data.containsKey('id') || data.containsKey('type')) {
+      // Response is the document directly: { "id": ..., "type": ..., ... }
+      return LegalDocumentModel.fromJson(data);
+    } else {
+      throw ApiException('Invalid response format: expected legal document data');
     }
-
-    return LegalDocumentModel.fromJson(data['data'] as Map<String, dynamic>);
   }
 
   /// --- Helpers ---
