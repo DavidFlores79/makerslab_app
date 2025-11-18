@@ -1,8 +1,13 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../../../core/validators/px_validators.dart';
+import '../../../../../theme/app_color.dart';
+import '../../../../legal/presentation/pages/privacy_policy_page.dart';
+import '../../../../legal/presentation/pages/terms_conditions_page.dart';
 import '../../../../../shared/widgets/index.dart';
 import '../../bloc/register/register_cubit.dart';
 
@@ -38,6 +43,64 @@ class RegisterStep3 extends StatelessWidget {
           onChanged: (value) {
             context.read<RegisterCubit>().updateConfirmPassword(value);
           },
+        ),
+        const SizedBox(height: 20),
+        _buildTermsCheckbox(context),
+      ],
+    );
+  }
+
+  Widget _buildTermsCheckbox(BuildContext context) {
+    final cubit = context.read<RegisterCubit>();
+    final state = context.watch<RegisterCubit>().state;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Checkbox(
+          value: state.acceptedTerms,
+          onChanged: (value) {
+            cubit.updateAcceptedTerms(value ?? false);
+          },
+          activeColor: AppColors.primary,
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: RichText(
+              text: TextSpan(
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.gray600,
+                ),
+                children: [
+                  const TextSpan(text: 'Acepto el '),
+                  TextSpan(
+                    text: AppLocalizations.of(context)!.privacy_notice_label,
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        context.push(PrivacyPolicyPage.routeName);
+                      },
+                  ),
+                  const TextSpan(text: ' así como los '),
+                  TextSpan(
+                    text: AppLocalizations.of(context)!.terms_conditions_label,
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        context.push(TermsConditionsPage.routeName);
+                      },
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ],
     );

@@ -26,43 +26,52 @@ void main() {
     const tText = 'Test text';
     const tSubject = 'Test subject';
 
-    test('should pass through Right(null) from repository on success', () async {
-      // Arrange
-      when(mockRepository.shareAssetFile(
-        assetPath: anyNamed('assetPath'),
-        fileName: anyNamed('fileName'),
-        text: anyNamed('text'),
-        subject: anyNamed('subject'),
-      )).thenAnswer((_) async => const Right(null));
+    test(
+      'should pass through Right(null) from repository on success',
+      () async {
+        // Arrange
+        when(
+          mockRepository.shareAssetFile(
+            assetPath: anyNamed('assetPath'),
+            fileName: anyNamed('fileName'),
+            text: anyNamed('text'),
+            subject: anyNamed('subject'),
+          ),
+        ).thenAnswer((_) async => const Right(null));
 
-      // Act
-      final result = await useCase(
-        assetPath: tAssetPath,
-        fileName: tFileName,
-        text: tText,
-        subject: tSubject,
-      );
+        // Act
+        final result = await useCase(
+          assetPath: tAssetPath,
+          fileName: tFileName,
+          text: tText,
+          subject: tSubject,
+        );
 
-      // Assert
-      expect(result, equals(const Right(null)));
-      verify(mockRepository.shareAssetFile(
-        assetPath: tAssetPath,
-        fileName: tFileName,
-        text: tText,
-        subject: tSubject,
-      )).called(1);
-      verifyNoMoreInteractions(mockRepository);
-    });
+        // Assert
+        expect(result, equals(const Right(null)));
+        verify(
+          mockRepository.shareAssetFile(
+            assetPath: tAssetPath,
+            fileName: tFileName,
+            text: tText,
+            subject: tSubject,
+          ),
+        ).called(1);
+        verifyNoMoreInteractions(mockRepository);
+      },
+    );
 
     test('should pass through FileNotFoundFailure from repository', () async {
       // Arrange
       const tFailure = FileNotFoundFailure('File not found');
-      when(mockRepository.shareAssetFile(
-        assetPath: anyNamed('assetPath'),
-        fileName: anyNamed('fileName'),
-        text: anyNamed('text'),
-        subject: anyNamed('subject'),
-      )).thenAnswer((_) async => const Left(tFailure));
+      when(
+        mockRepository.shareAssetFile(
+          assetPath: anyNamed('assetPath'),
+          fileName: anyNamed('fileName'),
+          text: anyNamed('text'),
+          subject: anyNamed('subject'),
+        ),
+      ).thenAnswer((_) async => const Left(tFailure));
 
       // Act
       final result = await useCase(
@@ -74,23 +83,27 @@ void main() {
 
       // Assert
       expect(result, equals(const Left(tFailure)));
-      verify(mockRepository.shareAssetFile(
-        assetPath: tAssetPath,
-        fileName: tFileName,
-        text: tText,
-        subject: tSubject,
-      )).called(1);
+      verify(
+        mockRepository.shareAssetFile(
+          assetPath: tAssetPath,
+          fileName: tFileName,
+          text: tText,
+          subject: tSubject,
+        ),
+      ).called(1);
     });
 
     test('should pass through FileSystemFailure from repository', () async {
       // Arrange
       const tFailure = FileSystemFailure('Cannot write to temp directory');
-      when(mockRepository.shareAssetFile(
-        assetPath: anyNamed('assetPath'),
-        fileName: anyNamed('fileName'),
-        text: anyNamed('text'),
-        subject: anyNamed('subject'),
-      )).thenAnswer((_) async => const Left(tFailure));
+      when(
+        mockRepository.shareAssetFile(
+          assetPath: anyNamed('assetPath'),
+          fileName: anyNamed('fileName'),
+          text: anyNamed('text'),
+          subject: anyNamed('subject'),
+        ),
+      ).thenAnswer((_) async => const Left(tFailure));
 
       // Act
       final result = await useCase(
@@ -107,12 +120,14 @@ void main() {
     test('should pass through ShareFailure from repository', () async {
       // Arrange
       const tFailure = ShareFailure('Platform share error');
-      when(mockRepository.shareAssetFile(
-        assetPath: anyNamed('assetPath'),
-        fileName: anyNamed('fileName'),
-        text: anyNamed('text'),
-        subject: anyNamed('subject'),
-      )).thenAnswer((_) async => const Left(tFailure));
+      when(
+        mockRepository.shareAssetFile(
+          assetPath: anyNamed('assetPath'),
+          fileName: anyNamed('fileName'),
+          text: anyNamed('text'),
+          subject: anyNamed('subject'),
+        ),
+      ).thenAnswer((_) async => const Left(tFailure));
 
       // Act
       final result = await useCase(
@@ -129,12 +144,14 @@ void main() {
     test('should pass through UnknownFailure from repository', () async {
       // Arrange
       const tFailure = UnknownFailure('Unknown error');
-      when(mockRepository.shareAssetFile(
-        assetPath: anyNamed('assetPath'),
-        fileName: anyNamed('fileName'),
-        text: anyNamed('text'),
-        subject: anyNamed('subject'),
-      )).thenAnswer((_) async => const Left(tFailure));
+      when(
+        mockRepository.shareAssetFile(
+          assetPath: anyNamed('assetPath'),
+          fileName: anyNamed('fileName'),
+          text: anyNamed('text'),
+          subject: anyNamed('subject'),
+        ),
+      ).thenAnswer((_) async => const Left(tFailure));
 
       // Act
       final result = await useCase(
@@ -150,37 +167,40 @@ void main() {
 
     test('should work with only required parameters', () async {
       // Arrange
-      when(mockRepository.shareAssetFile(
-        assetPath: anyNamed('assetPath'),
-        fileName: anyNamed('fileName'),
-        text: anyNamed('text'),
-        subject: anyNamed('subject'),
-      )).thenAnswer((_) async => const Right(null));
+      when(
+        mockRepository.shareAssetFile(
+          assetPath: anyNamed('assetPath'),
+          fileName: anyNamed('fileName'),
+          text: anyNamed('text'),
+          subject: anyNamed('subject'),
+        ),
+      ).thenAnswer((_) async => const Right(null));
 
       // Act
-      final result = await useCase(
-        assetPath: tAssetPath,
-        fileName: tFileName,
-      );
+      final result = await useCase(assetPath: tAssetPath, fileName: tFileName);
 
       // Assert
       expect(result, equals(const Right(null)));
-      verify(mockRepository.shareAssetFile(
-        assetPath: tAssetPath,
-        fileName: tFileName,
-        text: null,
-        subject: null,
-      )).called(1);
+      verify(
+        mockRepository.shareAssetFile(
+          assetPath: tAssetPath,
+          fileName: tFileName,
+          text: null,
+          subject: null,
+        ),
+      ).called(1);
     });
 
     test('should work with text but no subject', () async {
       // Arrange
-      when(mockRepository.shareAssetFile(
-        assetPath: anyNamed('assetPath'),
-        fileName: anyNamed('fileName'),
-        text: anyNamed('text'),
-        subject: anyNamed('subject'),
-      )).thenAnswer((_) async => const Right(null));
+      when(
+        mockRepository.shareAssetFile(
+          assetPath: anyNamed('assetPath'),
+          fileName: anyNamed('fileName'),
+          text: anyNamed('text'),
+          subject: anyNamed('subject'),
+        ),
+      ).thenAnswer((_) async => const Right(null));
 
       // Act
       final result = await useCase(
@@ -191,22 +211,26 @@ void main() {
 
       // Assert
       expect(result, equals(const Right(null)));
-      verify(mockRepository.shareAssetFile(
-        assetPath: tAssetPath,
-        fileName: tFileName,
-        text: tText,
-        subject: null,
-      )).called(1);
+      verify(
+        mockRepository.shareAssetFile(
+          assetPath: tAssetPath,
+          fileName: tFileName,
+          text: tText,
+          subject: null,
+        ),
+      ).called(1);
     });
 
     test('should work with subject but no text', () async {
       // Arrange
-      when(mockRepository.shareAssetFile(
-        assetPath: anyNamed('assetPath'),
-        fileName: anyNamed('fileName'),
-        text: anyNamed('text'),
-        subject: anyNamed('subject'),
-      )).thenAnswer((_) async => const Right(null));
+      when(
+        mockRepository.shareAssetFile(
+          assetPath: anyNamed('assetPath'),
+          fileName: anyNamed('fileName'),
+          text: anyNamed('text'),
+          subject: anyNamed('subject'),
+        ),
+      ).thenAnswer((_) async => const Right(null));
 
       // Act
       final result = await useCase(
@@ -217,12 +241,14 @@ void main() {
 
       // Assert
       expect(result, equals(const Right(null)));
-      verify(mockRepository.shareAssetFile(
-        assetPath: tAssetPath,
-        fileName: tFileName,
-        text: null,
-        subject: tSubject,
-      )).called(1);
+      verify(
+        mockRepository.shareAssetFile(
+          assetPath: tAssetPath,
+          fileName: tFileName,
+          text: null,
+          subject: tSubject,
+        ),
+      ).called(1);
     });
   });
 }

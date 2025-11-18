@@ -23,4 +23,7 @@ class ApiConfig {
 
   // Endpoints de catálogos
   static const String countriesEndpoint = '/api/countries';
+
+  // Endpoints de documentos legales
+  static const String legalDocumentsEndpoint = '/api/legal/active';
 }

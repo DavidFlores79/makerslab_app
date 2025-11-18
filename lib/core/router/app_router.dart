@@ -8,6 +8,8 @@ import '../../features/auth/presentation/routes/auth_routes.dart';
 import '../../features/home/presentation/bloc/home_bloc.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/routes/main_static_routes.dart';
+import '../../features/legal/presentation/pages/privacy_policy_page.dart';
+import '../../features/legal/presentation/pages/terms_conditions_page.dart';
 import '../../features/profile/presentation/pages/personal_data_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/settings_page.dart';
@@ -50,6 +52,18 @@ final GoRouter appRouter = GoRouter(
           path: SettingsPage.routeName,
           name: SettingsPage.routeName,
           pageBuilder: (c, s) => const NoTransitionPage(child: SettingsPage()),
+        ),
+        GoRoute(
+          path: TermsConditionsPage.routeName,
+          name: TermsConditionsPage.routeName,
+          pageBuilder:
+              (c, s) => const NoTransitionPage(child: TermsConditionsPage()),
+        ),
+        GoRoute(
+          path: PrivacyPolicyPage.routeName,
+          name: PrivacyPolicyPage.routeName,
+          pageBuilder:
+              (c, s) => const NoTransitionPage(child: PrivacyPolicyPage()),
         ),
       ],
     ),

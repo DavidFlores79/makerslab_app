@@ -7,6 +7,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../legal/presentation/pages/privacy_policy_page.dart';
+import '../../../legal/presentation/pages/terms_conditions_page.dart';
 import 'personal_data_page.dart';
 import 'settings_page.dart';
 
@@ -145,7 +147,7 @@ class _BuildLegalSection extends StatelessWidget {
           subtitle: 'Condiciones de uso',
           icon: Symbols.description,
           onTap: () {
-            // TODO: Navigate to terms and conditions
+            context.push(TermsConditionsPage.routeName);
           },
         ),
         ProfileItemCard(
@@ -153,7 +155,7 @@ class _BuildLegalSection extends StatelessWidget {
           subtitle: 'Manejo de datos',
           icon: Symbols.privacy_tip,
           onTap: () {
-            // TODO: Navigate to privacy policy
+            context.push(PrivacyPolicyPage.routeName);
           },
         ),
       ],
