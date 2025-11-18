@@ -136,8 +136,7 @@ class ChatRemoteDataSourceImpl implements RemoteChatDataSource {
                   );
                 }
 
-                result.insert(
-                  0,
+                result.add(
                   ImageMessage(
                     id: _uuid.v4(),
                     authorId: authorId,
