@@ -119,7 +119,7 @@ class CustomTextMessageBubble extends StatelessWidget {
                   ),
                   // Blockquotes
                   blockquote: TextStyle(
-                    color: textColor.withOpacity(0.7),
+                    color: textColor.withValues(alpha: 0.7),
                     fontStyle: FontStyle.italic,
                   ),
                   blockquoteDecoration: BoxDecoration(
