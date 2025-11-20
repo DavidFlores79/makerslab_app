@@ -1,57 +1,78 @@
-// ESP32 Bluetooth Classic + Gamepad Control (Motors + Servos)
-//
-// Conexiones:
-// - Motores (usando L298N o similar):
-//   - IN1 -> GPIO 25
-//   - IN2 -> GPIO 26
-//   - IN3 -> GPIO 27
-//   - IN4 -> GPIO 14
-//   - Motor VCC -> Fuente externa (6-12V dependiendo de tus motores)
-//   - Motor GND -> GND (compartido con ESP32)
-//
-// - Servos:
-//   - Servo Right Signal -> GPIO 2
-//   - Servo Left Signal -> GPIO 15
-//   - Gripper Right Signal -> GPIO 4
-//   - Gripper Left Signal -> GPIO 5
-//   - Servo Lift Signal -> GPIO 18
-//   - Servos VCC -> 5V (o fuente externa si los servos consumen mucha corriente)
-//   - Servos GND -> GND (compartido con ESP32)
-//
-// IMPORTANTE: ESP32 tiene Bluetooth Classic integrado, no necesitas módulo externo HC-05
-//
-// Bibliotecas necesarias:
-// - BluetoothSerial (incluida en ESP32 Arduino Core)
-// - ESP32Servo (instalar desde Library Manager)
+/*
+ * Proyecto: Control de Gamepad Bluetooth ESP32
+ * Descripción: Controla motores y servos usando Bluetooth Classic.
+ *             Diseñado para un coche brazo robótico o vehículo similar.
+ *
+ * Hardware:
+ * - Placa de desarrollo ESP32
+ * - Controlador de motor L298N (o similar)
+ * - Servos (ej. SG90, MG996R)
+ *
+ * Conexiones:
+ * - Motores (L298N):
+ *   - IN1 -> GPIO 25
+ *   - IN2 -> GPIO 26
+ *   - IN3 -> GPIO 27
+ *   - IN4 -> GPIO 14
+ *   - Motor VCC -> Fuente externa (6-12V)
+ *   - Motor GND -> GND (Compartido con ESP32)
+ *
+ * - Servos:
+ *   - Señal Servo Derecho -> GPIO 2
+ *   - Señal Servo Izquierdo -> GPIO 15
+ *   - Señal Pinza Derecha -> GPIO 4
+ *   - Señal Pinza Izquierda -> GPIO 5
+ *   - Señal Servo Elevación -> GPIO 18
+ *   - Servos VCC -> 5V (Se recomienda fuente externa para múltiples servos)
+ *   - Servos GND -> GND (Compartido con ESP32)
+ *
+ * Bibliotecas Requeridas:
+ * - BluetoothSerial (Integrada en el núcleo Arduino ESP32)
+ * - ESP32Servo (Instalar desde el Gestor de Bibliotecas)
+ *
+ * Comandos Bluetooth:
+ * - 'P' -> Ping (Respuesta: 'K')
+ * - 'F01' -> Avanzar
+ * - 'B01' -> Retroceder
+ * - 'L01' -> Girar Izquierda
+ * - 'R01' -> Girar Derecha
+ * - 'S00' -> Detener Motores
+ * - 'B00' -> Agarrar objeto
+ * - 'X00' -> Soltar objeto
+ * - 'Y00' -> Subir servos
+ * - 'A00' -> Secuencia automática (Soltar -> Bajar -> Agarrar)
+ */
 
 #include "BluetoothSerial.h"
 #include <ESP32Servo.h>
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
-#error Bluetooth is not enabled! Please run `make menuconfig` to enable it
+#error ¡Bluetooth no está habilitado! Por favor ejecuta `make menuconfig` para habilitarlo
 #endif
 
 BluetoothSerial SerialBT;
 
-// Pines de motores (L298N o similar)
+// Pines de Motores (L298N)
 const unsigned int IN1 = 25;
 const unsigned int IN2 = 26;
 const unsigned int IN3 = 27;
 const unsigned int IN4 = 14;
 
-const int MAX_SPEED = 255;  // Velocidad máxima PWM
+const int MAX_SPEED = 255; // Velocidad máxima PWM (0-255)
 
-// Calibración de motores (ajustar para balancear velocidades)
-const float LEFT_MOTOR_MULTIPLIER = 1.00;  // Motor izquierdo (IN1/IN2)
-const float RIGHT_MOTOR_MULTIPLIER = 0.70; // Motor derecho (IN3/IN4)
+// Calibración de Motores (Ajustar para equilibrar velocidades si un lado es más
+// rápido)
+const float LEFT_MOTOR_MULTIPLIER = 1.00;  // Motor Izquierdo (IN1/IN2)
+const float RIGHT_MOTOR_MULTIPLIER = 0.70; // Motor Derecho (IN3/IN4)
 
-// Pines de servos
+// Pines de Servos
 int servoPinR = 2;
 int servoPinL = 15;
 int pinGripLeft = 5;
 int pinGripRight = 4;
 int pinLift = 18;
 
+// Objetos Servo
 Servo servoRight;
 Servo servoLeft;
 Servo gripperRight;
@@ -62,19 +83,20 @@ String incomingBuffer = ""; // Buffer para comandos entrantes
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("ESP32 Gamepad Control iniciado");
+  Serial.println("Control de Gamepad ESP32 Iniciado");
 
   // Inicializar Bluetooth
   SerialBT.begin("ESP32_Gamepad"); // Nombre del dispositivo Bluetooth
   Serial.println("Bluetooth 'ESP32_Gamepad' listo");
 
-  // Configurar pines de motores
+  // Configurar Pines de Motores
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
   pinMode(IN3, OUTPUT);
   pinMode(IN4, OUTPUT);
 
-  // Inicializar servos
+  // Inicializar Servos
+  // Los servos estándar usan una frecuencia PWM de 50Hz
   servoLift.setPeriodHertz(50);
   servoLift.attach(pinLift);
   servoLift.write(0); // Posición inicial
@@ -91,29 +113,31 @@ void setup() {
   gripperRight.setPeriodHertz(50);
   gripperRight.attach(pinGripRight);
 
-  // Posición inicial de servos
+  // Mover servos a posición media inicial
   moveServosMiddle();
 
-  Serial.println("Sistema iniciado correctamente");
+  Serial.println("Sistema inicializado correctamente");
   Serial.println("Esperando comandos Bluetooth...");
 }
 
 void loop() {
-  // ***** Manejo de comandos entrantes por Bluetooth *****
+  // ***** Manejar comandos Bluetooth entrantes *****
   while (SerialBT.available()) {
     char c = SerialBT.read();
 
     // Ignorar retorno de carro
-    if (c == '\r') continue;
+    if (c == '\r')
+      continue;
 
-    // Fin de línea -> procesar comando
+    // Nueva línea indica fin del comando -> procesarlo
     if (c == '\n') {
       executeCommand(incomingBuffer);
       incomingBuffer = ""; // Limpiar buffer
     } else {
       incomingBuffer += c;
 
-      // Límite de seguridad para el buffer
+      // Límite de seguridad para el tamaño del buffer para evitar problemas de
+      // memoria
       if (incomingBuffer.length() > 16) {
         incomingBuffer = incomingBuffer.substring(incomingBuffer.length() - 16);
       }
@@ -124,9 +148,10 @@ void loop() {
 }
 
 void executeCommand(String command) {
-  command.trim();
+  command.trim(); // Eliminar espacios en blanco al inicio/final
 
-  if (command.length() == 0) return;
+  if (command.length() == 0)
+    return;
 
   Serial.print("Comando recibido: ");
   Serial.println(command);
@@ -138,7 +163,7 @@ void executeCommand(String command) {
     return;
   }
 
-  // ***** Comandos de movimiento *****
+  // ***** Comandos de Movimiento *****
   if (command == "S00") {
     stopMotors();
   } else if (command == "F01") {
@@ -168,7 +193,7 @@ void executeCommand(String command) {
   } else if (command == "R02") {
     emptyTrashContainer();
   } else {
-    Serial.print("Comando no reconocido: ");
+    Serial.print("Comando desconocido: ");
     Serial.println(command);
     SerialBT.print("ERROR\n");
   }
@@ -181,9 +206,11 @@ void executeCommand(String command) {
 void pickUpObject() {
   Serial.println("Acción: Agarrar objeto");
   int currentPosition = gripperLeft.read();
+  // Cerrar pinza lentamente
   for (int angle = currentPosition; angle <= 170; angle++) {
     gripperLeft.write(angle);
-    gripperRight.write(abs(angle - 180));
+    gripperRight.write(
+        abs(angle - 180)); // Movimiento espejo para pinza derecha
     delay(5);
   }
 }
@@ -191,6 +218,7 @@ void pickUpObject() {
 void releaseObject() {
   Serial.println("Acción: Soltar objeto");
   int currentPosition = gripperLeft.read();
+  // Abrir pinza lentamente
   for (int angle = currentPosition; angle >= 90; angle--) {
     gripperLeft.write(angle);
     gripperRight.write(abs(angle - 180));
@@ -269,7 +297,7 @@ void stopMotors() {
 }
 
 void turnLeft() {
-  Serial.println("Motores: Girar izquierda");
+  Serial.println("Motores: Girar Izquierda");
   analogWrite(IN1, 0);
   analogWrite(IN2, MAX_SPEED * 0.75 * LEFT_MOTOR_MULTIPLIER);
   analogWrite(IN3, MAX_SPEED * 0.75 * RIGHT_MOTOR_MULTIPLIER);
@@ -277,7 +305,7 @@ void turnLeft() {
 }
 
 void turnRight() {
-  Serial.println("Motores: Girar derecha");
+  Serial.println("Motores: Girar Derecha");
   analogWrite(IN1, MAX_SPEED * 0.75 * LEFT_MOTOR_MULTIPLIER);
   analogWrite(IN2, 0);
   analogWrite(IN3, 0);

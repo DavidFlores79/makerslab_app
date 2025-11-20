@@ -91,11 +91,31 @@ class PXAppValidators {
     if (value == null || value.isEmpty) {
       return "El correo es obligatorio";
     }
-    final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-    if (!regex.hasMatch(value)) {
+    // Trim whitespace
+    final trimmedValue = value.trim();
+
+    // Check for spaces in the email
+    if (trimmedValue.contains(' ')) {
+      return "El correo no puede contener espacios";
+    }
+
+    // Validate email format (no spaces allowed)
+    final regex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (!regex.hasMatch(trimmedValue)) {
       return "Correo inválido";
     }
     return null;
+  }
+
+  /// Convierte cualquier validador en opcional.
+  /// Si el campo está vacío, no valida. Si tiene valor, aplica el validador.
+  static String? optional(String? value, String? Function(String?) validator) {
+    // Si está vacío o es null, es válido (opcional)
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+    // Si hay valor, aplica el validador
+    return validator(value);
   }
 
   /// Password mínimo 8 caracteres (para login)

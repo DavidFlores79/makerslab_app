@@ -1,30 +1,41 @@
-// Arduino UNO + HC-05 Bluetooth + DHT11 Temperature & Humidity Sensor
-//
-// Conexiones:
-// - DHT11 VCC -> 5V Arduino
-// - DHT11 GND -> GND Arduino
-// - DHT11 DATA -> Pin 4 Arduino
-// - HC-05 VCC -> 5V Arduino (o 3.3V si tu módulo lo requiere)
-// - HC-05 GND -> GND Arduino
-// - HC-05 TXD -> Pin 10 Arduino (RX software)
-// - HC-05 RXD -> Pin 11 Arduino (TX software) + divisor de voltaje 5V->3.3V
-//
-// Bibliotecas necesarias:
-// - DHT sensor library by Adafruit
-// - Adafruit Unified Sensor
-//
-// Instalar desde: Sketch -> Include Library -> Manage Libraries -> buscar "DHT sensor library"
+/*
+ * Proyecto: Monitor de Temperatura y Humedad Arduino UNO Bluetooth
+ * Descripción: Lee datos de un sensor DHT11 y los envía por Bluetooth HC-05.
+ *
+ * Hardware:
+ * - Arduino UNO
+ * - Módulo Bluetooth HC-05
+ * - Sensor DHT11
+ *
+ * Conexiones:
+ * - DHT11 VCC -> 5V
+ * - DHT11 GND -> GND
+ * - DHT11 DATA -> Pin 4
+ * - HC-05 VCC -> 5V
+ * - HC-05 GND -> GND
+ * - HC-05 TXD -> Pin 10 (RX Software)
+ * - HC-05 RXD -> Pin 11 (TX Software)
+ *
+ * Bibliotecas Requeridas:
+ * - DHT sensor library (Adafruit)
+ * - Adafruit Unified Sensor
+ * - SoftwareSerial (Incluida en Arduino IDE)
+ *
+ * Comandos Bluetooth:
+ * - 'P' -> Ping (Respuesta: 'K')
+ * - Datos enviados periódicamente: "T:25.5|H:60.2\n"
+ */
 
-#include <SoftwareSerial.h>
 #include <DHT.h>
+#include <SoftwareSerial.h>
 
 // Configuración DHT11
-#define DHTPIN 4       // Pin digital conectado al sensor DHT
-#define DHTTYPE DHT11  // Tipo de sensor: DHT11
+#define DHTPIN 4      // Pin digital conectado al sensor DHT
+#define DHTTYPE DHT11 // Tipo de sensor: DHT11
 
 // Configuración Bluetooth HC-05
-#define BT_RX 10       // Pin RX del Arduino conectado a TXD del HC-05
-#define BT_TX 11       // Pin TX del Arduino conectado a RXD del HC-05 (con divisor de voltaje)
+#define BT_RX 10 // Pin RX del Arduino conectado a TXD del HC-05
+#define BT_TX 11 // Pin TX del Arduino conectado a RXD del HC-05
 
 SoftwareSerial SerialBT(BT_RX, BT_TX); // RX, TX
 DHT dht(DHTPIN, DHTTYPE);
@@ -34,7 +45,7 @@ const long interval = 2000; // Intervalo de lectura: 2 segundos
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("Arduino UNO + HC-05 + DHT11 iniciado");
+  Serial.println("Arduino UNO + HC-05 + DHT11 Iniciado");
 
   // Inicializar Bluetooth
   SerialBT.begin(9600); // Velocidad predeterminada del HC-05
@@ -66,7 +77,6 @@ void loop() {
         SerialBT.read(); // Consumir '\n'
       }
     }
-    // Puedes añadir más comandos aquí si los necesitas
   }
 
   // ***** Lecturas periódicas del sensor *****
