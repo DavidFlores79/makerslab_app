@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../theme/app_color.dart';
@@ -26,6 +27,11 @@ class MainSliverBackAppBar extends StatelessWidget {
       floating: false,
       expandedHeight: 220,
       backgroundColor: AppColors.blackAlpha50,
+      systemOverlayStyle: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
       automaticallyImplyLeading: false,
       leading: IconButton(
         onPressed: onBackPressed ?? () => Navigator.of(context).pop(),

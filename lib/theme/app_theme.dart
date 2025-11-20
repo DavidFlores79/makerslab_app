@@ -2,6 +2,7 @@
 // ABOUTME: Provides consistent theming across the app with proper color schemes and component themes
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:makerslab_app/theme/app_color.dart';
 
 class AppTheme {
@@ -53,6 +54,11 @@ class AppTheme {
         centerTitle: true,
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light, // For Android (dark icons)
+          statusBarBrightness: Brightness.dark, // For iOS (dark icons)
+        ),
         iconTheme: IconThemeData(color: AppColors.white),
         titleTextStyle: TextStyle(
           fontFamily: 'Roboto',
@@ -196,6 +202,11 @@ class AppTheme {
         centerTitle: true,
         backgroundColor: AppColors.darkSurface,
         foregroundColor: AppColors.darkOnSurface,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
         iconTheme: IconThemeData(color: AppColors.darkOnSurface),
         titleTextStyle: TextStyle(
           fontFamily: 'Roboto',

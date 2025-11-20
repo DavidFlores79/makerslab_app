@@ -1,5 +1,5 @@
 {
-  "version": "2.0.1",
+  "version": "2.5.0",
   "modules": [
     {
       "id": "temperature",
@@ -23,25 +23,39 @@
           },
           "instructions": [
             {
-              "title": "1. Conectar el sensor DHT11 al ESP32",
-              "description": "Conecta el pin VCC del DHT11 a 3.3V del ESP32, GND a GND, y el pin de datos al GPIO 4. El ESP32 tiene Bluetooth integrado, no necesitas módulo HC-05.",
+              "title": "1. Preparar protoboard con rieles de alimentación",
+              "description": "Conecta 3.3V del ESP32 al riel positivo (+) de la protoboard, y GND del ESP32 al riel negativo (-). El DHT11 se alimentará desde estos rieles. IMPORTANTE: Usa 3.3V, no 5V, para el ESP32.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Montar sensor DHT11 en protoboard",
+              "description": "Inserta el DHT11 en la protoboard. Conecta el pin VCC del DHT11 al riel positivo (+) 3.3V, el pin GND al riel negativo (-), y deja el pin de datos (DATA/OUT) en una fila libre de la protoboard.",
               "imagePath": "assets/images/static/temperature/instructions/instruction1.png",
               "actionType": "modalBottomSheet"
             },
             {
-              "title": "2. Descargar bibliotecas para ESP32",
-              "description": "Instala la biblioteca 'DHT sensor library' desde el gestor de bibliotecas de Arduino IDE.",
+              "title": "3. Conectar resistencia pull-up (opcional pero recomendada)",
+              "description": "Coloca una resistencia de 10kΩ entre el pin de datos del DHT11 y el riel positivo (+) 3.3V en la protoboard. Esta resistencia pull-up mejora la estabilidad de la señal del sensor.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "4. Conectar señal del DHT11 al ESP32",
+              "description": "Usa un cable Dupont para conectar el pin de datos del DHT11 (en la protoboard) al GPIO 4 del ESP32. Este pin leerá la temperatura y humedad del sensor.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "5. Instalar biblioteca DHT sensor library",
+              "description": "Abre Arduino IDE → Sketch → Include Library → Manage Libraries. Busca 'DHT sensor library' (por Adafruit) y haz clic en Install. Esta biblioteca es necesaria para leer datos del DHT11.",
               "actionType": "externalUrl",
               "actionValue": "https://www.arduino.cc/reference/en/libraries/dht-sensor-library/"
             },
             {
-              "title": "3. Configurar Bluetooth Classic en ESP32",
-              "description": "El ESP32 soporta Bluetooth Classic de forma nativa. Configura el nombre del dispositivo en el código INO.",
-              "actionType": "none"
-            },
-            {
-              "title": "4. Cargar el código al ESP32",
-              "description": "Usa el Arduino IDE para cargar el archivo esp32_bt_temp.ino a tu placa ESP32. Selecciona la placa correcta en Tools > Board.",
+              "title": "6. Cargar el código al ESP32",
+              "description": "En Arduino IDE, selecciona tu placa ESP32 en Tools → Board. Abre esp32_bt_temp.ino y haz clic en Upload. El ESP32 enviará lecturas de temperatura y humedad por Bluetooth Classic.",
+              "imagePath": "assets/images/static/noimage.png",
               "actionType": "modalBottomSheet"
             }
           ],
@@ -94,25 +108,45 @@
           },
           "instructions": [
             {
-              "title": "1. Conectar el módulo HC-05 al Arduino UNO con divisor de voltaje",
-              "description": "IMPORTANTE: El HC-05 funciona a 3.3V. Conecta VCC a 5V, GND a GND, TX del HC-05 a RX (pin 0) del Arduino. Para el pin RX del HC-05, usa un divisor de voltaje con resistencias de 1kΩ y 2kΩ antes de conectarlo al TX (pin 1) del Arduino.",
+              "title": "1. Preparar protoboard con rieles de alimentación",
+              "description": "Conecta 5V del Arduino UNO al riel positivo (+) rojo de la protoboard, y GND del Arduino al riel negativo (-) azul/negro. Estos rieles alimentarán el DHT11 y el HC-05.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Montar sensor DHT11 en protoboard",
+              "description": "Inserta el DHT11 en la protoboard. Conecta VCC del DHT11 al riel positivo (+) 5V, GND al riel negativo (-), y deja el pin de datos (DATA/OUT) en una fila libre de la protoboard.",
               "imagePath": "assets/images/static/temperature/instructions/instruction1.png",
               "actionType": "modalBottomSheet"
             },
             {
-              "title": "2. Conectar el sensor DHT11 al Arduino UNO",
-              "description": "Conecta VCC del DHT11 a 5V, GND a GND, y el pin de datos al pin digital 2 del Arduino UNO. Usa una resistencia de 10kΩ entre VCC y el pin de datos (pull-up).",
-              "actionType": "none"
+              "title": "3. Conectar resistencia pull-up de 10kΩ",
+              "description": "Coloca una resistencia de 10kΩ entre el pin de datos del DHT11 y el riel positivo (+) 5V en la protoboard. Esta resistencia pull-up es IMPORTANTE para la estabilidad de la señal del DHT11.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
             },
             {
-              "title": "3. Descargar bibliotecas para Arduino UNO",
-              "description": "Instala 'DHT sensor library' y 'SoftwareSerial' desde el gestor de bibliotecas de Arduino IDE.",
+              "title": "4. Conectar señal del DHT11 al Arduino UNO",
+              "description": "Usa un cable Dupont para conectar el pin de datos del DHT11 (en la protoboard) al pin digital 2 del Arduino UNO. Este pin leerá la temperatura y humedad del sensor.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "5. Conectar HC-05 usando 5V del Arduino",
+              "description": "Conecta el HC-05 en la protoboard: VCC del HC-05 al riel positivo (+) 5V, GND al riel negativo (-), TX del HC-05 a Pin0 del Arduino (RX), RX del HC-05 a Pin1 del Arduino (TX). NO se necesita divisor de voltaje porque el Arduino proporciona 5V regulado.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "6. Instalar bibliotecas necesarias",
+              "description": "Abre Arduino IDE → Sketch → Include Library → Manage Libraries. Busca e instala 'DHT sensor library' (por Adafruit). La biblioteca 'SoftwareSerial' ya está incluida en Arduino IDE.",
               "actionType": "externalUrl",
               "actionValue": "https://www.arduino.cc/reference/en/libraries/dht-sensor-library/"
             },
             {
-              "title": "4. Cargar el código al Arduino UNO",
-              "description": "Usa el Arduino IDE para cargar el archivo uno_bt_temp.ino. IMPORTANTE: Desconecta los pines RX/TX del HC-05 durante la carga para evitar conflictos con el puerto serial.",
+              "title": "7. Cargar el código al Arduino UNO",
+              "description": "IMPORTANTE: DESCONECTA los cables del HC-05 (pines 0 y 1) antes de cargar el código. Abre uno_bt_temp.ino en Arduino IDE y haz clic en Upload. Después de cargar exitosamente, VUELVE A CONECTAR los cables del HC-05.",
+              "imagePath": "assets/images/static/noimage.png",
               "actionType": "modalBottomSheet"
             }
           ],
@@ -144,20 +178,6 @@
               "qty": "1",
               "imagePath": "assets/images/static/materials/resistance10k.png",
               "actionType": "modalBottomSheet"
-            },
-            {
-              "title": "Resistencia 1kΩ",
-              "description": "Para divisor de voltaje del HC-05 (parte baja)",
-              "qty": "1",
-              "imagePath": "assets/images/static/materials/resistance1k.png",
-              "actionType": "none"
-            },
-            {
-              "title": "Resistencia 2kΩ",
-              "description": "Para divisor de voltaje del HC-05 (parte alta)",
-              "qty": "1",
-              "imagePath": "assets/images/static/materials/resistance2k.png",
-              "actionType": "none"
             },
             {
               "title": "Cables Dupont",
@@ -199,16 +219,40 @@
           },
           "instructions": [
             {
-              "title": "1. Conectar el servo SG90 al ESP32",
-              "description": "Conecta el cable naranja (señal) del servo al pin GPIO 13 del ESP32, el cable rojo a 5V, y el cable marrón a GND.",
+              "title": "1. Preparar la protoboard",
+              "description": "Coloca el ESP32 en la protoboard. Conecta los rieles de alimentación: un cable desde 5V del ESP32 al riel positivo (+) rojo, y otro desde GND del ESP32 al riel negativo (-) azul/negro de la protoboard.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Conectar el servo SG90 a la protoboard",
+              "description": "Identifica los cables del servo: MARRÓN (GND), ROJO (VCC/5V), NARANJA (Señal PWM). Conecta el cable MARRÓN al riel negativo (-) de la protoboard, el cable ROJO al riel positivo (+), y el cable NARANJA a una fila vacía de la protoboard.",
               "imagePath": "assets/images/static/servo/instructions/instruction1.png",
               "actionType": "modalBottomSheet"
             },
             {
-              "title": "2. Instalar biblioteca ESP32Servo",
-              "description": "Instala la biblioteca 'ESP32Servo' desde el gestor de bibliotecas de Arduino IDE. Esta biblioteca es específica para controlar servos en ESP32.",
+              "title": "3. Conectar señal del servo al ESP32",
+              "description": "Usa un cable Dupont para conectar la fila donde está el cable NARANJA del servo al pin GPIO 13 del ESP32. Este pin enviará las señales PWM para controlar el ángulo del servo.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "4. Instalar biblioteca ESP32Servo en Arduino IDE",
+              "description": "Abre Arduino IDE → Sketch → Include Library → Manage Libraries. Busca 'ESP32Servo' (por Kevin Harrington). Haz clic en 'Install'. Esta biblioteca es ESENCIAL para controlar servos en ESP32.",
               "actionType": "externalUrl",
               "actionValue": "https://www.arduino.cc/reference/en/libraries/esp32servo/"
+            },
+            {
+              "title": "5. Consideraciones de alimentación",
+              "description": "IMPORTANTE: Un solo SG90 puede funcionar con el 5V del ESP32 (alimentado por USB ~500mA). Si usas múltiples servos o el servo vibra/falla, usa una fuente externa de 5V y conecta su GND al GND del ESP32.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "6. Cargar el código al ESP32",
+              "description": "En Arduino IDE, selecciona tu placa ESP32 en Tools → Board. Abre el archivo esp32_bt_servo.ino, verifica que el pin sea GPIO 13, y haz clic en Upload. El servo debe moverse al recibir comandos Bluetooth.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
             }
           ],
           "materials": [
@@ -221,15 +265,22 @@
             },
             {
               "title": "Servo Motor SG90",
-              "description": "Servo de 180 grados, torque 1.8 kg/cm",
+              "description": "Servo de 180 grados, torque 1.8 kg/cm, voltaje 4.8-6V",
               "qty": "1",
               "imagePath": "assets/images/static/materials/servo-sg90.png",
               "actionType": "modalBottomSheet"
             },
             {
-              "title": "Cables Dupont",
-              "description": "Cables para conexiones",
-              "qty": "3",
+              "title": "Protoboard",
+              "description": "Placa de pruebas para prototipar circuitos",
+              "qty": "1",
+              "imagePath": "assets/images/static/materials/breadboard.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Cables Dupont Macho-Macho",
+              "description": "Cables para conexiones en protoboard (3 para servo + 2 para alimentación)",
+              "qty": "5",
               "imagePath": "assets/images/static/materials/dupont-cables.png",
               "actionType": "modalBottomSheet"
             }
@@ -246,65 +297,89 @@
           },
           "instructions": [
             {
-              "title": "1. Conectar el servo SG90 al Arduino UNO",
-              "description": "Conecta el cable naranja (señal) del servo al pin digital 9 del Arduino UNO, el cable rojo a 5V, y el cable marrón a GND.",
+              "title": "1. Preparar la protoboard con rieles de alimentación",
+              "description": "Coloca el Arduino UNO cerca de la protoboard. Conecta un cable desde 5V del Arduino al riel positivo (+) rojo de la protoboard, y otro desde GND del Arduino al riel negativo (-) azul/negro de la protoboard.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Conectar el servo SG90 a la protoboard",
+              "description": "Identifica los cables del servo: MARRÓN (GND), ROJO (VCC/5V), NARANJA (Señal). Conecta el cable MARRÓN al riel negativo (-), el cable ROJO al riel positivo (+), y el cable NARANJA a una fila vacía de la protoboard.",
               "imagePath": "assets/images/static/servo/instructions/instruction1.png",
               "actionType": "modalBottomSheet"
             },
             {
-              "title": "2. Conectar el módulo HC-05",
-              "description": "Conecta el módulo HC-05 al Arduino UNO con divisor de voltaje (igual que en el módulo de temperatura). VCC a 5V, GND a GND, TX a RX (pin 0), RX con divisor a TX (pin 1).",
-              "actionType": "none"
+              "title": "3. Conectar señal del servo al Arduino UNO",
+              "description": "Usa un cable Dupont para conectar la fila donde está el cable NARANJA del servo al pin digital 9 del Arduino UNO. Este es un pin PWM necesario para controlar el servo.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "4. Montar divisor de voltaje para HC-05 en protoboard",
+              "description": "IMPORTANTE: El HC-05 RX funciona a 3.3V. En la protoboard, conecta resistencia de 1kΩ desde TX del Arduino (pin 1) a una fila. Desde esa fila, conecta resistencia de 2kΩ a GND. Conecta RX del HC-05 a la unión de las dos resistencias.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "5. Conectar el módulo HC-05 a la protoboard",
+              "description": "Conecta VCC del HC-05 al riel positivo (+), GND del HC-05 al riel negativo (-), TX del HC-05 al pin RX (pin 0) del Arduino directamente, y RX del HC-05 al divisor de voltaje creado en el paso anterior.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "6. Instalar bibliotecas necesarias en Arduino IDE",
+              "description": "Abre Arduino IDE → Sketch → Include Library → Manage Libraries. Busca e instala 'Servo' (biblioteca estándar de Arduino, generalmente ya incluida). Verifica que 'SoftwareSerial' esté disponible (incluida por defecto).",
+              "actionType": "externalUrl",
+              "actionValue": "https://www.arduino.cc/reference/en/libraries/servo/"
+            },
+            {
+              "title": "7. Cargar el código al Arduino UNO",
+              "description": "IMPORTANTE: DESCONECTA los cables RX (pin 0) y TX (pin 1) del HC-05 antes de cargar el código. Carga uno_bt_servo.ino desde Arduino IDE. Después de cargar exitosamente, VUELVE A CONECTAR los cables RX/TX del HC-05.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
             }
           ],
           "materials": [
             {
               "title": "Arduino UNO R3",
-              "description": "Microcontrolador Arduino UNO",
+              "description": "Microcontrolador Arduino UNO con ATmega328P",
               "qty": "1",
               "imagePath": "assets/images/static/materials/arduino-uno.png",
               "actionType": "modalBottomSheet"
             },
             {
               "title": "Módulo Bluetooth HC-05",
-              "description": "Módulo Bluetooth para Arduino UNO",
+              "description": "Módulo Bluetooth Serial (requiere divisor de voltaje para RX)",
               "qty": "1",
               "imagePath": "assets/images/static/materials/hc-05.png",
               "actionType": "modalBottomSheet"
             },
             {
               "title": "Servo Motor SG90",
-              "description": "Servo de 180 grados",
+              "description": "Servo de 180 grados, torque 1.8 kg/cm, voltaje 4.8-6V",
               "qty": "1",
               "imagePath": "assets/images/static/materials/servo-sg90.png",
               "actionType": "modalBottomSheet"
             },
             {
-              "title": "Resistencia 1kΩ",
-              "description": "Para divisor de voltaje del HC-05",
-              "qty": "1",
+              "title": "Resistencias para divisor de voltaje",
+              "description": "1kΩ y 2kΩ para el HC-05",
+              "qty": "2",
               "imagePath": "assets/images/static/materials/resistance1k.png",
-              "actionType": "none"
-            },
-            {
-              "title": "Resistencia 2kΩ",
-              "description": "Para divisor de voltaje del HC-05",
-              "qty": "1",
-              "imagePath": "assets/images/static/materials/resistance2k.png",
-              "actionType": "none"
-            },
-            {
-              "title": "Cables Dupont",
-              "description": "Cables para conexiones",
-              "qty": "8",
-              "imagePath": "assets/images/static/materials/dupont-cables.png",
               "actionType": "modalBottomSheet"
             },
             {
               "title": "Protoboard",
-              "description": "Placa de pruebas",
+              "description": "Placa de pruebas para prototipar circuitos y divisor de voltaje",
               "qty": "1",
               "imagePath": "assets/images/static/materials/breadboard.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "Cables Dupont Macho-Macho",
+              "description": "Cables para conexiones (3 servo + 4 HC-05 + 2 alimentación + 2 divisor)",
+              "qty": "11",
+              "imagePath": "assets/images/static/materials/dupont-cables.png",
               "actionType": "modalBottomSheet"
             }
           ]
@@ -333,15 +408,52 @@
           },
           "instructions": [
             {
-              "title": "1. Conectar motores DC al driver L298N",
-              "description": "Conecta los 2 motores DC al driver L298N. Motor izquierdo a OUT1/OUT2, motor derecho a OUT3/OUT4.",
+              "title": "1. Preparar protoboard y rieles de alimentación",
+              "description": "Coloca el ESP32 en la protoboard. Conecta GND del ESP32 al riel negativo (-) de la protoboard. Este riel será la tierra común para todos los componentes.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Conectar driver L298N a la protoboard",
+              "description": "Coloca el L298N cerca de la protoboard. Conecta GND del L298N al riel negativo (-) de la protoboard para compartir tierra común con el ESP32.",
               "imagePath": "assets/images/static/gamepad/instructions/instruction1.png",
               "actionType": "modalBottomSheet"
             },
             {
-              "title": "2. Conectar ESP32 al driver L298N",
-              "description": "Conecta los pines de control del L298N al ESP32: IN1 a GPIO 27, IN2 a GPIO 26, IN3 a GPIO 25, IN4 a GPIO 33. Conecta ENA y ENB a pines PWM del ESP32.",
-              "actionType": "none"
+              "title": "3. Conectar motores DC (ruedas) al L298N",
+              "description": "Conecta los 2 motores DC de las ruedas al L298N: Motor IZQUIERDO (rueda izquierda) a OUT1/OUT2, Motor DERECHO (rueda derecha) a OUT3/OUT4. La polaridad se puede invertir en código si las ruedas giran al revés.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "4. Conectar ESP32 al L298N (pines de control)",
+              "description": "Conecta los pines de control del L298N al ESP32: IN1→GPIO25, IN2→GPIO26, IN3→GPIO27, IN4→GPIO14. Estos pines controlan la dirección y velocidad de las ruedas del coche.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "5. Conectar servos del brazo robótico al ESP32",
+              "description": "Conecta los servos del brazo robótico: Servo Derecho→GPIO2, Servo Izquierdo→GPIO15, Pinza Derecha→GPIO4, Pinza Izquierda→GPIO5, Servo Elevación→GPIO18. Conecta GND de servos al riel negativo (-) y VCC a 5V (fuente externa recomendada para múltiples servos).",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "6. Conectar alimentación externa (baterías)",
+              "description": "IMPORTANTE: Conecta una batería de 6-12V al pin VS (12V) del L298N para alimentar los motores. Conecta el negativo (-) de la batería al riel GND común. Para los servos, usa una fuente de 5V separada o el regulador del L298N.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "7. Instalar biblioteca ESP32Servo",
+              "description": "Abre Arduino IDE → Sketch → Include Library → Manage Libraries. Busca 'ESP32Servo' (por Kevin Harrington) y haz clic en Install. Esta biblioteca es ESENCIAL para controlar los servos del brazo robótico en ESP32.",
+              "actionType": "externalUrl",
+              "actionValue": "https://www.arduino.cc/reference/en/libraries/esp32servo/"
+            },
+            {
+              "title": "8. Cargar el código al ESP32",
+              "description": "En Arduino IDE, selecciona tu placa ESP32 en Tools → Board. Abre esp32_bt_gamepad.ino, verifica las conexiones de pines, y haz clic en Upload. El coche robot debe responder a comandos Bluetooth para moverse y usar el brazo.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
             }
           ],
           "materials": [
@@ -364,7 +476,7 @@
               "description": "Motores de 6V con caja reductora",
               "qty": "2",
               "imagePath": "assets/images/static/materials/dc-motor.png",
-              "actionType": "none"
+              "actionType": "modalBottomSheet"
             },
             {
               "title": "Servo SG90",
@@ -386,20 +498,58 @@
           },
           "instructions": [
             {
-              "title": "1. Conectar motores DC al driver L298N",
-              "description": "Conecta los 2 motores DC al driver L298N. Motor izquierdo a OUT1/OUT2, motor derecho a OUT3/OUT4.",
+              "title": "1. Preparar protoboard con rieles de alimentación",
+              "description": "Coloca el Arduino UNO cerca de la protoboard. Conecta GND del Arduino al riel negativo (-) de la protoboard. Este será el GND común para todos los componentes del coche robot.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Conectar driver L298N a la protoboard",
+              "description": "Coloca el L298N cerca de la protoboard. Conecta GND del L298N al riel negativo (-) de la protoboard para compartir tierra común. El L298N tiene un regulador de 5V que usaremos para el HC-05.",
               "imagePath": "assets/images/static/gamepad/instructions/instruction1.png",
               "actionType": "modalBottomSheet"
             },
             {
-              "title": "2. Conectar Arduino UNO al driver L298N",
-              "description": "Conecta los pines de control del L298N al Arduino UNO: IN1 a pin 7, IN2 a pin 6, IN3 a pin 5, IN4 a pin 4. Conecta ENA a pin 9 (PWM) y ENB a pin 10 (PWM).",
-              "actionType": "none"
+              "title": "3. Conectar motores DC (ruedas) al L298N",
+              "description": "Conecta los 2 motores DC de las ruedas al L298N: Motor IZQUIERDO (rueda izquierda) a OUT1/OUT2, Motor DERECHO (rueda derecha) a OUT3/OUT4. La polaridad se puede invertir en código si las ruedas giran al revés.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
             },
             {
-              "title": "3. Conectar módulo HC-05",
-              "description": "Conecta el HC-05 con divisor de voltaje. IMPORTANTE: Desconecta RX/TX durante la carga del código.",
-              "actionType": "none"
+              "title": "4. Conectar Arduino UNO al L298N (pines de control)",
+              "description": "Conecta los pines de control del L298N al Arduino UNO: IN1→Pin4, IN2→Pin5, IN3→Pin6, IN4→Pin7. Estos pines controlan la dirección y velocidad de las ruedas del coche robot.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "5. Conectar HC-05 usando salida 5V del L298N",
+              "description": "Conecta el HC-05: VCC del HC-05 a la salida 5V del L298N (regulador integrado), GND del HC-05 al riel negativo (-), TX del HC-05 a Pin10 del Arduino (RX Software), RX del HC-05 a Pin11 del Arduino (TX Software). NO se necesita divisor de voltaje porque usamos el 5V regulado del L298N.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "6. Conectar servos del brazo robótico",
+              "description": "Conecta los servos: Servo Derecho→Pin2, Servo Izquierdo→Pin8, Pinza Izquierda→Pin9, Pinza Derecha→Pin12, Servo Elevación→Pin13. Conecta GND de servos al riel negativo (-) y VCC a 5V (fuente externa recomendada para múltiples servos).",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "7. Conectar alimentación externa (baterías)",
+              "description": "IMPORTANTE: Conecta una batería de 6-12V al pin VS (12V) del L298N para alimentar los motores. Conecta el negativo (-) de la batería al riel GND común. El regulador del L298N proporciona 5V para el HC-05.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "8. Instalar bibliotecas necesarias",
+              "description": "Abre Arduino IDE → Sketch → Include Library → Manage Libraries. Busca e instala 'L298N' (para control de motores). Las bibliotecas 'Servo' y 'SoftwareSerial' ya están incluidas en Arduino IDE.",
+              "actionType": "externalUrl",
+              "actionValue": "https://www.arduino.cc/reference/en/libraries/l298n/"
+            },
+            {
+              "title": "9. Cargar el código al Arduino UNO",
+              "description": "IMPORTANTE: DESCONECTA los cables del HC-05 (pines 10 y 11) antes de cargar el código. Carga UNO_bt_gamepad.ino desde Arduino IDE. Después de cargar exitosamente, VUELVE A CONECTAR los cables del HC-05. El coche robot debe responder a comandos Bluetooth.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
             }
           ],
           "materials": [
@@ -429,7 +579,7 @@
               "description": "Motores de 6V con caja reductora",
               "qty": "2",
               "imagePath": "assets/images/static/materials/dc-motor.png",
-              "actionType": "none"
+              "actionType": "modalBottomSheet"
             },
             {
               "title": "Servo SG90",
@@ -437,13 +587,6 @@
               "qty": "5",
               "imagePath": "assets/images/static/materials/servo-sg90.png",
               "actionType": "modalBottomSheet"
-            },
-            {
-              "title": "Resistencias para divisor de voltaje",
-              "description": "1kΩ y 2kΩ para el HC-05",
-              "qty": "2",
-              "imagePath": "assets/images/static/materials/resistance1k.png",
-              "actionType": "none"
             }
           ]
         }
@@ -471,15 +614,40 @@
           },
           "instructions": [
             {
-              "title": "1. Conectar LED con resistencia al ESP32",
-              "description": "Conecta el ánodo del LED (+, pata larga) al pin GPIO 2 del ESP32 a través de una resistencia de 220Ω. Conecta el cátodo (-, pata corta) a GND.",
+              "title": "1. Preparar protoboard con rieles de alimentación",
+              "description": "Conecta 5V del ESP32 al riel positivo (+) rojo de la protoboard, y GND del ESP32 al riel negativo (-) azul/negro. Estos rieles distribuirán la alimentación para el circuito LED.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Montar circuito LED con resistencia 220Ω en protoboard",
+              "description": "En la protoboard: coloca la resistencia de 220Ω en una fila. Conecta un extremo de la resistencia a una fila vacía. Inserta el ánodo del LED (+, pata larga) en esa misma fila. Conecta el cátodo del LED (-, pata corta) al riel negativo (-) GND.",
               "imagePath": "assets/images/static/light_control/instructions/instruction1.png",
               "actionType": "modalBottomSheet"
             },
             {
-              "title": "2. Cargar el código al ESP32",
-              "description": "Carga el archivo esp32_bt_light.ino usando el Arduino IDE. El ESP32 tiene Bluetooth integrado, por lo que no necesitas módulo adicional.",
-              "actionType": "none"
+              "title": "3. Conectar ESP32 a protoboard",
+              "description": "Verifica que el ESP32 esté conectado a los rieles de alimentación de la protoboard (5V y GND). Esto proporciona la alimentación necesaria para el circuito.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "4. Conectar señal del LED al GPIO 2",
+              "description": "Usa un cable Dupont para conectar el extremo libre de la resistencia de 220Ω al pin GPIO 2 del ESP32. Este pin controlará el encendido/apagado del LED mediante comandos Bluetooth.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "5. Verificar conexiones",
+              "description": "Revisa que: (1) Resistencia 220Ω conectada entre GPIO 2 y ánodo LED, (2) Cátodo LED conectado a GND, (3) ESP32 alimentado correctamente. Un LED sin resistencia puede quemarse.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "6. Cargar el código al ESP32",
+              "description": "En Arduino IDE, selecciona tu placa ESP32 en Tools → Board. Abre esp32_bt_light.ino y haz clic en Upload. El LED debe encenderse/apagarse al recibir comandos '1' (encender) o '0' (apagar) por Bluetooth.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
             }
           ],
           "materials": [
@@ -502,7 +670,7 @@
               "description": "Resistencia limitadora de corriente para el LED",
               "qty": "1",
               "imagePath": "assets/images/static/materials/resistance220.png",
-              "actionType": "none"
+              "actionType": "modalBottomSheet"
             },
             {
               "title": "Cables Dupont",
@@ -531,20 +699,52 @@
           },
           "instructions": [
             {
-              "title": "1. Conectar LED con resistencia al Arduino UNO",
-              "description": "Conecta el ánodo del LED (+, pata larga) al pin digital 13 del Arduino UNO a través de una resistencia de 220Ω. Conecta el cátodo (-, pata corta) a GND.",
+              "title": "1. Preparar protoboard con rieles de alimentación",
+              "description": "Conecta 5V del Arduino UNO al riel positivo (+) rojo de la protoboard, y GND del Arduino al riel negativo (-) azul/negro. Estos rieles distribuirán la alimentación para el LED y el HC-05.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "2. Montar circuito LED con resistencia 220Ω en protoboard",
+              "description": "En la protoboard: coloca la resistencia de 220Ω en una fila. Conecta un extremo a una fila vacía. Inserta el ánodo del LED (+, pata larga) en esa misma fila. Conecta el cátodo del LED (-, pata corta) al riel negativo (-) GND.",
               "imagePath": "assets/images/static/light_control/instructions/instruction1.png",
               "actionType": "modalBottomSheet"
             },
             {
-              "title": "2. Conectar módulo HC-05",
-              "description": "Conecta el módulo HC-05 al Arduino UNO con divisor de voltaje. VCC a 5V, GND a GND, TX del HC-05 a RX (pin 0), RX del HC-05 con divisor a TX (pin 1).",
-              "actionType": "none"
+              "title": "3. Conectar Arduino UNO a protoboard",
+              "description": "Verifica que el Arduino UNO esté conectado a los rieles de alimentación de la protoboard (5V y GND). Esto proporciona alimentación para el circuito LED y el módulo HC-05.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
             },
             {
-              "title": "3. Cargar el código",
-              "description": "IMPORTANTE: Desconecta los pines RX/TX del HC-05 durante la carga del código uno_bt_light.ino. Vuelve a conectarlos después de cargar.",
-              "actionType": "none"
+              "title": "4. Conectar señal del LED al pin digital 13",
+              "description": "Usa un cable Dupont para conectar el extremo libre de la resistencia de 220Ω al pin digital 13 del Arduino UNO. Este pin controlará el encendido/apagado del LED mediante comandos Bluetooth.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "5. Conectar HC-05 usando 5V del Arduino",
+              "description": "Conecta el HC-05: VCC del HC-05 al riel positivo (+) 5V de la protoboard, GND del HC-05 al riel negativo (-), TX del HC-05 a Pin10 del Arduino (RX Software), RX del HC-05 a Pin11 del Arduino (TX Software). NO se necesita divisor de voltaje porque el Arduino proporciona 5V regulado.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "6. Instalar biblioteca SoftwareSerial",
+              "description": "La biblioteca 'SoftwareSerial' ya está incluida en Arduino IDE por defecto. No necesitas instalar bibliotecas adicionales para este proyecto. SoftwareSerial permite la comunicación con el HC-05.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "7. Cargar el código al Arduino UNO",
+              "description": "IMPORTANTE: DESCONECTA los cables del HC-05 (pines 10 y 11) antes de cargar el código. Abre uno_bt_light.ino en Arduino IDE y haz clic en Upload. Esto evita conflictos con el puerto serial durante la carga.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
+            },
+            {
+              "title": "8. Reconectar HC-05 y probar",
+              "description": "Después de cargar el código exitosamente, VUELVE A CONECTAR los cables del HC-05 (pines 10 y 11). El LED debe encenderse/apagarse al recibir comandos '1' (encender) o '0' (apagar) por Bluetooth.",
+              "imagePath": "assets/images/static/noimage.png",
+              "actionType": "modalBottomSheet"
             }
           ],
           "materials": [
@@ -574,21 +774,7 @@
               "description": "Resistencia limitadora para el LED",
               "qty": "1",
               "imagePath": "assets/images/static/materials/resistance220.png",
-              "actionType": "none"
-            },
-            {
-              "title": "Resistencia 1kΩ",
-              "description": "Para divisor de voltaje del HC-05",
-              "qty": "1",
-              "imagePath": "assets/images/static/materials/resistance1k.png",
-              "actionType": "none"
-            },
-            {
-              "title": "Resistencia 2kΩ",
-              "description": "Para divisor de voltaje del HC-05",
-              "qty": "1",
-              "imagePath": "assets/images/static/materials/resistance2k.png",
-              "actionType": "none"
+              "actionType": "modalBottomSheet"
             },
             {
               "title": "Cables Dupont",

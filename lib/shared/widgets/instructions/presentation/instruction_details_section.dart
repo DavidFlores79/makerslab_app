@@ -36,7 +36,7 @@ class InstructionDetailsSection extends StatelessWidget {
             Text(
               instruction.description,
               style: theme.bodyLarge,
-              maxLines: 4,
+              maxLines: 10,
               overflow: TextOverflow.ellipsis,
             ),
             // ElevatedButton(onPressed: () {}, child: const Text('Acción')),
