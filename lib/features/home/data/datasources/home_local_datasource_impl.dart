@@ -12,7 +12,7 @@ import 'module_detail_json_parser.dart';
 
 const _kModulesKey = 'CACHED_MODULES_v1';
 const _kModuleDetailsKey =
-    'CACHED_MODULE_DETAILS_v6'; // Bumped to v6 for interfaceRoute fix
+    'CACHED_MODULE_DETAILS_v20'; // Bumped to v20 - enhanced temperature module with protoboard instructions
 
 class HomeLocalDatasourceImpl implements HomeLocalDatasource {
   final SharedPreferences prefs;

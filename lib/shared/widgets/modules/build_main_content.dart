@@ -27,6 +27,7 @@ class BuildMainContent extends StatefulWidget {
 
 class _BuildMainContentState extends State<BuildMainContent> {
   InoPlatform _selectedPlatform = InoPlatform.esp32; // Initialize with default
+  bool _isPlatformLoaded = false;
   static const String _kPlatformSelectionKey = 'LAST_SELECTED_PLATFORM';
 
   @override
@@ -45,10 +46,23 @@ class _BuildMainContentState extends State<BuildMainContent> {
         if (mounted) {
           setState(() {
             _selectedPlatform = platform;
+            _isPlatformLoaded = true;
           });
         }
       } catch (e) {
         // Keep default ESP32 if parsing fails
+        if (mounted) {
+          setState(() {
+            _isPlatformLoaded = true;
+          });
+        }
+      }
+    } else {
+      // No preference saved, mark as loaded (default is ESP32)
+      if (mounted) {
+        setState(() {
+          _isPlatformLoaded = true;
+        });
       }
     }
   }
@@ -100,7 +114,8 @@ class _BuildMainContentState extends State<BuildMainContent> {
         const SizedBox(height: 30),
 
         // Video Player (platform-specific)
-        if (platformConfig.videoUrl != null)
+        // Only show video player after platform preference is loaded to prevent disposal crash
+        if (_isPlatformLoaded && platformConfig.videoUrl != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: AspectRatio(
