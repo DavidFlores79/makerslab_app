@@ -305,11 +305,9 @@ class _ServoConnectedView extends StatelessWidget {
               child: Form(
                 key: formKey,
                 child: PXCustomTextField(
-                  focusNode: focusNode,
                   controller: textController,
                   labelText: 'Posición (0 a 180)',
                   keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
                   // Si tu PXCustomTextField acepta onTap/onChanged puedes agregarlos aquí
                   validator: (value) {
                     if (value == null || value.isEmpty) {

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/validators/px_validators.dart';
 import '../../theme/app_color.dart';
 
 class PXCustomTextField extends StatefulWidget {
@@ -17,13 +18,12 @@ class PXCustomTextField extends StatefulWidget {
   final InputBorder? border;
   final bool obscureText;
   final FormFieldValidator<String>? validator;
+  final bool optional; // Hace el validator opcional automáticamente
   final int? maxLength;
   final TextEditingController?
   controller; // opcional si quieres control externo
   final int? maxLines;
   final bool readOnly;
-  final TextAlign? textAlign;
-  final FocusNode? focusNode;
 
   const PXCustomTextField({
     super.key,
@@ -39,12 +39,11 @@ class PXCustomTextField extends StatefulWidget {
     this.obscureText = false,
     this.hintText,
     this.validator,
+    this.optional = false,
     this.maxLength,
     this.controller,
     this.maxLines,
     this.readOnly = false,
-    this.textAlign,
-    this.focusNode,
   });
 
   @override
@@ -59,6 +58,15 @@ class _PXCustomTextFieldState extends State<PXCustomTextField> {
   void initState() {
     super.initState();
     _obscureText = widget.obscureText;
+  }
+
+  /// Obtiene el validator apropiado según si es opcional o no
+  FormFieldValidator<String>? _getValidator() {
+    if (widget.validator == null) return null;
+    if (widget.optional) {
+      return (value) => PXAppValidators.optional(value, widget.validator!);
+    }
+    return widget.validator;
   }
 
   void _onChanged(String value) {
@@ -80,12 +88,11 @@ class _PXCustomTextFieldState extends State<PXCustomTextField> {
     final theme = Theme.of(context);
 
     return TextFormField(
-      focusNode: widget.focusNode,
       readOnly: widget.readOnly,
       controller: widget.controller,
       keyboardType: widget.keyboardType,
       obscureText: _obscureText,
-      validator: widget.validator,
+      validator: _getValidator(),
       inputFormatters:
           widget.keyboardType == TextInputType.datetime
               ? [DateInputFormatter()]
@@ -131,7 +138,6 @@ class _PXCustomTextFieldState extends State<PXCustomTextField> {
       style: widget.style ?? theme.textTheme.bodyLarge,
       onChanged: _onChanged,
       maxLines: widget.maxLines ?? 1,
-      textAlign: widget.textAlign ?? TextAlign.start,
       maxLength:
           widget.maxLength ??
           (widget.keyboardType == TextInputType.phone ? 10 : null),

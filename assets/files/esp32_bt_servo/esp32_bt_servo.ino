@@ -1,35 +1,56 @@
-// Sketch: ESP32 Bluetooth -> controlar servo por posición enviada desde la app
-// Envíos aceptados:
-//  - "P\n"  -> ping, responde "K\n"
-//  - "90\n" -> mueve servo a 90 grados (también acepta "S90\n")
+/*
+ * Proyecto: Control de Servo ESP32 Bluetooth
+ * Descripción: Controla la posición de un servomotor vía Bluetooth.
+ *
+ * Hardware:
+ * - Placa de desarrollo ESP32
+ * - Servomotor (ej. SG90, MG996R)
+ *
+ * Conexiones:
+ * - Servo Señal -> GPIO 13
+ * - Servo VCC -> 5V
+ * - Servo GND -> GND
+ * - LED (Opcional) -> GPIO 2
+ *
+ * Bibliotecas Requeridas:
+ * - BluetoothSerial (Integrada en el núcleo Arduino ESP32)
+ * - ESP32Servo (Instalar desde el Gestor de Bibliotecas)
+ *
+ * Comandos Bluetooth:
+ * - 'P' -> Ping (Respuesta: 'K')
+ * - 'S90' o '90' -> Mover servo a 90 grados
+ */
 
 #include "BluetoothSerial.h"
-#include <ESP32Servo.h> // librería recomendada para servos en ESP32
+#include <ESP32Servo.h>
 
 BluetoothSerial SerialBT;
 
 // Pines / configuración
-const int SERVO_PIN = 13;    // cambia por el pin que uses para el servo
-const int LED_PIN = 2;       // led de estado (opcional)
-const char* BT_NAME = "ESP32_Servo";
+const int SERVO_PIN = 13; // Pin del servo
+const int LED_PIN = 2;    // LED de estado (opcional)
+const char *BT_NAME = "ESP32_Servo";
 
 Servo myServo;
 
-int currentAngle = 90; // ángulo actual inicial
+int currentAngle = 90; // Ángulo actual inicial
 const int MIN_ANGLE = 0;
 const int MAX_ANGLE = 180;
 
 // Para movimiento suave
-const int STEP_DELAY_MS = 12; // ajuste para velocidad de giro (bajar = más rápido)
+const int STEP_DELAY_MS =
+    12; // Ajuste para velocidad de giro (menor = más rápido)
 
 void setup() {
   Serial.begin(115200);
   SerialBT.begin(BT_NAME);
   Serial.println("Dispositivo iniciado. Empareja por Bluetooth!");
-  Serial.println("Envía un número (0-180) o 'S90' y termina con '\\n' para mover el servo.");
+  Serial.println("Envía un número (0-180) o 'S90' y termina con '\\n' para "
+                 "mover el servo.");
+
   pinMode(LED_PIN, OUTPUT);
 
-  myServo.setPeriodHertz(50); // frecuencia típica para servos
+  myServo.setPeriodHertz(50); // Frecuencia típica para servos
   myServo.attach(SERVO_PIN);
 
   // Coloca el servo en la posición inicial
@@ -40,12 +61,13 @@ void setup() {
 }
 
 void loop() {
-  // Manejo de comandos/heartbeats entrantes de Bluetooth
+  // ***** Manejo de comandos entrantes de Bluetooth *****
   while (SerialBT.available()) {
     String line = SerialBT.readStringUntil('\n');
-    line.trim(); // elimina espacios y CR/LF sobrantes
+    line.trim(); // Elimina espacios y CR/LF sobrantes
 
-    if (line.length() == 0) continue;
+    if (line.length() == 0)
+      continue;
 
     Serial.print("Recibido por BT: ");
     Serial.println(line);
@@ -61,7 +83,8 @@ void loop() {
     if (line.charAt(0) == 'S' || line.charAt(0) == 's') {
       String numberPart = line.substring(1);
       numberPart.trim();
-      if (numberPart.length() == 0) continue;
+      if (numberPart.length() == 0)
+        continue;
       int target = numberPart.toInt();
       moveServoTo(constrain(target, MIN_ANGLE, MAX_ANGLE));
       continue;
@@ -71,7 +94,10 @@ void loop() {
     bool isNumber = true;
     for (size_t i = 0; i < line.length(); ++i) {
       char c = line.charAt(i);
-      if (!(isDigit(c) || (i==0 && (c=='-' || c=='+')))) { isNumber = false; break; }
+      if (!(isDigit(c) || (i == 0 && (c == '-' || c == '+')))) {
+        isNumber = false;
+        break;
+      }
     }
     if (isNumber) {
       int target = line.toInt();
@@ -83,8 +109,7 @@ void loop() {
     Serial.println("Comando no reconocido.");
   }
 
-  // Puedes añadir aquí lecturas periódicas o tareas no bloqueantes
-  delay(10);
+  delay(10); // Pequeña pausa para estabilidad
 }
 
 void moveServoTo(int targetAngle) {
@@ -92,7 +117,7 @@ void moveServoTo(int targetAngle) {
   if (targetAngle == currentAngle) {
     Serial.print("Ya en posición: ");
     Serial.println(currentAngle);
-    // aún así confirmamos por BT
+    // Aún así confirmamos por BT
     SerialBT.print("S");
     SerialBT.print(currentAngle);
     SerialBT.print("\n");
@@ -120,7 +145,7 @@ void moveServoTo(int targetAngle) {
   Serial.print("Posición final: ");
   Serial.println(currentAngle);
 
-  // enviar confirmación por Bluetooth
+  // Enviar confirmación por Bluetooth
   SerialBT.print("S");
   SerialBT.print(currentAngle);
   SerialBT.print("\n");

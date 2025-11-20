@@ -1,25 +1,47 @@
+/*
+ * Proyecto: Control de LED con ESP32 y Bluetooth
+ * Descripción: Enciende y apaga un LED usando Bluetooth Classic.
+ *
+ * Hardware:
+ * - Placa de desarrollo ESP32
+ * - LED y Resistencia
+ * - Botón (Opcional)
+ *
+ * Conexiones:
+ * - LED -> GPIO 2
+ * - Botón -> GPIO 4
+ *
+ * Bibliotecas Requeridas:
+ * - BluetoothSerial (Integrada en el núcleo Arduino ESP32)
+ *
+ * Comandos Bluetooth:
+ * - '1' -> Encender LED
+ * - '0' -> Apagar LED
+ */
+
 #include "BluetoothSerial.h"
 
 BluetoothSerial SerialBT;
 
-#define ledPin    2    // Pin del LED
-#define buttonPin 4    // Pin del botón
+#define ledPin 2    // Pin del LED
+#define buttonPin 4 // Pin del botón
 
-int ledState = LOW;           // 0 o 1
-int buttonState = LOW;        // estado debounced
-int lastButtonReading = LOW;  // última lectura cruda
+int ledState = LOW;          // 0 o 1
+int buttonState = LOW;       // estado debounced
+int lastButtonReading = LOW; // última lectura cruda
 
 unsigned long lastDebounceTime = 0;
 const unsigned long debounceDelay = 50; // ms
 
 unsigned long lastSendMillis = 0;
-const unsigned long sendInterval = 2000; // ms: intervalo para enviar estado por BT
+const unsigned long sendInterval =
+    2000; // ms: intervalo para enviar estado por BT
 
 String incomingBuf = ""; // buffer no bloqueante para datos entrantes
 
 void setup() {
   Serial.begin(115200);
-  SerialBT.begin("ESP32test");
+  SerialBT.begin("ESP32test"); // Nombre del dispositivo Bluetooth
   Serial.println("Dispositivo iniciado. Empareja por Bluetooth!");
 
   pinMode(ledPin, OUTPUT);
@@ -33,7 +55,8 @@ void setup() {
 
 void processCommand(String cmd) {
   cmd.trim();
-  if (cmd.length() == 0) return;
+  if (cmd.length() == 0)
+    return;
 
   // Aceptamos "0" o "1" para controlar el LED
   if (cmd == "0" || cmd == "1") {
@@ -41,7 +64,7 @@ void processCommand(String cmd) {
     if (v != ledState) {
       ledState = v;
       digitalWrite(ledPin, ledState);
-      Serial.print("Comando BT: ledState set a ");
+      Serial.print("Comando BT: ledState establecido a ");
       Serial.println(ledState);
     } else {
       Serial.print("Comando BT recibido pero ledState ya es ");
@@ -57,10 +80,12 @@ void processCommand(String cmd) {
 }
 
 void loop() {
-  // --- Lectura no bloqueante de Bluetooth (montamos líneas terminadas en '\n') ---
+  // --- Lectura no bloqueante de Bluetooth (montamos líneas terminadas en '\n')
+  // ---
   while (SerialBT.available()) {
     char c = SerialBT.read();
-    if (c == '\r') continue;        // ignorar CR si hay
+    if (c == '\r')
+      continue; // ignorar CR si hay
     if (c == '\n') {
       // procesar línea completa
       processCommand(incomingBuf);
@@ -85,7 +110,8 @@ void loop() {
   if ((millis() - lastDebounceTime) > debounceDelay) {
     if (reading != buttonState) {
       buttonState = reading;
-      // Asumo botón activo HIGH; si usas INPUT_PULLUP cambia la condición a (buttonState == LOW)
+      // Asumo botón activo HIGH; si usas INPUT_PULLUP cambia la condición a
+      // (buttonState == LOW)
       if (buttonState == HIGH) {
         // toggle al presionar
         ledState = !ledState;
@@ -105,7 +131,7 @@ void loop() {
     lastSendMillis = millis();
     // formato simple: "0\n" o "1\n"
     SerialBT.print(String(ledState) + "\n");
-    Serial.print("Envio periódico estado LED: ");
+    Serial.print("Envío periódico estado LED: ");
     Serial.println(ledState);
   }
 

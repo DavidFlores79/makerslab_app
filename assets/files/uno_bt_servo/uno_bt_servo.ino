@@ -1,33 +1,46 @@
-// Arduino UNO + HC-05 Bluetooth + Servo Motor Control
-//
-// Conexiones:
-// - Servo VCC -> 5V Arduino (o fuente externa para servos grandes)
-// - Servo GND -> GND Arduino
-// - Servo Signal -> Pin 9 Arduino
-// - HC-05 VCC -> 5V Arduino (o 3.3V si tu módulo lo requiere)
-// - HC-05 GND -> GND Arduino
-// - HC-05 TXD -> Pin 10 Arduino (RX software)
-// - HC-05 RXD -> Pin 11 Arduino (TX software) + divisor de voltaje 5V->3.3V
-//
-// IMPORTANTE: Si tu servo consume mucha corriente, usa una fuente externa
-// y conecta GND de la fuente externa con GND del Arduino
+/*
+ * Proyecto: Control de Servo Arduino UNO Bluetooth
+ * Descripción: Controla la posición de un servomotor vía Bluetooth HC-05.
+ *
+ * Hardware:
+ * - Arduino UNO
+ * - Módulo Bluetooth HC-05
+ * - Servomotor (ej. SG90, MG996R)
+ *
+ * Conexiones:
+ * - Servo Señal -> Pin 9
+ * - Servo VCC -> 5V
+ * - Servo GND -> GND
+ * - HC-05 VCC -> 5V
+ * - HC-05 GND -> GND
+ * - HC-05 TXD -> Pin 10 (RX Software)
+ * - HC-05 RXD -> Pin 11 (TX Software)
+ *
+ * Bibliotecas Requeridas:
+ * - Servo (Incluida en Arduino IDE)
+ * - SoftwareSerial (Incluida en Arduino IDE)
+ *
+ * Comandos Bluetooth:
+ * - 'P' -> Ping (Respuesta: 'K')
+ * - 'S90' o '90' -> Mover servo a 90 grados
+ */
 
-#include <SoftwareSerial.h>
 #include <Servo.h>
+#include <SoftwareSerial.h>
 
 // Configuración Bluetooth HC-05
-#define BT_RX 10       // Pin RX del Arduino conectado a TXD del HC-05
-#define BT_TX 11       // Pin TX del Arduino conectado a RXD del HC-05 (con divisor de voltaje)
+#define BT_RX 10 // Pin RX del Arduino conectado a TXD del HC-05
+#define BT_TX 11 // Pin TX del Arduino conectado a RXD del HC-05
 
 // Configuración Servo
-#define SERVO_PIN 9    // Pin digital conectado al servo
+#define SERVO_PIN 9 // Pin digital conectado al servo
 
 SoftwareSerial SerialBT(BT_RX, BT_TX); // RX, TX
 Servo myServo;
 
-int currentAngle = 90;      // Ángulo actual (posición inicial: 90°)
-const int MIN_ANGLE = 0;    // Ángulo mínimo permitido
-const int MAX_ANGLE = 180;  // Ángulo máximo permitido
+int currentAngle = 90;     // Ángulo actual (posición inicial: 90°)
+const int MIN_ANGLE = 0;   // Ángulo mínimo permitido
+const int MAX_ANGLE = 180; // Ángulo máximo permitido
 
 // Para movimiento suave (interpolación)
 const int STEP_DELAY_MS = 15; // Milisegundos entre pasos (menor = más rápido)
@@ -36,7 +49,7 @@ String incomingBuffer = ""; // Buffer para comandos entrantes
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("Arduino UNO + HC-05 + Servo iniciado");
+  Serial.println("Arduino UNO + HC-05 + Servo Iniciado");
 
   // Inicializar Bluetooth
   SerialBT.begin(9600); // Velocidad predeterminada del HC-05
@@ -45,7 +58,7 @@ void setup() {
   // Inicializar servo
   myServo.attach(SERVO_PIN);
   myServo.write(currentAngle); // Posición inicial
-  delay(300); // Esperar a que el servo alcance la posición
+  delay(300);                  // Esperar a que el servo alcance la posición
 
   Serial.println("Servo inicializado en 90°");
   Serial.println("Esperando comandos Bluetooth...");
@@ -58,7 +71,8 @@ void loop() {
     char c = SerialBT.read();
 
     // Ignorar retorno de carro
-    if (c == '\r') continue;
+    if (c == '\r')
+      continue;
 
     // Fin de línea -> procesar comando
     if (c == '\n') {
@@ -80,7 +94,8 @@ void loop() {
 void processCommand(String cmd) {
   cmd.trim(); // Eliminar espacios en blanco
 
-  if (cmd.length() == 0) return;
+  if (cmd.length() == 0)
+    return;
 
   Serial.print("Comando recibido: ");
   Serial.println(cmd);

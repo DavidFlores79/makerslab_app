@@ -15,6 +15,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart' as fcui;
 
 import '../../../../di/service_locator.dart';
 import '../../../../theme/app_color.dart';
+import '../../../../core/ui/snackbar_service.dart';
 import '../../domain/usecases/upload_file_usecase.dart';
 import '../bloc/chat_bloc.dart';
 import '../bloc/chat_event.dart';
@@ -264,10 +265,8 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
 
     if (_pendingFile != null) {
       if (trimmed.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Escribe un texto para enviar con la imagen/archivo'),
-          ),
+        SnackbarService().show(
+          message: 'Escribe un texto para enviar con la imagen/archivo',
         );
         return;
       }
@@ -282,11 +281,8 @@ class _ChatContentState extends State<ChatContent> with WidgetsBindingObserver {
       if (uploadedUrl == null && _pendingIsImage) {
         // Show error if upload failed for images (required for API)
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Error al subir la imagen. Intenta de nuevo.'),
-              backgroundColor: Colors.red,
-            ),
+          SnackbarService().show(
+            message: 'Error al subir la imagen. Intenta de nuevo.',
           );
         }
         return;
