@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as fbs;
 
+import '../../../../core/data/datasources/heartbeat_local_datasource.dart';
 import '../../../../core/domain/repositories/bluetooth_repository.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failure.dart';
@@ -15,6 +16,7 @@ import '../datasources/temperature_local_datasource.dart';
 class TemperatureRepositoryImpl implements TemperatureRepository {
   final BluetoothRepository bluetoothRepository;
   final TemperatureLocalDataSource local;
+  final HeartbeatLocalDataSource heartbeatDataSource;
 
   StreamController<Either<Failure, Temperature>>? _controller;
   StreamSubscription<Either<Failure, Uint8List>>? _dataSub;
@@ -25,6 +27,7 @@ class TemperatureRepositoryImpl implements TemperatureRepository {
   TemperatureRepositoryImpl({
     required this.bluetoothRepository,
     required this.local,
+    required this.heartbeatDataSource,
   }) {
     _setupDataStream();
     // Constructor
@@ -46,12 +49,14 @@ class TemperatureRepositoryImpl implements TemperatureRepository {
         debugPrint('[TemperatureRepo] Falló la conexión: ${failure.message}');
         return Left(failure);
       },
-      (_) {
+      (_) async {
         debugPrint(
           '[TemperatureRepo] Conexión exitosa. Configurando stream de datos...',
         );
         _setupDataStream();
-        _startHeartbeat();
+        final heartbeatEnabled =
+            await heartbeatDataSource.getHeartbeatEnabled();
+        if (heartbeatEnabled) _startHeartbeat();
         _resetTimeout();
         return const Right(null);
       },
