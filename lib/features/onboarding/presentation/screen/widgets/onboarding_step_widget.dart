@@ -24,7 +24,8 @@ class OnboardingStepWidget extends StatelessWidget {
         children: [
           Image.asset(
             UtilImage.PAISAMEX_LOGO_WHITE,
-            fit: BoxFit.fitWidth,
+            fit: BoxFit.contain,
+            height: 150,
             width: size.width * 0.5,
           ),
           const SizedBox(height: 30),

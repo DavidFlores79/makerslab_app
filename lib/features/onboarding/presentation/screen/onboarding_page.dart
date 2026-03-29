@@ -66,16 +66,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
             onPageChanged: (index) => setState(() => currentPage = index),
             children: steps,
           ),
-          Container(
-            alignment: const Alignment(-0.8, 0),
-            child: SmoothPageIndicator(
-              controller: _controller,
-              count: steps.length,
-              effect: const WormEffect(
-                dotHeight: 15,
-                dotWidth: 15,
-                activeDotColor: AppColors.white,
-                dotColor: AppColors.gray200,
+          Positioned(
+            bottom: 100,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: SmoothPageIndicator(
+                controller: _controller,
+                count: steps.length,
+                effect: const WormEffect(
+                  dotHeight: 15,
+                  dotWidth: 15,
+                  activeDotColor: AppColors.white,
+                  dotColor: AppColors.gray200,
+                ),
               ),
             ),
           ),
