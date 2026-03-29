@@ -6,6 +6,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as fbs;
 
+import '../../../../core/data/datasources/heartbeat_local_datasource.dart';
 import '../../../../core/data/services/logger_service.dart';
 import '../../../../core/domain/repositories/bluetooth_repository.dart';
 import '../../../../core/error/failure.dart';
@@ -13,6 +14,7 @@ import '../../domain/repositories/gamepad_repository.dart';
 
 class GamepadRepositoryImpl implements GamepadRepository {
   final BluetoothRepository bluetoothRepository;
+  final HeartbeatLocalDataSource heartbeatDataSource;
   final ILogger logger = LoggerService();
 
   // StreamController que emite Either<Failure, String> con líneas de telemetría.
@@ -22,7 +24,10 @@ class GamepadRepositoryImpl implements GamepadRepository {
   Timer? _timeoutTimer;
   final StringBuffer _dataBuffer = StringBuffer();
 
-  GamepadRepositoryImpl({required this.bluetoothRepository}) {
+  GamepadRepositoryImpl({
+    required this.bluetoothRepository,
+    required this.heartbeatDataSource,
+  }) {
     _setupDataStream();
   }
 
@@ -49,10 +54,12 @@ class GamepadRepositoryImpl implements GamepadRepository {
         logger.error('[GamepadRepo] Falló la conexión: ${failure.message}');
         return Left(failure);
       },
-      (_) {
+      (_) async {
         logger.info('[GamepadRepo] Conexión exitosa. Configurando stream...');
         _setupDataStream();
-        // _startHeartbeat(); // descomenta si quieres heartbeat
+        final heartbeatEnabled =
+            await heartbeatDataSource.getHeartbeatEnabled();
+        if (heartbeatEnabled) _startHeartbeat();
         _resetTimeout();
         return const Right(null);
       },

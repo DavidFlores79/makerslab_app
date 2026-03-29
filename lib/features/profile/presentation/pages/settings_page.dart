@@ -1,9 +1,10 @@
 // ABOUTME: This file contains the Settings page for app configuration
-// ABOUTME: It provides theme selection and placeholder sections for future settings
+// ABOUTME: It provides theme selection, heartbeat toggle, and placeholder sections for future settings
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 import '../../../../shared/widgets/px_back_app_bar.dart';
+import '../widgets/heartbeat_toggle_widget.dart';
 import '../widgets/theme_selector_widget.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -48,6 +49,12 @@ class SettingsPage extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 30),
+
+              // Bluetooth Section
+              _SectionHeader(icon: Symbols.bluetooth, title: 'Bluetooth'),
+              const SizedBox(height: 12),
+              const _SettingsCard(child: HeartbeatToggleWidget()),
               const SizedBox(height: 30),
 
               // Notifications Section (Placeholder)

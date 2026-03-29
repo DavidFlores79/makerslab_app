@@ -97,11 +97,17 @@ import '../features/temperature/data/datasources/temperature_local_datasource.da
 import '../features/temperature/data/repositories/temperature_repository_impl.dart';
 import '../features/temperature/domain/repositories/temperature_repository.dart';
 import '../features/temperature/presentation/bloc/temperature_bloc.dart';
+import '../core/data/datasources/heartbeat_local_datasource.dart';
 import '../core/data/datasources/theme_local_datasource.dart';
+import '../core/data/repositories/heartbeat_repository_impl.dart';
 import '../core/data/repositories/theme_repository_impl.dart';
+import '../core/domain/repositories/heartbeat_repository.dart';
 import '../core/domain/repositories/theme_repository.dart';
+import '../core/domain/usecases/load_heartbeat_preference_usecase.dart';
 import '../core/domain/usecases/load_theme_preference_usecase.dart';
+import '../core/domain/usecases/save_heartbeat_preference_usecase.dart';
 import '../core/domain/usecases/save_theme_preference_usecase.dart';
+import '../core/presentation/bloc/heartbeat/heartbeat_bloc.dart';
 import '../core/presentation/bloc/theme/theme_bloc.dart';
 
 // Importa tus repositorios, usecases, Blocs
@@ -179,6 +185,11 @@ Future<void> setupLocator() async {
     () => ThemeLocalDataSourceImpl(sharedPreferences: getIt()),
   );
 
+  // heartbeat local datasource
+  getIt.registerLazySingleton<HeartbeatLocalDataSource>(
+    () => HeartbeatLocalDataSourceImpl(sharedPreferences: getIt()),
+  );
+
   //remote data sources
   getIt.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(dio: getIt(), logger: logger),
@@ -242,20 +253,25 @@ Future<void> setupLocator() async {
     () => TemperatureRepositoryImpl(
       bluetoothRepository: getIt<BluetoothRepository>(),
       local: getIt<TemperatureLocalDataSource>(),
+      heartbeatDataSource: getIt<HeartbeatLocalDataSource>(),
     ),
   );
   getIt.registerLazySingleton<LightControlRepository>(
     () => LightControlRepositoryImpl(
       bluetoothRepository: getIt<BluetoothRepository>(),
+      heartbeatDataSource: getIt<HeartbeatLocalDataSource>(),
     ),
   );
   getIt.registerLazySingleton<ServoRepository>(
-    () =>
-        ServoRepositoryImpl(bluetoothRepository: getIt<BluetoothRepository>()),
+    () => ServoRepositoryImpl(
+      bluetoothRepository: getIt<BluetoothRepository>(),
+      heartbeatDataSource: getIt<HeartbeatLocalDataSource>(),
+    ),
   );
   getIt.registerLazySingleton<GamepadRepository>(
     () => GamepadRepositoryImpl(
       bluetoothRepository: getIt<BluetoothRepository>(),
+      heartbeatDataSource: getIt<HeartbeatLocalDataSource>(),
     ),
   );
 
@@ -270,6 +286,11 @@ Future<void> setupLocator() async {
   // Theme repository
   getIt.registerLazySingleton<ThemeRepository>(
     () => ThemeRepositoryImpl(localDataSource: getIt()),
+  );
+
+  // Heartbeat repository
+  getIt.registerLazySingleton<HeartbeatRepository>(
+    () => HeartbeatRepositoryImpl(localDataSource: getIt()),
   );
 
   // Use cases
@@ -347,6 +368,14 @@ Future<void> setupLocator() async {
     () => SaveThemePreferenceUseCase(repository: getIt()),
   );
 
+  // Heartbeat use cases
+  getIt.registerLazySingleton(
+    () => LoadHeartbeatPreferenceUseCase(repository: getIt()),
+  );
+  getIt.registerLazySingleton(
+    () => SaveHeartbeatPreferenceUseCase(repository: getIt()),
+  );
+
   // Blocs
   getIt.registerFactory(() => OnboardingBloc(getIt(), getIt()));
   getIt.registerFactory(() => LegalBloc(getLegalDocument: getIt()));
@@ -386,6 +415,14 @@ Future<void> setupLocator() async {
   // Theme BLoC (singleton for global theme state)
   getIt.registerLazySingleton(
     () => ThemeBloc(loadThemeUseCase: getIt(), saveThemeUseCase: getIt()),
+  );
+
+  // Heartbeat BLoC (singleton for global heartbeat preference state)
+  getIt.registerLazySingleton(
+    () => HeartbeatBloc(
+      loadHeartbeatUseCase: getIt(),
+      saveHeartbeatUseCase: getIt(),
+    ),
   );
 
   getIt.registerFactory(

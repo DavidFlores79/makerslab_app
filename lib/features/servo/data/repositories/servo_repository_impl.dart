@@ -7,6 +7,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as fbs;
 
+import '../../../../core/data/datasources/heartbeat_local_datasource.dart';
 import '../../../../core/data/services/logger_service.dart';
 import '../../../../core/domain/repositories/bluetooth_repository.dart';
 import '../../../../core/error/failure.dart';
@@ -14,6 +15,7 @@ import '../../domain/repositories/servo_repository.dart';
 
 class ServoRepositoryImpl implements ServoRepository {
   final BluetoothRepository bluetoothRepository;
+  final HeartbeatLocalDataSource heartbeatDataSource;
   final ILogger logger = LoggerService();
 
   // StreamController maneja Either<Failure, double> para la posición del servo.
@@ -23,7 +25,10 @@ class ServoRepositoryImpl implements ServoRepository {
   Timer? _timeoutTimer;
   final StringBuffer _dataBuffer = StringBuffer();
 
-  ServoRepositoryImpl({required this.bluetoothRepository}) {
+  ServoRepositoryImpl({
+    required this.bluetoothRepository,
+    required this.heartbeatDataSource,
+  }) {
     _setupDataStream();
   }
 
@@ -51,10 +56,12 @@ class ServoRepositoryImpl implements ServoRepository {
         logger.error('[ServoRepo] Falló la conexión: ${failure.message}');
         return Left(failure);
       },
-      (_) {
+      (_) async {
         logger.info('[ServoRepo] Conexión exitosa. Configurando stream...');
         _setupDataStream();
-        // _startHeartbeat();
+        final heartbeatEnabled =
+            await heartbeatDataSource.getHeartbeatEnabled();
+        if (heartbeatEnabled) _startHeartbeat();
         _resetTimeout();
         return const Right(null);
       },
