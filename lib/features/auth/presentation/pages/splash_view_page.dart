@@ -1,6 +1,8 @@
+// ABOUTME: This file contains the splash screen page with animated logo
+// ABOUTME: It displays a video animation and handles the fade-in transition
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 import '../../../../theme/app_color.dart';
-import '../../../../utils/util_image.dart';
 
 class SplashViewPage extends StatefulWidget {
   static const String routeName = "/splash_view";
@@ -14,47 +16,58 @@ class SplashViewPage extends StatefulWidget {
 
 class _SplashViewPageState extends State<SplashViewPage>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+  late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+  VideoPlayerController? _videoController;
+  bool _isVideoInitialized = false;
 
   @override
   void initState() {
     super.initState();
 
-    _animationController = AnimationController(
+    _fadeController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(milliseconds: 800),
     );
 
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 1.0, curve: Curves.easeInOut),
-      ),
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.2, 1.0, curve: Curves.easeInOut),
-      ),
+    _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    _videoController = VideoPlayerController.asset(
+      'assets/videos/logo_animated.mp4',
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _animationController.forward();
-    });
+    await _videoController!.initialize();
 
-    _animationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        widget.onAnimationCompleted?.call();
-      }
-    });
+    if (mounted) {
+      setState(() {
+        _isVideoInitialized = true;
+      });
+
+      _fadeController.forward();
+      _videoController!.play();
+
+      // Listen for video completion
+      _videoController!.addListener(() {
+        if (_videoController!.value.position >=
+            _videoController!.value.duration) {
+          Future.delayed(const Duration(milliseconds: 500), () {
+            widget.onAnimationCompleted?.call();
+          });
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _fadeController.dispose();
+    _videoController?.dispose();
     super.dispose();
   }
 
@@ -63,53 +76,21 @@ class _SplashViewPageState extends State<SplashViewPage>
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Fondo de imagen
-          Positioned.fill(
-            child: Image.asset(
-              UtilImage.SIGN_IN_BACKGROUND_1,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(color: Colors.black);
-              },
-            ),
-          ),
-
-          // Overlay oscuro
-          Positioned.fill(
-            child: Container(color: AppColors.black3.withValues(alpha: 0.7)),
-          ),
-
-          // Logo animado
-          Center(
-            child: AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, child) {
-                return Opacity(
-                  opacity: _fadeAnimation.value,
-                  child: Transform.scale(
-                    scale: _scaleAnimation.value,
-                    child: child,
+      backgroundColor: AppColors.primary,
+      body: Center(
+        child:
+            _isVideoInitialized && _videoController != null
+                ? FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SizedBox(
+                    width: size.width * 0.4,
+                    child: AspectRatio(
+                      aspectRatio: _videoController!.value.aspectRatio,
+                      child: VideoPlayer(_videoController!),
+                    ),
                   ),
-                );
-              },
-              child: Image.asset(
-                UtilImage.PAISAMEX_LOGO_WHITE,
-                width: size.width * 0.4,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(
-                    Icons.image,
-                    size: size.width * 0.4,
-                    color: Colors.white,
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
+                )
+                : const SizedBox.shrink(),
       ),
     );
   }

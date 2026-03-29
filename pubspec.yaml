@@ -118,6 +118,7 @@ flutter:
     - assets/files/uno_bt_servo/
     - assets/files/uno_bt_light/
     - assets/lotties/
+    - assets/videos/
 
   fonts:
     - family: Roboto

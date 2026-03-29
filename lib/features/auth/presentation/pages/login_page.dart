@@ -184,7 +184,8 @@ class _LoginPageState extends State<LoginPage> {
     final size = MediaQuery.of(context).size;
     return Image.asset(
       UtilImage.LOGO_MAIN,
-      fit: BoxFit.fitWidth,
+      fit: BoxFit.contain,
+      height: 150,
       width: size.width * 0.35,
     );
   }

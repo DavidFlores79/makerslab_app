@@ -282,19 +282,14 @@ class _GamepadConnectedViewState extends State<_GamepadConnectedView> {
       'Joystick - dx: ${dx.toStringAsFixed(2)}, dy: ${dy.toStringAsFixed(2)}, magnitude: ${magnitude.toStringAsFixed(2)}, angle: ${angle.toStringAsFixed(1)}°',
     );
 
-    // Corrected mapping (rotated 90° to match Arduino orientation):
-    // Right: angle ~0°   → B01 (Backward on Arduino)
-    // Up: angle ~90°     → R01 (Right on Arduino)
-    // Left: angle ~180°  → F01 (Forward on Arduino)
-    // Down: angle ~-90°  → L01 (Left on Arduino)
     if (angle >= -45 && angle < 45) {
-      return 'L01'; // Right on screen = Backward on Arduino
+      return 'R01'; // Right on screen → turn right
     } else if (angle >= 45 && angle < 135) {
-      return 'F01'; // Up on screen = Right on Arduino
+      return 'F01'; // Up on screen → forward
     } else if (angle >= -135 && angle < -45) {
-      return 'B01'; // Down on screen = Left on Arduino
+      return 'B01'; // Down on screen → backward
     } else {
-      return 'R01'; // Left on screen = Forward on Arduino
+      return 'L01'; // Left on screen → turn left
     }
   }
 
