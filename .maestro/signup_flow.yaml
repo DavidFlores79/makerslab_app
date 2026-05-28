@@ -1,0 +1,70 @@
+appId: mx.enlacetecnologias.makerslab_app
+---
+# ─── Launch ───────────────────────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# Wait for splash video to finish
+- waitForAnimationToEnd
+
+# ─── Onboarding (3 slides) ────────────────────────────────────────────────────
+- tapOn: "Siguiente"
+- waitForAnimationToEnd
+- tapOn: "Siguiente"
+- waitForAnimationToEnd
+- tapOn: "Empezar"
+- waitForAnimationToEnd
+
+# ─── Navigate to Register ─────────────────────────────────────────────────────
+- tapOn:
+    text: "Iniciar sesión"
+    optional: true
+
+- tapOn: "¿No tienes una cuenta? Regístrate"
+
+# ─── Step 1: Nombre ───────────────────────────────────────────────────────────
+- tapOn: "Nombre completo"
+- inputText: "David Test"
+- hideKeyboard
+
+- tapOn: "Siguiente"
+
+# ─── Step 2: País + Teléfono ──────────────────────────────────────────────────
+# Country dropdown defaults to Mexico (+52) — matches MOCK_OTP_PHONE prefix
+- waitForAnimationToEnd
+
+- tapOn: "Teléfono"
+- inputText: "1234567890"
+- hideKeyboard
+
+- tapOn: "Confirmar Teléfono"
+- inputText: "1234567890"
+- hideKeyboard
+
+- tapOn: "Siguiente"
+
+# ─── Step 3: Contraseña + términos ────────────────────────────────────────────
+- waitForAnimationToEnd
+
+- tapOn: "Contraseña"
+- inputText: "Test1234!"
+- hideKeyboard
+
+- tapOn: "Confirmar Contraseña"
+- inputText: "Test1234!"
+- hideKeyboard
+
+# Accept terms checkbox
+- tapOn: "Acepto los términos"
+
+# ─── Submit ───────────────────────────────────────────────────────────────────
+- tapOn: "Regístrate"
+
+# ─── OTP Screen: assert screen loaded and enter mock code ────────────────────
+- waitForAnimationToEnd
+- assertVisible: "Código de verificación"
+- inputText: "123456"
+
+# ─── Assert success: home screen ─────────────────────────────────────────────
+- waitForAnimationToEnd
+- assertVisible: "David Test"

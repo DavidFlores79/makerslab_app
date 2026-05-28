@@ -1,3 +1,6 @@
+// ABOUTME: This file contains the RegisterPage with multi-step registration form
+// ABOUTME: Manages page navigation across 3 steps: name, phone/country, password
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -18,8 +21,17 @@ import '../widgets/index.dart';
 import 'login_page.dart';
 import 'otp_page.dart';
 
-class RegisterPage extends StatelessWidget {
+class RegisterPage extends StatefulWidget {
   static const routeName = '/register';
+
+  const RegisterPage({super.key});
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final _pageController = PageController();
 
   final _formKeys = [
     GlobalKey<FormState>(),
@@ -27,10 +39,12 @@ class RegisterPage extends StatelessWidget {
     GlobalKey<FormState>(),
   ];
 
-  late final List<Widget> steps;
+  late final List<Widget> _steps;
 
-  RegisterPage({super.key}) {
-    steps = [
+  @override
+  void initState() {
+    super.initState();
+    _steps = [
       Form(key: _formKeys[0], child: RegisterStep1()),
       Form(key: _formKeys[1], child: RegisterStep2()),
       Form(key: _formKeys[2], child: RegisterStep3()),
@@ -38,19 +52,19 @@ class RegisterPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final pageController = PageController();
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<RegisterCubit>(),
       child: Scaffold(
         body: BlocListener<AuthBloc, AuthState>(
           listener: (context, authState) {
             if (authState is RegistrationPending) {
-              // Navigate to OTP with registrationId
-              debugPrint(
-                '>>> Navigating to OTP with registrationId: ${authState.registrationId}',
-              );
               context.go(
                 OtpPage.routeName,
                 extra: {
@@ -60,9 +74,9 @@ class RegisterPage extends StatelessWidget {
                 },
               );
             } else if (authState is AuthError) {
-              SnackbarService().show(message: authState.message);
-              pageController.jumpToPage(0);
+              _pageController.jumpToPage(0);
               context.read<RegisterCubit>().reset();
+              SnackbarService().show(message: authState.message);
             }
           },
           child: BlocBuilder<RegisterCubit, RegisterState>(
@@ -79,23 +93,20 @@ class RegisterPage extends StatelessWidget {
                         const SizedBox(height: 20),
                         PXSectionTitle(
                           padding: const EdgeInsets.symmetric(vertical: 10),
-                          title:
-                              AppLocalizations.of(
-                                context,
-                              )!.complete_registration_data_label,
+                          title: AppLocalizations.of(context)!.complete_registration_data_label,
                           subtitle: '',
                         ),
                         SizedBox(
-                          height: 270, // Ajusta según el diseño de tus steps
+                          height: 270,
                           child: PageView(
-                            controller: pageController,
+                            controller: _pageController,
                             physics: const NeverScrollableScrollPhysics(),
-                            children: steps,
+                            children: _steps,
                           ),
                         ),
                         SmoothPageIndicator(
-                          controller: pageController,
-                          count: steps.length,
+                          controller: _pageController,
+                          count: _steps.length,
                           effect: const WormEffect(
                             dotHeight: 15,
                             dotWidth: 15,
@@ -107,12 +118,8 @@ class RegisterPage extends StatelessWidget {
                         MainAppButton(
                           onPressed: () {
                             final currentStep = state.step;
-
-                            // validar campos del step actual
-                            if (_formKeys[currentStep].currentState!
-                                .validate()) {
+                            if (_formKeys[currentStep].currentState!.validate()) {
                               if (currentStep >= 2) {
-                                // último step: registrar
                                 context.read<AuthBloc>().add(
                                   RegisterRequested(
                                     name: state.name ?? '',
@@ -121,19 +128,17 @@ class RegisterPage extends StatelessWidget {
                                   ),
                                 );
                               } else {
-                                // avanzar al siguiente step
                                 context.read<RegisterCubit>().nextStep();
-                                pageController.nextPage(
+                                _pageController.nextPage(
                                   duration: const Duration(milliseconds: 500),
                                   curve: Curves.easeInOut,
                                 );
                               }
                             }
                           },
-                          label:
-                              state.step >= 2
-                                  ? AppLocalizations.of(context)!.sign_up_label
-                                  : AppLocalizations.of(context)!.next,
+                          label: state.step >= 2
+                              ? AppLocalizations.of(context)!.sign_up_label
+                              : AppLocalizations.of(context)!.next,
                         ),
                         _buildReturnToLoginButton(context),
                       ],
@@ -163,9 +168,7 @@ class RegisterPage extends StatelessWidget {
       onPressed: () => context.go(LoginPage.routeName),
       child: Text(
         AppLocalizations.of(context)!.already_have_account_label,
-        style: Theme.of(
-          context,
-        ).textTheme.labelLarge?.copyWith(color: AppColors.primary),
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.primary),
       ),
     );
   }

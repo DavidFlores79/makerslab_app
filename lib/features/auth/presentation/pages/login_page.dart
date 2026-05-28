@@ -49,7 +49,11 @@ class _LoginPageState extends State<LoginPage> {
                 '${state.user.name ?? state.user.phone}',
               ),
             );
-            context.pop(true);
+            if (context.canPop()) {
+              context.pop(true);
+            } else {
+              context.go('/home');
+            }
           } else if (state is AuthError) {
             SnackbarService().show(message: state.message);
           }

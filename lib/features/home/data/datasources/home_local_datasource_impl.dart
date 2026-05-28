@@ -10,7 +10,7 @@ import '../models/module_detail_model.dart';
 import 'home_local_datasource.dart';
 import 'module_detail_json_parser.dart';
 
-const _kModulesKey = 'CACHED_MODULES_v1';
+const _kModulesKey = 'CACHED_MODULES_v2';
 const _kModuleDetailsKey =
     'CACHED_MODULE_DETAILS_v20'; // Bumped to v20 - enhanced temperature module with protoboard instructions
 

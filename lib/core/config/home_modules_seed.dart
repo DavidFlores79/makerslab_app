@@ -4,7 +4,7 @@ import '../../features/home/data/models/main_menu_item_model.dart';
 import '../mocks/main_menu_mock.dart' as mock;
 
 Future<void> seedDefaultModulesIfNeeded(SharedPreferences prefs) async {
-  const key = 'CACHED_MODULES_v1';
+  const key = 'CACHED_MODULES_v2';
   final raw = prefs.getString(key);
   if (raw != null && raw.isNotEmpty) return; // ya seed-eado
 
