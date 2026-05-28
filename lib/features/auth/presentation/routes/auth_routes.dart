@@ -108,7 +108,7 @@ final authRoutes = [
     builder:
         (context, state) => BlocProvider.value(
           value: context.read<AuthBloc>(),
-          child: ForgotPasswordPage(),
+          child: const ForgotPasswordPage(),
         ),
   ),
   //Onboarding pages
