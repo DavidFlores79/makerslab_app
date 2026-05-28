@@ -36,3 +36,11 @@ class _GamepadStreamFailed extends GamepadEvent {
   final String message;
   _GamepadStreamFailed(this.message);
 }
+
+/// Evento disparado al mover un slider del gamepad.
+/// `sliderId` es el índice del slider (1-based), `value` el valor entero enviado.
+class GamepadSliderChanged extends GamepadEvent {
+  final int sliderId;
+  final int value;
+  GamepadSliderChanged({required this.sliderId, required this.value});
+}

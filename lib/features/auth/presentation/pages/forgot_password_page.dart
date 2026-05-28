@@ -1,3 +1,6 @@
+// ABOUTME: This file contains the ForgotPasswordPage for initiating password reset
+// ABOUTME: It collects the user's country code and phone number to send a reset OTP
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -8,16 +11,37 @@ import '../../../../core/ui/snackbar_service.dart';
 import '../../../../core/validators/px_validators.dart';
 import '../../../../shared/widgets/index.dart';
 import '../../../../utils/util_image.dart';
+import '../../../catalogs/data/models/country_model.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../widgets/app_country_dropdown.dart';
 
-class ForgotPasswordPage extends StatelessWidget {
+class ForgotPasswordPage extends StatefulWidget {
   static const routeName = '/forgot-password';
 
-  final _phoneController = TextEditingController();
+  const ForgotPasswordPage({super.key});
 
-  ForgotPasswordPage({super.key});
+  @override
+  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
+}
+
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+  final _phoneController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  String _countryCode = '52';
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  String get _fullPhone {
+    final code =
+        _countryCode.startsWith('+') ? _countryCode : '+$_countryCode';
+    return '$code${_phoneController.text}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +55,7 @@ class ForgotPasswordPage extends StatelessWidget {
               OtpPage.routeName,
               extra: {
                 'userId': state.userId,
-                'phone': _phoneController.text,
+                'phone': _fullPhone,
                 'isForForgotPassword': true,
               },
             );
@@ -40,19 +64,26 @@ class ForgotPasswordPage extends StatelessWidget {
           }
         },
         builder: (context, state) {
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildLogo(context),
-                _buildWelcomeText(context),
-                const SizedBox(height: 20),
-                _buildPhoneField(context),
-                const SizedBox(height: 20),
-                _buildSendCodeButton(context, state),
-              ],
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildLogo(context),
+                    _buildWelcomeText(context),
+                    const SizedBox(height: 20),
+                    _buildCountryDropdown(context),
+                    const SizedBox(height: 20),
+                    _buildPhoneField(context),
+                    const SizedBox(height: 20),
+                    _buildSendCodeButton(context, state),
+                  ],
+                ),
+              ),
             ),
           );
         },
@@ -77,6 +108,25 @@ class ForgotPasswordPage extends StatelessWidget {
     );
   }
 
+  Widget _buildCountryDropdown(BuildContext context) {
+    return AppCountryDropdown(
+      labelText: AppLocalizations.of(context)!.country_label,
+      onChanged: (CountryModel? country) {
+        if (country != null && country.phoneCode != null) {
+          setState(() {
+            _countryCode = country.phoneCode!;
+          });
+        }
+      },
+      validator: (CountryModel? value) {
+        if (value == null) {
+          return AppLocalizations.of(context)!.select_option_error;
+        }
+        return null;
+      },
+    );
+  }
+
   Widget _buildPhoneField(BuildContext context) {
     return PXCustomTextField(
       labelText: AppLocalizations.of(context)!.cellphone_number_label,
@@ -90,13 +140,15 @@ class ForgotPasswordPage extends StatelessWidget {
   }
 
   Widget _buildSendCodeButton(BuildContext context, AuthState state) {
-    debugPrint('>>> Phone to send: ${_phoneController.text}');
     return MainAppButton(
       isLoading: state is ForgotPasswordInProgress,
       onPressed: () {
-        context.read<AuthBloc>().add(
-          ForgotPasswordRequested(_phoneController.text),
-        );
+        if (_formKey.currentState!.validate()) {
+          FocusScope.of(context).unfocus();
+          context.read<AuthBloc>().add(
+            ForgotPasswordRequested(_fullPhone),
+          );
+        }
       },
       label: AppLocalizations.of(context)!.send_label,
     );

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,6 +37,7 @@ class GamepadBloc extends Bloc<GamepadEvent, GamepadState> {
     on<GamepadDirectionChanged>(_onDirectionChanged);
     on<GamepadButtonPressed>(_onButtonPressed);
     on<GamepadStopRequested>(_onStopRequested);
+    on<GamepadSliderChanged>(_onSliderChanged);
     on<_GamepadStreamReceived>(_onStreamReceived);
     on<_GamepadStreamFailed>(_onStreamFailed);
 
@@ -101,9 +101,9 @@ class GamepadBloc extends Bloc<GamepadEvent, GamepadState> {
     GamepadDirectionChanged event,
     Emitter<GamepadState> emit,
   ) async {
-    // Intentamos enviar el comando de dirección inmediatamente.
     if (bluetoothBloc.state is BluetoothConnected &&
         state is GamepadConnected) {
+      final current = state as GamepadConnected;
       final command = '${event.command}\n';
       debugPrint('🎮 GamepadBloc: Sending direction command: $command');
       final result = await sendStringUseCase(command);
@@ -116,7 +116,11 @@ class GamepadBloc extends Bloc<GamepadEvent, GamepadState> {
         },
         (_) {
           debugPrint('✅ GamepadBloc: Command sent successfully');
-          // No emitimos un nuevo estado por cada dirección para evitar rebuilds; si quieres telemetry, úsalo.
+          emit(GamepadConnected(
+            lastTelemetryLine: current.lastTelemetryLine,
+            lastSentCommand: event.command,
+            heartbeatBeat: current.heartbeatBeat,
+          ));
         },
       );
     } else {
@@ -131,11 +135,17 @@ class GamepadBloc extends Bloc<GamepadEvent, GamepadState> {
   ) async {
     if (bluetoothBloc.state is BluetoothConnected &&
         state is GamepadConnected) {
+      final current = state as GamepadConnected;
       final command = '\n${event.code}\n';
       final result = await sendStringUseCase(command);
-      result.fold((failure) => emit(GamepadError(failure.message)), (_) {
-        // Opcional: emitir algún feedback si quieres
-      });
+      result.fold(
+        (failure) => emit(GamepadError(failure.message)),
+        (_) => emit(GamepadConnected(
+          lastTelemetryLine: current.lastTelemetryLine,
+          lastSentCommand: event.code,
+          heartbeatBeat: current.heartbeatBeat,
+        )),
+      );
     } else {
       emit(GamepadError('No conectado: imposible enviar código de botón.'));
     }
@@ -147,8 +157,38 @@ class GamepadBloc extends Bloc<GamepadEvent, GamepadState> {
   ) async {
     if (bluetoothBloc.state is BluetoothConnected &&
         state is GamepadConnected) {
+      final current = state as GamepadConnected;
       final result = await sendStringUseCase('S00\n');
-      result.fold((failure) => emit(GamepadError(failure.message)), (_) {});
+      result.fold(
+        (failure) => emit(GamepadError(failure.message)),
+        (_) => emit(GamepadConnected(
+          lastTelemetryLine: current.lastTelemetryLine,
+          lastSentCommand: 'S00',
+          heartbeatBeat: current.heartbeatBeat,
+        )),
+      );
+    }
+  }
+
+  Future<void> _onSliderChanged(
+    GamepadSliderChanged event,
+    Emitter<GamepadState> emit,
+  ) async {
+    if (bluetoothBloc.state is BluetoothConnected &&
+        state is GamepadConnected) {
+      final current = state as GamepadConnected;
+      final cmd = 'SL${event.sliderId}${event.value.toString().padLeft(2, '0')}';
+      final result = await sendStringUseCase('$cmd\n');
+      result.fold(
+        (failure) => emit(GamepadError(failure.message)),
+        (_) => emit(GamepadConnected(
+          lastTelemetryLine: current.lastTelemetryLine,
+          lastSentCommand: cmd,
+          heartbeatBeat: current.heartbeatBeat,
+        )),
+      );
+    } else {
+      emit(GamepadError('No conectado: imposible enviar valor de slider.'));
     }
   }
 
@@ -156,8 +196,12 @@ class GamepadBloc extends Bloc<GamepadEvent, GamepadState> {
     _GamepadStreamReceived event,
     Emitter<GamepadState> emit,
   ) async {
-    // Actualiza estado con la última línea de telemetría recibida
-    emit(GamepadConnected(lastTelemetryLine: event.line));
+    final current = state is GamepadConnected ? state as GamepadConnected : null;
+    emit(GamepadConnected(
+      lastTelemetryLine: event.line,
+      lastSentCommand: current?.lastSentCommand ?? 'S00',
+      heartbeatBeat: !(current?.heartbeatBeat ?? false),
+    ));
   }
 
   Future<void> _onStreamFailed(
