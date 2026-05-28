@@ -222,7 +222,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         path,
         data: data,
         cancelToken: cancelToken,
-        options: Options(validateStatus: (s) => s != null && s < 500),
+        options: Options(validateStatus: (s) => s != null && s <= 500),
       );
 
       if (response.statusCode != null &&
@@ -249,7 +249,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         path,
         data: data,
         cancelToken: cancelToken,
-        options: Options(validateStatus: (s) => s != null && s < 500),
+        options: Options(validateStatus: (s) => s != null && s <= 500),
       );
 
       if (response.statusCode != null &&

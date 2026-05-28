@@ -1,0 +1,58 @@
+appId: mx.enlacetecnologias.makerslab_app
+---
+# ─── This flow validates that registering with an existing phone shows an error ─
+# Prerequisite: +521234567890 must already be registered in the DB
+
+# ─── Launch ───────────────────────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+- waitForAnimationToEnd
+
+# ─── Skip onboarding ──────────────────────────────────────────────────────────
+- tapOn: "Siguiente"
+- waitForAnimationToEnd
+- tapOn: "Siguiente"
+- waitForAnimationToEnd
+- tapOn: "Empezar"
+- waitForAnimationToEnd
+
+# ─── Navigate to Register ─────────────────────────────────────────────────────
+- tapOn:
+    text: "Iniciar sesión"
+    optional: true
+
+- tapOn: "¿No tienes una cuenta? Regístrate"
+
+# ─── Step 1: Nombre ───────────────────────────────────────────────────────────
+- tapOn: "Nombre completo"
+- inputText: "David Test"
+- hideKeyboard
+- tapOn: "Siguiente"
+
+# ─── Step 2: País + Teléfono ──────────────────────────────────────────────────
+- waitForAnimationToEnd
+- tapOn: "Teléfono"
+- inputText: "1234567890"
+- hideKeyboard
+- tapOn: "Confirmar Teléfono"
+- inputText: "1234567890"
+- hideKeyboard
+- tapOn: "Siguiente"
+
+# ─── Step 3: Contraseña + términos ────────────────────────────────────────────
+- waitForAnimationToEnd
+- tapOn: "Contraseña"
+- inputText: "Test1234!"
+- hideKeyboard
+- tapOn: "Confirmar Contraseña"
+- inputText: "Test1234!"
+- hideKeyboard
+- tapOn: "Acepto los términos"
+
+# ─── Submit ───────────────────────────────────────────────────────────────────
+- tapOn: "Regístrate"
+
+# ─── Assert error snackbar shows ─────────────────────────────────────────────
+- waitForAnimationToEnd
+- assertVisible: "Este tel"

@@ -240,6 +240,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                   final isDarkMode =
                                       theme.brightness == Brightness.dark;
 
+                                  Color? cardColor;
+                                  if (!isDarkMode && m.colorHex != null) {
+                                    final hex = m.colorHex!.replaceAll('#', '');
+                                    final value = int.tryParse(
+                                      hex.length == 6 ? 'FF$hex' : hex,
+                                      radix: 16,
+                                    );
+                                    if (value != null) {
+                                      cardColor = Color(value);
+                                    }
+                                  }
+
                                   // RepaintBoundary improves performance by isolating each card's paint operations
                                   return RepaintBoundary(
                                     child: Card(
@@ -248,7 +260,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                               ? theme
                                                   .colorScheme
                                                   .surfaceContainerHighest
-                                              : AppColors.gray300,
+                                              : cardColor ?? AppColors.gray300,
                                       elevation: 3,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(

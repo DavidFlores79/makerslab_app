@@ -57,12 +57,15 @@ class RegisterStep3 extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Checkbox(
-          value: state.acceptedTerms,
-          onChanged: (value) {
-            cubit.updateAcceptedTerms(value ?? false);
-          },
-          activeColor: AppColors.primary,
+        Semantics(
+          label: 'Acepto los términos',
+          child: Checkbox(
+            value: state.acceptedTerms,
+            onChanged: (value) {
+              cubit.updateAcceptedTerms(value ?? false);
+            },
+            activeColor: AppColors.primary,
+          ),
         ),
         Expanded(
           child: Padding(
